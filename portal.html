@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Waqar GIS Portal - Executive Spatial Suite</title>
 
-  <!-- Google Fonts: Cinzel for Architectural Title & Plus Jakarta Sans for UI -->
+  <!-- Google Fonts: Cinzel & Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -34,25 +34,23 @@
       display: flex; 
     }
 
-    /* Architectural Fluted Left Sidebar (Inspiration: Picture 1 & 2) */
+    /* Architectural Fluted Left Sidebar */
     .sidebar {
-      width: 290px;
-      min-width: 290px;
+      width: 300px;
+      min-width: 300px;
       background: linear-gradient(180deg, #20242c 0%, #15181e 100%);
       color: #f1f5f9;
       padding: 22px 18px;
       display: flex;
       flex-direction: column;
-      gap: 22px;
+      gap: 20px;
       overflow-y: auto;
-      /* Vertical Fluted Gold Trim Line */
       border-right: 2px solid #c5a059;
       box-shadow: 6px 0 25px rgba(0, 0, 0, 0.6);
       z-index: 1000;
       position: relative;
     }
 
-    /* Fluted Panel Background Effect */
     .sidebar::before {
       content: "";
       position: absolute;
@@ -67,22 +65,21 @@
       pointer-events: none;
     }
 
-    /* Arched Portal Brand Header (Inspiration: Picture 3) */
+    /* Arched Portal Brand Header */
     .portal-brand {
       display: flex;
       align-items: center;
       gap: 14px;
-      padding-bottom: 18px;
+      padding-bottom: 16px;
       border-bottom: 1px solid rgba(197, 160, 89, 0.3);
       position: relative;
     }
 
-    /* Architectural Arch Icon Container */
     .portal-icon-arch {
       width: 42px;
       height: 48px;
       background: linear-gradient(135deg, #d4af37 0%, #8a6d2b 100%);
-      border-radius: 20px 20px 4px 4px; /* Curved Arch Shape */
+      border-radius: 20px 20px 4px 4px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -103,7 +100,7 @@
 
     .sidebar h3 {
       font-size: 10.5px;
-      color: #c5a059; /* Bronze Gold Header */
+      color: #c5a059;
       letter-spacing: 1.5px;
       margin-bottom: 10px;
       font-weight: 700;
@@ -119,8 +116,8 @@
       color: #c5a059;
     }
 
-    /* Luxury Search Box Container */
-    .search-box-sidebar {
+    /* Luxury Panel Boxes */
+    .panel-box {
       background: rgba(38, 43, 53, 0.7);
       padding: 14px;
       border-radius: 12px;
@@ -129,35 +126,44 @@
       backdrop-filter: blur(6px);
     }
 
-    .search-box-sidebar input {
+    .panel-box input {
       width: 100%;
-      padding: 10px 12px;
+      padding: 9px 11px;
       border-radius: 8px;
       border: 1px solid rgba(197, 160, 89, 0.35);
       background: #15181e;
       color: #f8fafc;
-      font-size: 13px;
+      font-size: 12.5px;
       outline: none;
-      margin-top: 6px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       transition: all 0.3s ease;
     }
 
-    .search-box-sidebar input:focus {
+    .panel-box input:focus {
       border-color: #d4af37;
       box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
     }
 
-    .search-box-sidebar input::placeholder { color: #788294; }
+    .panel-box input::placeholder { color: #788294; }
 
-    /* Luxury Metallic Gold Buttons (Inspiration: Picture 1 Gold Trim) */
+    /* Dual Input Container for Coordinates */
+    .coord-inputs {
+      display: flex;
+      gap: 8px;
+    }
+
+    .coord-inputs input {
+      margin-bottom: 10px;
+    }
+
+    /* Metallic Gold & Dark Buttons */
     .btn {
       width: 100%;
-      padding: 11px;
+      padding: 10px;
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 12.5px;
+      font-size: 12px;
       font-weight: 700;
       transition: all 0.25s ease;
       letter-spacing: 0.5px;
@@ -172,7 +178,6 @@
     .btn-gold:hover { 
       background: linear-gradient(135deg, #d4af37 0%, #a8843c 100%); 
       transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(212, 175, 55, 0.35);
     }
 
     .btn-dark { 
@@ -189,14 +194,11 @@
       background: linear-gradient(135deg, #059669 0%, #046c51 100%); 
       color: #fff; 
       border: 1px solid #34d399;
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
     }
     .btn-emerald:hover { 
       background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
-      transform: translateY(-1px);
     }
 
-    /* Map Area Wrapper */
     #map-wrapper {
       flex: 1;
       position: relative;
@@ -210,7 +212,7 @@
       background: #e2e8f0; 
     }
 
-    /* Auth-Guard Badge Override Styling (Floating Pill) */
+    /* Float Auth Badge Override */
     div[style*="position: fixed"], 
     div[style*="position:absolute"] {
       position: absolute !important;
@@ -230,7 +232,6 @@
       font-weight: 600 !important;
     }
 
-    /* Results Panel Styling */
     #results {
       position: absolute;
       bottom: 24px;
@@ -245,7 +246,6 @@
       z-index: 999;
       box-shadow: 0 8px 25px rgba(0,0,0,0.6);
       backdrop-filter: blur(8px);
-      line-height: 1.6;
     }
 
     #results strong { color: #d4af37; }
@@ -253,20 +253,29 @@
 </head>
 <body>
 
-  <!-- Fluted & Arched Sidebar -->
   <div class="sidebar">
     
-    <!-- Architectural Brand Header -->
+    <!-- Brand Title -->
     <div class="portal-brand">
       <div class="portal-icon-arch">🏛️</div>
       <div class="portal-title">Waqar GIS Portal</div>
     </div>
 
-    <!-- Search Box -->
-    <div class="search-box-sidebar">
+    <!-- Search Box (District / Tehsil) -->
+    <div class="panel-box">
       <h3>Search Location</h3>
       <input type="text" id="sidebar-search" placeholder="District Or Tehsil..." />
-      <button class="btn btn-gold" onclick="searchLocation()">SEARCH</button>
+      <button class="btn btn-gold" onclick="searchLocation()">SEARCH LOCATION</button>
+    </div>
+
+    <!-- NEW: Coordinates Search Panel (Lat / Long) -->
+    <div class="panel-box">
+      <h3>Go-To Coordinates</h3>
+      <div class="coord-inputs">
+        <input type="number" id="coord-lat" step="any" placeholder="Latitude (e.g. 34.01)" />
+        <input type="number" id="coord-lng" step="any" placeholder="Longitude (e.g. 71.53)" />
+      </div>
+      <button class="btn btn-gold" onclick="goToCoordinates()">LOCATE COORDINATES</button>
     </div>
 
     <!-- Basemap Layer Controls -->
@@ -285,7 +294,7 @@
     <!-- Mensuration Panel -->
     <div>
       <h3>3. Mensuration Panel</h3>
-      <p style="font-size:12px; color:#94a3b8; line-height:1.5;">Draw Points, Lines, or Polygons on the map using the toolbar to measure area and distance.</p>
+      <p style="font-size:11.5px; color:#94a3b8; line-height:1.4;">Use map toolbar to measure distance and area in Marla.</p>
     </div>
 
     <!-- Export Data -->
@@ -293,16 +302,15 @@
       <h3>4. Export Data</h3>
       <button class="btn btn-emerald" onclick="exportGeoJSON()">Download GeoJSON</button>
     </div>
+
   </div>
 
-  <!-- Map Section -->
   <div id="map-wrapper">
     <div id="map"></div>
     <div id="results">Measurement details will appear here...</div>
   </div>
 
 <script>
-  // Initialize Leaflet Map
   const map = L.map('map').setView([34.0, 71.5], 8);
 
   let osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -314,6 +322,8 @@
   });
 
   osmLayer.addTo(map);
+
+  let coordMarker = null;
 
   setTimeout(() => { map.invalidateSize(); }, 300);
 
@@ -339,6 +349,31 @@
         L.marker([parseFloat(place.lat), parseFloat(place.lon)]).addTo(map).bindPopup(place.display_name).openPopup();
       })
       .catch(() => alert('Search error! Please check internet connection.'));
+  }
+
+  /* Go-To Coordinates Functionality */
+  function goToCoordinates() {
+    const lat = parseFloat(document.getElementById('coord-lat').value);
+    const lng = parseFloat(document.getElementById('coord-lng').value);
+
+    if (isNaN(lat) || isNaN(lng)) {
+      alert('Please enter valid Latitude and Longitude values!');
+      return;
+    }
+
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      alert('Latitude must be between -90 and 90, Longitude between -180 and 180!');
+      return;
+    }
+
+    if (coordMarker) map.removeLayer(coordMarker);
+
+    map.setView([lat, lng], 15);
+    coordMarker = L.marker([lat, lng]).addTo(map)
+      .bindPopup(`<b>Coordinate Point</b><br>Lat: ${lat.toFixed(5)}<br>Lng: ${lng.toFixed(5)}`)
+      .openPopup();
+
+    document.getElementById('results').innerHTML = `<strong>Location Found:</strong><br>Latitude: ${lat.toFixed(5)}<br>Longitude: ${lng.toFixed(5)}`;
   }
 
   document.getElementById('sidebar-search').addEventListener('keypress', function(e) {
