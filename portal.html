@@ -273,10 +273,10 @@
   </div>
 
 <script>
-  /* MAP WITH MAX ZOOM 22 FOR HIGH-RES CLOSE-UP & VILLAGE LABELS */
+  /* MAP WITH SEAMLESS TILE SCALING AND AUTO-FALLBACK */
   const map = L.map('map', { 
     crossOrigin: true,
-    maxZoom: 22,
+    maxZoom: 19,
     zoomControl: true
   }).setView([34.0, 71.5], 13);
 
@@ -284,22 +284,23 @@
   L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
 
   const basemaps = {
-    // High-Res Satellite Hybrid Layer Combined with Village and Place Names Overlay
+    // Satellite Hybrid with village names and stable max zoom matching native data
     satellite: L.layerGroup([
       L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         attribution: '© Esri & Village Mapping Integration',
-        maxZoom: 22,
-        maxNativeZoom: 19
+        maxZoom: 19,
+        maxNativeZoom: 19,
+        keepBuffer: 4
       }),
       L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
-        maxZoom: 22,
+        maxZoom: 19,
         maxNativeZoom: 19,
         opacity: 0.95
       })
     ]),
-    osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 22 }),
-    topo: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri Topo', maxZoom: 22 }),
-    dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© CartoDB', maxZoom: 22 })
+    osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }),
+    topo: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri Topo', maxZoom: 19 }),
+    dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© CartoDB', maxZoom: 19 })
   };
 
   let currentBasemap = basemaps.satellite;
@@ -364,7 +365,7 @@
         if (!d.length) return alert('Location not found!');
         const lat = parseFloat(d[0].lat);
         const lon = parseFloat(d[0].lon);
-        map.setView([lat, lon], 17);
+        map.setView([lat, lon], 16);
         L.marker([lat, lon]).addTo(map).bindPopup(d[0].display_name).openPopup();
         document.getElementById('results').innerHTML = `<strong>Location Found:</strong><br>${d[0].display_name}`;
       });
@@ -375,7 +376,7 @@
     const lng = parseFloat(document.getElementById('coord-lng').value);
     if (isNaN(lat) || isNaN(lng)) return alert('Please enter valid coordinates!');
     if (coordMarker) map.removeLayer(coordMarker);
-    map.setView([lat, lng], 18);
+    map.setView([lat, lng], 17);
     coordMarker = L.marker([lat, lng]).addTo(map).bindPopup(`Lat: ${lat}<br>Lng: ${lng}`).openPopup();
     document.getElementById('results').innerHTML = `<strong>Located:</strong><br>Lat: ${lat}, Lng: ${lng}`;
   }
