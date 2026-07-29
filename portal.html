@@ -166,7 +166,7 @@
 
   <div id="main-container">
     <div id="map"></div>
-    <div id="results"><strong>Spatial Inspector:</strong><br>Map par location search karein ya shape draw karein.</div>
+    <div id="results"><strong>Spatial Inspector:</strong><br>Search a location or draw features on the map.</div>
 
     <!-- Attribute Table Panel -->
     <div id="attribute-panel">
@@ -218,11 +218,11 @@
 
   function searchLocation() {
     const query = document.getElementById('sidebar-search').value;
-    if (!query) return alert('District ya Tehsil ka naam likhein!');
+    if (!query) return alert('Please enter a location name!');
     fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=pk`)
       .then(r => r.json())
       .then(d => {
-        if (!d.length) return alert('Location nahi mili!');
+        if (!d.length) return alert('Location not found!');
         const lat = parseFloat(d[0].lat);
         const lon = parseFloat(d[0].lon);
         map.setView([lat, lon], 12);
@@ -234,7 +234,7 @@
   function goToCoordinates() {
     const lat = parseFloat(document.getElementById('coord-lat').value);
     const lng = parseFloat(document.getElementById('coord-lng').value);
-    if (isNaN(lat) || isNaN(lng)) return alert('Sahi coordinates daalein!');
+    if (isNaN(lat) || isNaN(lng)) return alert('Please enter valid coordinates!');
     if (coordMarker) map.removeLayer(coordMarker);
     map.setView([lat, lng], 15);
     coordMarker = L.marker([lat, lng]).addTo(map).bindPopup(`Lat: ${lat}<br>Lng: ${lng}`).openPopup();
@@ -244,7 +244,7 @@
   /* Upload GeoJSON or KML File */
   function loadSpatialFile() {
     const file = document.getElementById('file-input').files[0];
-    if (!file) return alert('Pehle .geojson ya .kml file select karein!');
+    if (!file) return alert('Please select a .geojson or .kml file first!');
 
     const fileName = file.name.toLowerCase();
     uploadedLayerGroup.clearLayers();
@@ -324,12 +324,12 @@
 
   function checkTopology() {
     const data = drawnItems.toGeoJSON();
-    if (!data.features.length) return alert('Pehle map par koi shape draw karein!');
+    if (!data.features.length) return alert('Please draw a feature on the map first!');
     let errors = 0;
     data.features.forEach(f => {
       if (f.geometry.type === 'Polygon') errors += turf.kinks(f).features.length;
     });
-    alert(errors > 0 ? `Topology Check: ${errors} self-intersection errors mile hain!` : 'Topology Valid! Koi error nahi mila.');
+    alert(errors > 0 ? `Topology Check: Found ${errors} self-intersection errors!` : 'Topology Valid! No errors found.');
   }
 
   function exportGeoJSON() {
