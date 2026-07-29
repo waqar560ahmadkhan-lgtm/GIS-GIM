@@ -77,16 +77,52 @@
     .btn-dark:hover { background: #2f3542; border-color: #c5a059; }
     .btn-emerald { background: linear-gradient(135deg, #059669 0%, #046c51 100%); color: #fff; border: 1px solid #34d399; }
 
-    /* Main Container */
+    /* Main Map Container */
     #main-container { flex: 1; display: flex; flex-direction: column; position: relative; height: 100vh; }
     #map { flex: 1; width: 100%; height: 100%; background: #1e232a; z-index: 1; }
 
-    /* Luxury Gold Vertex Handles & Drawing UI */
+    /* LUXURY GOLD & WHITE TOOLBAR & VERTEX HANDLES */
+    .leaflet-draw-toolbar {
+      background: #ffffff !important;
+      border: 2px solid #d4af37 !important;
+      border-radius: 8px !important;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
+      overflow: hidden;
+    }
+
+    .leaflet-draw-toolbar a {
+      background-color: #ffffff !important;
+      border-bottom: 1px solid #f0e6d2 !important;
+      color: #15181e !important;
+    }
+
+    .leaflet-draw-toolbar a:hover {
+      background-color: #d4af37 !important;
+      color: #ffffff !important;
+    }
+
+    .leaflet-draw-actions {
+      left: 32px !important;
+    }
+
+    .leaflet-draw-actions a {
+      background-color: #ffffff !important;
+      color: #8a6d2b !important;
+      border-left: 1px solid #d4af37 !important;
+      font-weight: bold;
+    }
+
+    .leaflet-draw-actions a:hover {
+      background-color: #d4af37 !important;
+      color: #ffffff !important;
+    }
+
+    /* Vertex Gold Circles */
     .leaflet-div-icon {
       background: #d4af37 !important;
       border: 2px solid #ffffff !important;
       border-radius: 50% !important;
-      box-shadow: 0 0 8px rgba(212, 175, 55, 0.9), 0 0 3px rgba(0, 0, 0, 0.8) !important;
+      box-shadow: 0 0 8px rgba(212, 175, 55, 1) !important;
       width: 12px !important;
       height: 12px !important;
       margin-left: -6px !important;
@@ -94,27 +130,9 @@
     }
 
     .leaflet-editing-icon {
-      background: #f3e5ab !important;
-      border: 2px solid #c5a059 !important;
+      background: #ffffff !important;
+      border: 2px solid #d4af37 !important;
       border-radius: 50% !important;
-      box-shadow: 0 0 10px rgba(197, 160, 89, 1) !important;
-    }
-
-    .leaflet-draw-toolbar a {
-      background-color: #20242c !important;
-      border-bottom: 1px solid rgba(197, 160, 89, 0.3) !important;
-      color: #d4af37 !important;
-    }
-
-    .leaflet-draw-toolbar a:hover {
-      background-color: #c5a059 !important;
-      color: #15181e !important;
-    }
-
-    .leaflet-draw-actions a {
-      background-color: #15181e !important;
-      color: #c5a059 !important;
-      border-left: 1px solid #c5a059 !important;
     }
 
     /* Attribute Table Panel (Bottom) */
@@ -202,8 +220,8 @@
     <div class="panel-box">
       <h3>Basemap Selector</h3>
       <select id="basemap-select" onchange="switchBasemap(this.value)">
+        <option value="satellite" selected>Satellite Imagery (Esri)</option>
         <option value="osm">Street Map (OpenStreetMap)</option>
-        <option value="satellite">Satellite Imagery (Esri)</option>
         <option value="topo">Esri Topographic</option>
         <option value="dark">Dark Gray Canvas (CartoDB)</option>
       </select>
@@ -229,7 +247,7 @@
 
   <div id="main-container">
     <div id="map"></div>
-    <div id="results"><strong>Spatial Inspector:</strong><br>Search a location or draw features on the map.</div>
+    <div id="results"><strong>Spatial Inspector:</strong><br>Double click any feature on the map to remove it.</div>
     <div id="cursor-hud">Lat: 0.0000 | Lng: 0.0000</div>
 
     <!-- Attribute Table Panel -->
@@ -261,13 +279,13 @@
   L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
 
   const basemaps = {
-    osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }),
     satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri' }),
+    osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }),
     topo: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri Topo' }),
     dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© CartoDB' })
   };
 
-  let currentBasemap = basemaps.osm;
+  let currentBasemap = basemaps.satellite;
   currentBasemap.addTo(map);
 
   let coordMarker = null;
@@ -301,28 +319,15 @@
     const SQFT_PER_MARLA = 272.25;
 
     let totalSqFt = areaSqMeters * SQFT_PER_SQM;
-
     let kanals = Math.floor(totalSqFt / SQFT_PER_KANAL);
     let remainingSqFt = totalSqFt % SQFT_PER_KANAL;
-
     let marlas = Math.floor(remainingSqFt / SQFT_PER_MARLA);
     let finalSqFt = Math.round(remainingSqFt % SQFT_PER_MARLA);
 
-    // Massavi Rollover Rules
-    if (finalSqFt >= 270) {
-      marlas += 1;
-      finalSqFt = 0;
-    }
-    if (marlas >= 20) {
-      kanals += 1;
-      marlas -= 20;
-    }
+    if (finalSqFt >= 270) { marlas += 1; finalSqFt = 0; }
+    if (marlas >= 20) { kanals += 1; marlas -= 20; }
 
     return {
-      totalSqFt: Math.round(totalSqFt),
-      kanals: kanals,
-      marlas: marlas,
-      finalSqFt: finalSqFt,
       formattedText: `${kanals} Kanal, ${marlas} Marla, ${finalSqFt} SqFt`
     };
   }
@@ -336,9 +341,9 @@
         if (!d.length) return alert('Location not found!');
         const lat = parseFloat(d[0].lat);
         const lon = parseFloat(d[0].lon);
-        map.setView([lat, lon], 12);
+        map.setView([lat, lon], 14);
         L.marker([lat, lon]).addTo(map).bindPopup(d[0].display_name).openPopup();
-        document.getElementById('results').innerHTML = `<strong>Selected Location:</strong><br>${d[0].display_name}<br><em>Lat: ${lat.toFixed(4)}, Lng: ${lon.toFixed(4)}</em>`;
+        document.getElementById('results').innerHTML = `<strong>Location Found:</strong><br>${d[0].display_name}`;
       });
   }
 
@@ -347,16 +352,14 @@
     const lng = parseFloat(document.getElementById('coord-lng').value);
     if (isNaN(lat) || isNaN(lng)) return alert('Please enter valid coordinates!');
     if (coordMarker) map.removeLayer(coordMarker);
-    map.setView([lat, lng], 15);
+    map.setView([lat, lng], 16);
     coordMarker = L.marker([lat, lng]).addTo(map).bindPopup(`Lat: ${lat}<br>Lng: ${lng}`).openPopup();
-    document.getElementById('results').innerHTML = `<strong>Target Coordinates:</strong><br>Latitude: ${lat}<br>Longitude: ${lng}`;
+    document.getElementById('results').innerHTML = `<strong>Located:</strong><br>Lat: ${lat}, Lng: ${lng}`;
   }
 
-  /* Upload GeoJSON or KML File */
   function loadSpatialFile() {
     const file = document.getElementById('file-input').files[0];
-    if (!file) return alert('Please select a .geojson or .kml file first!');
-
+    if (!file) return alert('Please select a file first!');
     const fileName = file.name.toLowerCase();
     uploadedLayerGroup.clearLayers();
 
@@ -379,13 +382,13 @@
           });
           uploadedLayerGroup.addLayer(layer);
           map.fitBounds(layer.getBounds());
-        } catch(err) { alert('Invalid GeoJSON format!'); }
+        } catch(err) { alert('Invalid GeoJSON!'); }
       };
       reader.readAsText(file);
     }
   }
 
-  /* Leaflet Draw Initialization with Luxury Handles & Double-Click Control */
+  /* Leaflet Draw Setup */
   const drawnItems = new L.FeatureGroup();
   map.addLayer(drawnItems);
 
@@ -394,35 +397,33 @@
       polygon: {
         allowIntersection: false,
         showArea: true,
-        drawError: { color: '#e15b5b', message: '<strong>Error:</strong> Shape edges cannot cross!' },
         shapeOptions: { color: '#d4af37', fillColor: '#c5a059', fillOpacity: 0.45, weight: 2 }
       },
-      polyline: {
-        shapeOptions: { color: '#d4af37', weight: 3 }
-      },
+      polyline: { shapeOptions: { color: '#d4af37', weight: 3 } },
       rectangle: false,
       circle: false,
       circlemarker: false
     },
-    edit: { featureGroup: drawnItems }
+    edit: { featureGroup: drawnItems, remove: true }
   });
   map.addControl(drawControl);
 
-  /* Double Click Event: Drawn Shape ko Double Click se Remove Karna */
-  drawnItems.on('layeradd', function (e) {
-    const layer = e.layer;
-    layer.on('dblclick', function (ev) {
-      L.DomEvent.stopPropagation(ev);
-      drawnItems.removeLayer(layer);
-      
-      featureRecords = featureRecords.filter(f => f.id !== layer._leaflet_id);
-      updateAttributeTable();
-      
-      document.getElementById('results').innerHTML = `<strong>Status:</strong><br>Feature removed successfully.`;
+  /* FIXED DELETE FUNCTION (ON DOUBLE-CLICK & ON TOOLBAR DELETE) */
+  function removeFeature(layer) {
+    const layerId = layer._custom_id;
+    drawnItems.removeLayer(layer);
+    featureRecords = featureRecords.filter(f => f.id !== layerId);
+    updateAttributeTable();
+    document.getElementById('results').innerHTML = `<strong>Status:</strong><br>Feature #${layerId} deleted successfully.`;
+  }
+
+  map.on(L.Draw.Event.DELETED, function(e) {
+    e.layers.eachLayer(function(layer) {
+      removeFeature(layer);
     });
   });
 
-  /* Drawing Creation & Automatic Massavi Calculation */
+  /* Drawing Creation Function */
   map.on(L.Draw.Event.CREATED, function(e) {
     const layer = e.layer;
     const fillColor = document.getElementById('fill-color').value;
@@ -432,9 +433,15 @@
       layer.setStyle({ color: strokeColor, fillColor: fillColor, fillOpacity: 0.5, weight: 2.5 });
     }
 
-    drawnItems.addLayer(layer);
     featureCounter++;
-    layer._leaflet_id = featureCounter;
+    layer._custom_id = featureCounter;
+    drawnItems.addLayer(layer);
+
+    // Attach Direct Double Click Delete to Layer
+    layer.on('dblclick', function(ev) {
+      L.DomEvent.stopPropagation(ev);
+      removeFeature(layer);
+    });
 
     const geojson = layer.toGeoJSON();
     const type = e.layerType;
@@ -446,17 +453,16 @@
       const areaM2 = turf.area(geojson);
       const massavi = calculateMassaviArea(areaM2);
       massaviAreaText = massavi.formattedText;
-      
       const perimeterMeters = (turf.length(geojson, {units: 'kilometers'}) * 1000).toFixed(2);
       length = `${perimeterMeters} m`;
       coords = 'Polygon Boundary';
 
       document.getElementById('results').innerHTML = `
-        <strong>Feature Calculated:</strong><br>
+        <strong>Feature Calculated (#${featureCounter}):</strong><br>
         Type: Polygon<br>
         Area: <b>${massaviAreaText}</b><br>
         Perimeter: ${length}<br>
-        <small style="color:#c5a059;">(Tip: Double-click shape to remove)</small>
+        <small style="color:#d4af37;">(Tip: Double-click polygon to delete)</small>
       `;
     } else if (type === 'polyline') {
       const lineLen = turf.length(geojson, {units: 'kilometers'});
@@ -464,19 +470,18 @@
       coords = 'Line Path';
 
       document.getElementById('results').innerHTML = `
-        <strong>Feature Calculated:</strong><br>
+        <strong>Feature Calculated (#${featureCounter}):</strong><br>
         Type: Line<br>
         Length: <b>${length}</b><br>
-        <small style="color:#c5a059;">(Tip: Double-click line to remove)</small>
+        <small style="color:#d4af37;">(Tip: Double-click line to delete)</small>
       `;
     } else if (type === 'marker') {
       const c = geojson.geometry.coordinates;
       coords = `${c[1].toFixed(5)}, ${c[0].toFixed(5)}`;
 
       document.getElementById('results').innerHTML = `
-        <strong>Feature Calculated:</strong><br>
-        Type: Point<br>
-        Coords: <b>${coords}</b>
+        <strong>Feature Calculated (#${featureCounter}):</strong><br>
+        Type: Point<br>Coords: <b>${coords}</b>
       `;
     }
 
@@ -491,22 +496,19 @@
     updateAttributeTable();
   });
 
-  /* Spatial Buffer Generation */
   function createBuffer() {
     const data = drawnItems.toGeoJSON();
     const radiusMeters = parseFloat(document.getElementById('buffer-radius').value);
-    if (!data.features.length) return alert('Please draw a feature on the map to create a buffer!');
-    if (isNaN(radiusMeters) || radiusMeters <= 0) return alert('Enter a valid buffer distance!');
+    if (!data.features.length) return alert('Please draw a feature on map first!');
+    if (isNaN(radiusMeters) || radiusMeters <= 0) return alert('Enter valid buffer meters!');
 
     bufferLayerGroup.clearLayers();
     const buffered = turf.buffer(data, radiusMeters / 1000, { units: 'kilometers' });
-    
     const bufferGeoJSON = L.geoJSON(buffered, {
       style: { color: '#ef4444', fillColor: '#f87171', fillOpacity: 0.35, dashArray: '5, 5' }
     });
-
     bufferLayerGroup.addLayer(bufferGeoJSON);
-    document.getElementById('results').innerHTML = `<strong>Spatial Buffer Created:</strong><br>Radius: ${radiusMeters} Meters`;
+    document.getElementById('results').innerHTML = `<strong>Buffer Created:</strong><br>${radiusMeters} Meters`;
   }
 
   function updateAttributeTable() {
@@ -529,26 +531,25 @@
 
   function checkTopology() {
     const data = drawnItems.toGeoJSON();
-    if (!data.features.length) return alert('Please draw a feature on the map first!');
+    if (!data.features.length) return alert('Please draw a feature first!');
     let errors = 0;
     data.features.forEach(f => {
       if (f.geometry.type === 'Polygon') errors += turf.kinks(f).features.length;
     });
-    alert(errors > 0 ? `Topology Check: Found ${errors} self-intersection errors!` : 'Topology Valid! No errors found.');
+    alert(errors > 0 ? `Topology Error: ${errors} intersections found!` : 'Topology Valid! No errors.');
   }
 
   function exportGeoJSON() {
     const data = drawnItems.toGeoJSON();
-    if (!data.features.length) return alert('No features drawn to export!');
+    if (!data.features.length) return alert('No features to export!');
     const a = document.createElement('a');
     a.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));
     a.download = 'waqar_gis_data.geojson';
     a.click();
   }
 
-  /* Export Attribute Data as CSV */
   function exportCSV() {
-    if (featureRecords.length === 0) return alert('No attribute data to export!');
+    if (featureRecords.length === 0) return alert('No data to export!');
     let csvContent = "data:text/csv;charset=utf-8,ID,Type,Massavi Area,Length,Coordinates\n";
     featureRecords.forEach(f => {
       csvContent += `${f.id},${f.type},"${f.massaviArea}",${f.length},"${f.coords}"\n`;
@@ -562,7 +563,6 @@
     document.body.removeChild(link);
   }
 
-  /* Export Map as PNG Image */
   function exportMapImage() {
     html2canvas(document.getElementById('map')).then(canvas => {
       const a = document.createElement('a');
@@ -572,7 +572,6 @@
     });
   }
 
-  /* Export Map as PDF Report */
   function exportMapPDF() {
     html2canvas(document.getElementById('map')).then(canvas => {
       const imgData = canvas.toDataURL('image/png');
