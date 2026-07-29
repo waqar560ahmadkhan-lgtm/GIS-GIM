@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GIS GIM - Advanced Spatial Suite</title>
+  <title>Waqar GIS Portal - Advanced Spatial Suite</title>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -14,145 +14,81 @@
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { display: flex; flex-direction: column; height: 100vh; background: #f1f5f9; }
+    body { display: flex; height: 100vh; overflow: hidden; background: #0f172a; }
 
-    header {
-      background: #1e293b;
-      padding: 10px 20px;
+    /* Left Sidebar Styling */
+    .sidebar {
+      width: 260px;
+      background: #0f172a;
+      color: #ffffff;
+      padding: 16px;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 2px solid #334155;
+      flex-direction: column;
+      gap: 18px;
+      overflow-y: auto;
+      border-right: 1px solid #1e293b;
+      z-index: 100;
     }
 
+    /* Portal Brand Title */
     .portal-brand {
       display: flex;
       align-items: center;
       gap: 10px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #1e293b;
     }
 
     .portal-icon {
-      width: 36px;
-      height: 36px;
+      width: 32px;
+      height: 32px;
       background: #2563eb;
-      border-radius: 8px;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
+      font-size: 16px;
     }
 
     .portal-title {
       font-size: 16px;
       font-weight: 700;
-      color: #ffffff;
-      letter-spacing: 0.3px;
-    }
-
-    .portal-subtitle {
-      font-size: 11px;
-      color: #64748b;
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .search-header {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: #ffffff;
-      border-radius: 6px;
-      padding: 6px 12px;
-      border: 1px solid #e2e8f0;
-    }
-
-    .search-header input {
-      border: none;
-      outline: none;
-      font-size: 13px;
-      color: #334155;
-      width: 180px;
-      background: transparent;
-    }
-
-    .search-header input::placeholder { color: #94a3b8; }
-
-    .search-header button {
-      background: #2563eb;
-      color: #fff;
-      border: none;
-      padding: 4px 10px;
-      border-radius: 4px;
-      font-size: 12px;
-      cursor: pointer;
-      font-weight: 500;
-    }
-
-    .user-badge {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: #0f172a;
-      padding: 5px 12px;
-      border-radius: 20px;
-      border: 1px solid #334155;
-    }
-
-    .online-dot {
-      width: 7px;
-      height: 7px;
-      background: #22c55e;
-      border-radius: 50%;
-    }
-
-    .user-name { font-size: 12px; color: #94a3b8; }
-
-    .admin-tag {
-      font-size: 11px;
-      color: #fff;
-      background: #2563eb;
-      padding: 1px 7px;
-      border-radius: 4px;
-    }
-
-    .logout-btn {
-      padding: 6px 14px;
-      font-size: 12px;
-      background: #2563eb;
-      border: none;
-      color: #fff;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 500;
-    }
-
-    .logout-btn:hover { background: #1d4ed8; }
-
-    .container { display: flex; flex: 1; overflow: hidden; }
-
-    .sidebar {
-      width: 220px;
-      background: #ffffff;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      overflow-y: auto;
-      border-right: 1px solid #e2e8f0;
+      color: #38bdf8;
     }
 
     .sidebar h3 {
-      font-size: 10px;
+      font-size: 11px;
       color: #94a3b8;
-      letter-spacing: 1px;
+      letter-spacing: 0.8px;
       margin-bottom: 8px;
       font-weight: 600;
+      text-transform: uppercase;
     }
 
+    /* Search Box Container inside Sidebar */
+    .search-box-sidebar {
+      background: #1e293b;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+    }
+
+    .search-box-sidebar input {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid #475569;
+      background: #0f172a;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+      margin-top: 6px;
+      margin-bottom: 8px;
+    }
+
+    .search-box-sidebar input::placeholder { color: #64748b; }
+
+    /* Sidebar Buttons */
     .btn {
       width: 100%;
       padding: 9px;
@@ -160,91 +96,129 @@
       border-radius: 6px;
       cursor: pointer;
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 600;
       transition: all 0.2s;
     }
 
-    .btn-primary { background: #2563eb; color: #fff; }
-    .btn-primary:hover { background: #1d4ed8; }
-    .btn-secondary { background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
-    .btn-secondary:hover { background: #e2e8f0; }
+    .btn-blue { background: #2563eb; color: #fff; }
+    .btn-blue:hover { background: #1d4ed8; }
+    .btn-dark { background: #1e293b; color: #e2e8f0; border: 1px solid #334155; }
+    .btn-dark:hover { background: #334155; }
     .btn-green { background: #10b981; color: #fff; }
     .btn-green:hover { background: #059669; }
 
-    #map { flex: 1; }
+    /* Map Section */
+    #map-wrapper {
+      flex: 1;
+      position: relative;
+      height: 100%;
+    }
+
+    #map { width: 100%; height: 100%; }
+
+    /* Floating User Info Badge (Top Right Corner of Map) */
+    .top-right-user {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(15, 23, 42, 0.9);
+      padding: 6px 14px;
+      border-radius: 30px;
+      border: 1px solid #334155;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .user-name { font-size: 13px; color: #f8fafc; font-weight: 600; }
+    .admin-tag { font-size: 10px; color: #38bdf8; background: #1e293b; padding: 2px 6px; border-radius: 4px; font-weight: 700; }
+    
+    .logout-btn {
+      background: #dc2626;
+      color: #fff;
+      border: none;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .logout-btn:hover { background: #b91c1c; }
 
     #results {
       position: absolute;
-      bottom: 30px;
-      left: 235px;
-      background: #1e293bee;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(15, 23, 42, 0.95);
       color: #fff;
-      padding: 10px 16px;
+      padding: 12px 16px;
       border-radius: 8px;
       font-size: 13px;
       border: 1px solid #334155;
-      max-width: 400px;
+      max-width: 350px;
       z-index: 999;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
     }
   </style>
 </head>
 <body>
 
-<header>
-  <div class="portal-brand">
-    <div class="portal-icon">🗺️</div>
-    <div>
-      <div class="portal-title">Waqar GIS Portal</div>
-      <div class="portal-subtitle">Advanced Spatial Suite</div>
-    </div>
-  </div>
-
-  <div class="header-right">
-    <div class="search-header">
-      🔍
-      <input type="text" id="header-search" placeholder="Tehsil ya District..." />
-      <button onclick="searchLocation()">Search</button>
-    </div>
-
-    <div class="user-badge">
-      <div class="online-dot"></div>
-      <span class="user-name">Waqar</span>
-      <span class="admin-tag">Admin</span>
-    </div>
-
-    <button class="logout-btn" onclick="logout()">Logout</button>
-  </div>
-</header>
-
-<div class="container">
+  <!-- Left Sidebar -->
   <div class="sidebar">
+    <div class="portal-brand">
+      <div class="portal-icon">🗺️</div>
+      <div class="portal-title">Waqar GIS Portal</div>
+    </div>
 
+    <!-- Search Box in Sidebar -->
+    <div class="search-box-sidebar">
+      <h3>🔍 SEARCH LOCATION</h3>
+      <input type="text" id="sidebar-search" placeholder="District Or Tehsil..." />
+      <button class="btn btn-blue" onclick="searchLocation()">Search</button>
+    </div>
+
+    <!-- Basemap Layer Controls -->
     <div>
       <h3>1. BASEMAP LAYER</h3>
-      <button class="btn btn-primary" onclick="setBasemap('osm')" style="margin-bottom:8px;">Street Map (OSM)</button>
-      <button class="btn btn-secondary" onclick="setBasemap('satellite')">Satellite Imagery</button>
+      <button class="btn btn-blue" onclick="setBasemap('osm')" style="margin-bottom:8px;">Street Map (OSM)</button>
+      <button class="btn btn-dark" onclick="setBasemap('satellite')">Satellite Imagery</button>
     </div>
 
+    <!-- Topology Check -->
     <div>
       <h3>2. TOPOLOGY CHECK</h3>
-      <button class="btn btn-secondary" onclick="checkTopology()">Validate Topology</button>
+      <button class="btn btn-dark" onclick="checkTopology()">Validate Topology</button>
     </div>
 
+    <!-- Mensuration Panel -->
     <div>
       <h3>3. MENSURATION PANEL</h3>
-      <p style="font-size:12px; color:#94a3b8; line-height:1.5;">Draw any Point, Line, or Polygon using the toolbar on the map to calculate measurements.</p>
+      <p style="font-size:12px; color:#94a3b8; line-height:1.4;">Draw any Point, Line, or Polygon using the toolbar on the map to calculate measurements.</p>
     </div>
 
+    <!-- Export Data -->
     <div>
       <h3>4. EXPORT DATA</h3>
       <button class="btn btn-green" onclick="exportGeoJSON()">Download GeoJSON</button>
     </div>
-
   </div>
 
-  <div id="map"></div>
-  <div id="results"></div>
-</div>
+  <!-- Map Section -->
+  <div id="map-wrapper">
+    
+    <!-- Clean Floating User Badge -->
+    <div class="top-right-user">
+      <span class="user-name">Waqar</span>
+      <span class="admin-tag">Admin</span>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <div id="map"></div>
+    <div id="results">Measurement details yahan show hongi...</div>
+  </div>
 
 <script>
   const map = L.map('map').setView([34.0, 71.5], 8);
@@ -270,7 +244,7 @@
   }
 
   function searchLocation() {
-    const query = document.getElementById('header-search').value;
+    const query = document.getElementById('sidebar-search').value;
     if (!query) { alert('Kuch likhen search box mein!'); return; }
     fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=pk`)
       .then(res => res.json())
@@ -283,7 +257,7 @@
       .catch(() => alert('Search error! Internet check karein.'));
   }
 
-  document.getElementById('header-search').addEventListener('keypress', function(e) {
+  document.getElementById('sidebar-search').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') searchLocation();
   });
 
@@ -327,7 +301,7 @@
   }
 
   function exportGeoJSON() {
-    const data = drawnItems.toGeoJSON();
+    const data.drawnItems.toGeoJSON();
     if (data.features.length === 0) { alert('Pehle kuch digitize karein!'); return; }
     const a = document.createElement('a');
     a.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));
