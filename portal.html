@@ -33,7 +33,7 @@
       background: linear-gradient(180deg, #20242c 0%, #15181e 100%);
       color: #f1f5f9; padding: 20px 16px; display: flex; flex-direction: column;
       gap: 14px; overflow-y: auto; border-right: 2px solid #c5a059;
-      box-shadow: 6px 0 25px rgba(0, 0, 0, 0.6); z-index: 1000; position: relative;
+      box-shadow: 6px 0 25px rgba(0, 0, 0, 0.6); z-index: 10; position: relative;
     }
 
     .portal-brand {
@@ -79,13 +79,13 @@
 
     /* Main Container */
     #main-container { flex: 1; display: flex; flex-direction: column; position: relative; height: 100vh; }
-    #map { flex: 1; width: 100%; height: 100%; background: #1e232a; }
+    #map { flex: 1; width: 100%; height: 100%; background: #1e232a; z-index: 1; }
 
     /* Attribute Table Panel (Bottom) */
     #attribute-panel {
       height: 180px; background: rgba(21, 24, 30, 0.95);
       border-top: 2px solid #c5a059; padding: 10px 16px; overflow-y: auto;
-      backdrop-filter: blur(10px); z-index: 999;
+      backdrop-filter: blur(10px); z-index: 10;
     }
     #attribute-panel h4 { color: #d4af37; font-size: 12px; margin-bottom: 8px; font-family: 'Cinzel', serif; }
     
@@ -98,9 +98,10 @@
     /* Result Box Overlay */
     #results {
       position: absolute; top: 20px; right: 20px;
-      background: rgba(21, 24, 30, 0.9); color: #f8fafc; padding: 10px 14px;
-      border-radius: 8px; font-size: 12px; border: 1px solid rgba(197, 160, 89, 0.4);
-      z-index: 999; max-width: 280px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      background: rgba(21, 24, 30, 0.92); color: #f8fafc; padding: 12px 16px;
+      border-radius: 8px; font-size: 12px; border: 1px solid rgba(197, 160, 89, 0.5);
+      z-index: 500; max-width: 300px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
     }
     #results strong { color: #d4af37; }
   </style>
@@ -165,7 +166,7 @@
 
   <div id="main-container">
     <div id="map"></div>
-    <div id="results">Draw or search to inspect attributes...</div>
+    <div id="results"><strong>Spatial Inspector:</strong><br>Map par location search karein ya shape draw karein.</div>
 
     <!-- Attribute Table Panel -->
     <div id="attribute-panel">
@@ -217,29 +218,33 @@
 
   function searchLocation() {
     const query = document.getElementById('sidebar-search').value;
-    if (!query) return alert('Enter location name!');
+    if (!query) return alert('District ya Tehsil ka naam likhein!');
     fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=pk`)
       .then(r => r.json())
       .then(d => {
-        if (!d.length) return alert('Location not found!');
-        map.setView([parseFloat(d[0].lat), parseFloat(d[0].lon)], 12);
-        L.marker([parseFloat(d[0].lat), parseFloat(d[0].lon)]).addTo(map).bindPopup(d[0].display_name).openPopup();
+        if (!d.length) return alert('Location nahi mili!');
+        const lat = parseFloat(d[0].lat);
+        const lon = parseFloat(d[0].lon);
+        map.setView([lat, lon], 12);
+        L.marker([lat, lon]).addTo(map).bindPopup(d[0].display_name).openPopup();
+        document.getElementById('results').innerHTML = `<strong>Selected Location:</strong><br>${d[0].display_name}<br><em>Lat: ${lat.toFixed(4)}, Lng: ${lon.toFixed(4)}</em>`;
       });
   }
 
   function goToCoordinates() {
     const lat = parseFloat(document.getElementById('coord-lat').value);
     const lng = parseFloat(document.getElementById('coord-lng').value);
-    if (isNaN(lat) || isNaN(lng)) return alert('Enter valid coordinates!');
+    if (isNaN(lat) || isNaN(lng)) return alert('Sahi coordinates daalein!');
     if (coordMarker) map.removeLayer(coordMarker);
     map.setView([lat, lng], 15);
     coordMarker = L.marker([lat, lng]).addTo(map).bindPopup(`Lat: ${lat}<br>Lng: ${lng}`).openPopup();
+    document.getElementById('results').innerHTML = `<strong>Target Coordinates:</strong><br>Latitude: ${lat}<br>Longitude: ${lng}`;
   }
 
   /* Upload GeoJSON or KML File */
   function loadSpatialFile() {
     const file = document.getElementById('file-input').files[0];
-    if (!file) return alert('Select a .geojson or .kml file!');
+    if (!file) return alert('Pehle .geojson ya .kml file select karein!');
 
     const fileName = file.name.toLowerCase();
     uploadedLayerGroup.clearLayers();
@@ -284,15 +289,18 @@
 
     if (type === 'polygon') {
       const areaM2 = turf.area(geojson);
-      area = (areaM2 / 4047).toFixed(2);
+      area = (areaM2 / 252.929).toFixed(2); // Converts sq meters to Marla
       length = (turf.length(geojson, {units: 'kilometers'}) * 1000).toFixed(2) + ' m';
-      coords = 'Polygon Bounds';
+      coords = 'Polygon Boundary';
+      document.getElementById('results').innerHTML = `<strong>Last Drawn Feature:</strong><br>Type: Polygon<br>Area: ${area} Marla<br>Perimeter: ${length}`;
     } else if (type === 'polyline') {
       length = turf.length(geojson, {units: 'kilometers'}).toFixed(2) + ' km';
       coords = 'Line Path';
+      document.getElementById('results').innerHTML = `<strong>Last Drawn Feature:</strong><br>Type: Line<br>Length: ${length}`;
     } else if (type === 'marker') {
       const c = geojson.geometry.coordinates;
       coords = `${c[1].toFixed(4)}, ${c[0].toFixed(4)}`;
+      document.getElementById('results').innerHTML = `<strong>Last Drawn Feature:</strong><br>Type: Point<br>Coords: ${coords}`;
     }
 
     featureRecords.push({ id: featureCounter, type: type.toUpperCase(), area, length, coords });
@@ -316,26 +324,26 @@
 
   function checkTopology() {
     const data = drawnItems.toGeoJSON();
-    if (!data.features.length) return alert('Draw a shape first!');
+    if (!data.features.length) return alert('Pehle map par koi shape draw karein!');
     let errors = 0;
     data.features.forEach(f => {
       if (f.geometry.type === 'Polygon') errors += turf.kinks(f).features.length;
     });
-    alert(errors > 0 ? `Found ${errors} self-intersection errors!` : 'Topology Valid!');
+    alert(errors > 0 ? `Topology Check: ${errors} self-intersection errors mile hain!` : 'Topology Valid! Koi error nahi mila.');
   }
 
   function exportGeoJSON() {
     const data = drawnItems.toGeoJSON();
-    if (!data.features.length) return alert('No features drawn!');
+    if (!data.features.length) return alert('No features drawn to export!');
     const a = document.createElement('a');
     a.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));
-    a.download = 'gis_data.geojson';
+    a.download = 'waqar_gis_data.geojson';
     a.click();
   }
 
   /* Export Map as PNG Image */
   function exportMapImage() {
-    html2canvas(document.getElementById('map-wrapper') || document.getElementById('map')).then(canvas => {
+    html2canvas(document.getElementById('map')).then(canvas => {
       const a = document.createElement('a');
       a.href = canvas.toDataURL('image/png');
       a.download = 'Waqar_GIS_Map.png';
@@ -345,7 +353,7 @@
 
   /* Export Map as PDF Report */
   function exportMapPDF() {
-    html2canvas(document.getElementById('map-wrapper') || document.getElementById('map')).then(canvas => {
+    html2canvas(document.getElementById('map')).then(canvas => {
       const imgData = canvas.toDataURL('image/png');
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF('landscape');
