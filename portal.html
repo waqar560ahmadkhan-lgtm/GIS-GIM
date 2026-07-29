@@ -81,6 +81,42 @@
     #main-container { flex: 1; display: flex; flex-direction: column; position: relative; height: 100vh; }
     #map { flex: 1; width: 100%; height: 100%; background: #1e232a; z-index: 1; }
 
+    /* Luxury Gold Vertex Handles & Drawing UI */
+    .leaflet-div-icon {
+      background: #d4af37 !important;
+      border: 2px solid #ffffff !important;
+      border-radius: 50% !important;
+      box-shadow: 0 0 8px rgba(212, 175, 55, 0.9), 0 0 3px rgba(0, 0, 0, 0.8) !important;
+      width: 12px !important;
+      height: 12px !important;
+      margin-left: -6px !important;
+      margin-top: -6px !important;
+    }
+
+    .leaflet-editing-icon {
+      background: #f3e5ab !important;
+      border: 2px solid #c5a059 !important;
+      border-radius: 50% !important;
+      box-shadow: 0 0 10px rgba(197, 160, 89, 1) !important;
+    }
+
+    .leaflet-draw-toolbar a {
+      background-color: #20242c !important;
+      border-bottom: 1px solid rgba(197, 160, 89, 0.3) !important;
+      color: #d4af37 !important;
+    }
+
+    .leaflet-draw-toolbar a:hover {
+      background-color: #c5a059 !important;
+      color: #15181e !important;
+    }
+
+    .leaflet-draw-actions a {
+      background-color: #15181e !important;
+      color: #c5a059 !important;
+      border-left: 1px solid #c5a059 !important;
+    }
+
     /* Attribute Table Panel (Bottom) */
     #attribute-panel {
       height: 180px; background: rgba(21, 24, 30, 0.95);
@@ -349,23 +385,56 @@
     }
   }
 
-  /* Leaflet Draw & Attribute Table Logic */
+  /* Leaflet Draw Initialization with Luxury Handles & Double-Click Control */
   const drawnItems = new L.FeatureGroup();
   map.addLayer(drawnItems);
-  const drawControl = new L.Control.Draw({ edit: { featureGroup: drawnItems } });
+
+  const drawControl = new L.Control.Draw({
+    draw: {
+      polygon: {
+        allowIntersection: false,
+        showArea: true,
+        drawError: { color: '#e15b5b', message: '<strong>Error:</strong> Shape edges cannot cross!' },
+        shapeOptions: { color: '#d4af37', fillColor: '#c5a059', fillOpacity: 0.45, weight: 2 }
+      },
+      polyline: {
+        shapeOptions: { color: '#d4af37', weight: 3 }
+      },
+      rectangle: false,
+      circle: false,
+      circlemarker: false
+    },
+    edit: { featureGroup: drawnItems }
+  });
   map.addControl(drawControl);
 
+  /* Double Click Event: Drawn Shape ko Double Click se Remove Karna */
+  drawnItems.on('layeradd', function (e) {
+    const layer = e.layer;
+    layer.on('dblclick', function (ev) {
+      L.DomEvent.stopPropagation(ev);
+      drawnItems.removeLayer(layer);
+      
+      featureRecords = featureRecords.filter(f => f.id !== layer._leaflet_id);
+      updateAttributeTable();
+      
+      document.getElementById('results').innerHTML = `<strong>Status:</strong><br>Feature removed successfully.`;
+    });
+  });
+
+  /* Drawing Creation & Automatic Massavi Calculation */
   map.on(L.Draw.Event.CREATED, function(e) {
     const layer = e.layer;
     const fillColor = document.getElementById('fill-color').value;
     const strokeColor = document.getElementById('stroke-color').value;
 
     if (layer.setStyle) {
-      layer.setStyle({ color: strokeColor, fillColor: fillColor, fillOpacity: 0.5 });
+      layer.setStyle({ color: strokeColor, fillColor: fillColor, fillOpacity: 0.5, weight: 2.5 });
     }
 
     drawnItems.addLayer(layer);
     featureCounter++;
+    layer._leaflet_id = featureCounter;
 
     const geojson = layer.toGeoJSON();
     const type = e.layerType;
@@ -386,7 +455,8 @@
         <strong>Feature Calculated:</strong><br>
         Type: Polygon<br>
         Area: <b>${massaviAreaText}</b><br>
-        Perimeter: ${length}
+        Perimeter: ${length}<br>
+        <small style="color:#c5a059;">(Tip: Double-click shape to remove)</small>
       `;
     } else if (type === 'polyline') {
       const lineLen = turf.length(geojson, {units: 'kilometers'});
@@ -396,7 +466,8 @@
       document.getElementById('results').innerHTML = `
         <strong>Feature Calculated:</strong><br>
         Type: Line<br>
-        Length: <b>${length}</b>
+        Length: <b>${length}</b><br>
+        <small style="color:#c5a059;">(Tip: Double-click line to remove)</small>
       `;
     } else if (type === 'marker') {
       const c = geojson.geometry.coordinates;
@@ -440,7 +511,10 @@
 
   function updateAttributeTable() {
     const tbody = document.querySelector('#attr-table tbody');
-    if (featureRecords.length === 0) return;
+    if (featureRecords.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#788294;">No digitization features added yet.</td></tr>`;
+      return;
+    }
     
     tbody.innerHTML = featureRecords.map(f => `
       <tr>
