@@ -5,127 +5,184 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GIS GIM - Advanced Spatial Suite</title>
 
-  <!-- Leaflet CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <!-- Leaflet Draw Plugin -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
-
-  <!-- Turf.js -->
   <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
-
-  <!-- Nominatim Search -->
-  <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
-
-  <!-- Auth Guard -->
   <script src="auth-guard.js"></script>
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { display: flex; flex-direction: column; height: 100vh; background-color: #1a1a24; color: #ffffff; }
+    body { display: flex; flex-direction: column; height: 100vh; background: #f1f5f9; }
 
     header {
-      background: #00be15;
-      padding: 12px 20px;
+      background: #1e293b;
+      padding: 10px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 2px solid #2e2c3d;
+      border-bottom: 2px solid #334155;
     }
-    header h1 { font-size: 20px; color: #00b2ff; letter-spacing: 1px; }
-    .status-badge {
-      background: #002a1a;
-      color: #2ecc8f;
-      padding: 4px 12px;
-      border-radius: 20px;
+
+    .portal-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .portal-icon {
+      width: 36px;
+      height: 36px;
+      background: #2563eb;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .portal-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.3px;
+    }
+
+    .portal-subtitle {
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .search-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #ffffff;
+      border-radius: 6px;
+      padding: 6px 12px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .search-header input {
+      border: none;
+      outline: none;
       font-size: 13px;
-      border: 1px solid #2ecc8f44;
+      color: #334155;
+      width: 180px;
+      background: transparent;
     }
+
+    .search-header input::placeholder { color: #94a3b8; }
+
+    .search-header button {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #0f172a;
+      padding: 5px 12px;
+      border-radius: 20px;
+      border: 1px solid #334155;
+    }
+
+    .online-dot {
+      width: 7px;
+      height: 7px;
+      background: #22c55e;
+      border-radius: 50%;
+    }
+
+    .user-name { font-size: 12px; color: #94a3b8; }
+
+    .admin-tag {
+      font-size: 11px;
+      color: #fff;
+      background: #2563eb;
+      padding: 1px 7px;
+      border-radius: 4px;
+    }
+
+    .logout-btn {
+      padding: 6px 14px;
+      font-size: 12px;
+      background: #2563eb;
+      border: none;
+      color: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .logout-btn:hover { background: #1d4ed8; }
 
     .container { display: flex; flex: 1; overflow: hidden; }
 
     .sidebar {
       width: 220px;
-      background: #14151e;
-      padding: 20px;
+      background: #ffffff;
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 16px;
       overflow-y: auto;
+      border-right: 1px solid #e2e8f0;
     }
 
     .sidebar h3 {
-      font-size: 11px;
-      color: #888;
+      font-size: 10px;
+      color: #94a3b8;
       letter-spacing: 1px;
       margin-bottom: 8px;
+      font-weight: 600;
     }
-
-    /* Search Box Style */
-    .search-section {
-      background: #1e1f2e;
-      border-radius: 8px;
-      padding: 10px;
-      border: 1px solid #2ecc8f44;
-    }
-    .search-section h3 {
-      color: #2ecc8f;
-      margin-bottom: 8px;
-    }
-    #search-input {
-      width: 100%;
-      padding: 8px 10px;
-      border-radius: 6px;
-      border: 1px solid #2ecc8f;
-      background: #0d0e17;
-      color: #fff;
-      font-size: 13px;
-      outline: none;
-    }
-    #search-input::placeholder { color: #666; }
-    #search-btn {
-      width: 100%;
-      margin-top: 8px;
-      padding: 8px;
-      background: #2ecc8f;
-      color: #000;
-      border: none;
-      border-radius: 6px;
-      font-size: 13px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    #search-btn:hover { background: #27ae7a; }
 
     .btn {
       width: 100%;
-      padding: 10px;
+      padding: 9px;
       border: none;
       border-radius: 6px;
       cursor: pointer;
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 500;
       transition: all 0.2s;
     }
-    .btn-primary { background: #2ecc8f; color: #000; }
-    .btn-secondary { background: #1e1f2e; color: #fff; border: 1px solid #333; }
-    .btn:hover { opacity: 0.85; }
+
+    .btn-primary { background: #2563eb; color: #fff; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-secondary { background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
+    .btn-secondary:hover { background: #e2e8f0; }
+    .btn-green { background: #10b981; color: #fff; }
+    .btn-green:hover { background: #059669; }
 
     #map { flex: 1; }
 
     #results {
       position: absolute;
       bottom: 30px;
-      left: 230px;
-      background: #1a1a24ee;
+      left: 235px;
+      background: #1e293bee;
       color: #fff;
       padding: 10px 16px;
       border-radius: 8px;
       font-size: 13px;
-      border: 1px solid #2ecc8f44;
+      border: 1px solid #334155;
       max-width: 400px;
       z-index: 999;
     }
@@ -134,47 +191,53 @@
 <body>
 
 <header>
-  <h1>🗺️ Waqar GIS Portal</h1>
-  <div style="display:flex; gap:10px; align-items:center;">
-    <span class="status-badge">Waqar (Admin)</span>
-    <span class="status-badge">Admin</span>
-    <button class="btn btn-secondary" style="width:auto; padding:6px 14px;" onclick="logout()">Logout</button>
+  <div class="portal-brand">
+    <div class="portal-icon">🗺️</div>
+    <div>
+      <div class="portal-title">Waqar GIS Portal</div>
+      <div class="portal-subtitle">Advanced Spatial Suite</div>
+    </div>
+  </div>
+
+  <div class="header-right">
+    <div class="search-header">
+      🔍
+      <input type="text" id="header-search" placeholder="Tehsil ya District..." />
+      <button onclick="searchLocation()">Search</button>
+    </div>
+
+    <div class="user-badge">
+      <div class="online-dot"></div>
+      <span class="user-name">Waqar</span>
+      <span class="admin-tag">Admin</span>
+    </div>
+
+    <button class="logout-btn" onclick="logout()">Logout</button>
   </div>
 </header>
 
 <div class="container">
   <div class="sidebar">
 
-    <!-- SEARCH -->
-    <div class="search-section">
-      <h3>🔍 SEARCH LOCATION</h3>
-      <input type="text" id="search-input" placeholder="Tehsil ya District..." />
-      <button class="btn" id="search-btn" onclick="searchLocation()">Search</button>
-    </div>
-
-    <!-- BASEMAP -->
     <div>
       <h3>1. BASEMAP LAYER</h3>
       <button class="btn btn-primary" onclick="setBasemap('osm')" style="margin-bottom:8px;">Street Map (OSM)</button>
       <button class="btn btn-secondary" onclick="setBasemap('satellite')">Satellite Imagery</button>
     </div>
 
-    <!-- TOPOLOGY -->
     <div>
       <h3>2. TOPOLOGY CHECK</h3>
       <button class="btn btn-secondary" onclick="checkTopology()">Validate Topology</button>
     </div>
 
-    <!-- MENSURATION -->
     <div>
       <h3>3. MENSURATION PANEL</h3>
-      <p style="font-size:12px; color:#888; line-height:1.5;">Draw any Point, Line, or Polygon using the toolbar on the map to calculate measurements.</p>
+      <p style="font-size:12px; color:#94a3b8; line-height:1.5;">Draw any Point, Line, or Polygon using the toolbar on the map to calculate measurements.</p>
     </div>
 
-    <!-- EXPORT -->
     <div>
       <h3>4. EXPORT DATA</h3>
-      <button class="btn btn-primary" onclick="exportGeoJSON()">Download GeoJSON</button>
+      <button class="btn btn-green" onclick="exportGeoJSON()">Download GeoJSON</button>
     </div>
 
   </div>
@@ -206,38 +269,27 @@
     }
   }
 
-  // Search Function
   function searchLocation() {
-    const query = document.getElementById('search-input').value;
+    const query = document.getElementById('header-search').value;
     if (!query) { alert('Kuch likhen search box mein!'); return; }
-
     fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=pk`)
       .then(res => res.json())
       .then(data => {
-        if (data.length === 0) {
-          alert('Koi jagah nahi mili! Dobara try karein.');
-          return;
-        }
+        if (data.length === 0) { alert('Koi jagah nahi mili!'); return; }
         const place = data[0];
-        const lat = parseFloat(place.lat);
-        const lon = parseFloat(place.lon);
-        map.setView([lat, lon], 12);
-        L.marker([lat, lon]).addTo(map).bindPopup(place.display_name).openPopup();
+        map.setView([parseFloat(place.lat), parseFloat(place.lon)], 12);
+        L.marker([parseFloat(place.lat), parseFloat(place.lon)]).addTo(map).bindPopup(place.display_name).openPopup();
       })
       .catch(() => alert('Search error! Internet check karein.'));
   }
 
-  // Enter key se bhi search ho
-  document.getElementById('search-input').addEventListener('keypress', function(e) {
+  document.getElementById('header-search').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') searchLocation();
   });
 
-  // Draw
   const drawnItems = new L.FeatureGroup();
   map.addLayer(drawnItems);
-  const drawControl = new L.Control.Draw({
-    edit: { featureGroup: drawnItems }
-  });
+  const drawControl = new L.Control.Draw({ edit: { featureGroup: drawnItems } });
   map.addControl(drawControl);
 
   map.on(L.Draw.Event.CREATED, function(e) {
@@ -250,10 +302,10 @@
       const areaM2 = turf.area(geojson);
       const areaMa = (areaM2 / 4047).toFixed(2);
       const perimeter = turf.length(geojson, { units: 'kilometers' }) * 1000;
-      html = `<strong>Area:</strong> ${areaMa} ha / ${areaMa} Marla<br><strong>Perimeter:</strong> ${perimeter.toFixed(2)} meters`;
+      html = `<strong>Area:</strong> ${areaMa} Marla<br><strong>Perimeter:</strong> ${perimeter.toFixed(2)} meters`;
     } else if (type === 'polyline') {
-      const lengthKM = turf.length(geojson, { units: 'kilometers' }) * 1000;
-      html = `<strong>Type:</strong> Line<br><strong>Length:</strong> ${(lengthKM / 1000).toFixed(2)} km`;
+      const lengthKM = turf.length(geojson, { units: 'kilometers' });
+      html = `<strong>Type:</strong> Line<br><strong>Length:</strong> ${lengthKM.toFixed(2)} km`;
     } else if (type === 'marker') {
       const c = geojson.geometry.coordinates;
       html = `<strong>Type:</strong> Point<br><strong>Lat:</strong> ${c[1].toFixed(5)}<br><strong>Lng:</strong> ${c[0].toFixed(5)}`;
@@ -271,7 +323,7 @@
         errors += kinks.features.length;
       }
     });
-    alert(errors > 0 ? `Topology Error! ${errors} self-intersection(s) mili hain.` : 'Topology Valid! Sab features sami hain.');
+    alert(errors > 0 ? `Topology Error! ${errors} self-intersection(s) mili hain.` : 'Topology Valid! Sab features sahi hain.');
   }
 
   function exportGeoJSON() {
