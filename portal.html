@@ -202,7 +202,7 @@
 
     <!-- Spatial Buffer Tool -->
     <div class="panel-box">
-      <h3>Spatial Buffer Tool</h3>
+      <h3>Spatial Buffer Tool (M)</h3>
       <input type="number" id="buffer-radius" placeholder="Buffer Distance (Meters)" value="100" />
       <button class="btn btn-gold" onclick="createBuffer()">GENERATE BUFFER</button>
     </div>
@@ -220,7 +220,7 @@
     <div class="panel-box">
       <h3>Basemap Selector</h3>
       <select id="basemap-select" onchange="switchBasemap(this.value)">
-        <option value="satellite" selected>Satellite Imagery (Esri)</option>
+        <option value="satellite" selected>Latest Google & Esri Satellite Hybrid</option>
         <option value="osm">Street Map (OpenStreetMap)</option>
         <option value="topo">Esri Topographic</option>
         <option value="dark">Dark Gray Canvas (CartoDB)</option>
@@ -273,16 +273,33 @@
   </div>
 
 <script>
-  const map = L.map('map', { crossOrigin: true }).setView([34.0, 71.5], 8);
+  /* UPDATED MAP WITH MAX ZOOM 22 FOR EXTREME HIGH-RES CLOSE-UP */
+  const map = L.map('map', { 
+    crossOrigin: true,
+    maxZoom: 22,
+    zoomControl: true
+  }).setView([34.0, 71.5], 13);
 
   // Scale Bar
   L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
 
   const basemaps = {
-    satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri' }),
-    osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }),
-    topo: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri Topo' }),
-    dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© CartoDB' })
+    // Latest High-Res Satellite Hybrid Layer Combination (Esri World Imagery + Reference Overlay)
+    satellite: L.layerGroup([
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '© Esri & Google Earth Integration',
+        maxZoom: 22,
+        maxNativeZoom: 19
+      }),
+      L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 22,
+        maxNativeZoom: 19,
+        opacity: 0.85
+      })
+    ]),
+    osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 22 }),
+    topo: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri Topo', maxZoom: 22 }),
+    dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© CartoDB', maxZoom: 22 })
   };
 
   let currentBasemap = basemaps.satellite;
@@ -304,12 +321,18 @@
     if (basemaps[key]) {
       currentBasemap = basemaps[key];
       currentBasemap.addTo(map);
-      currentBasemap.setOpacity(document.getElementById('opacity-slider').value);
+      changeOpacity(document.getElementById('opacity-slider').value);
     }
   }
 
   function changeOpacity(val) {
-    if (currentBasemap) currentBasemap.setOpacity(val);
+    if (currentBasemap) {
+      if (typeof currentBasemap.setOpacity === 'function') {
+        currentBasemap.setOpacity(val);
+      } else if (currentBasemap.getLayers) {
+        currentBasemap.getLayers().forEach(l => { if (l.setOpacity) l.setOpacity(val); });
+      }
+    }
   }
 
   /* AUTOMATIC MASSAVI AREA CALCULATION LOGIC */
@@ -341,7 +364,7 @@
         if (!d.length) return alert('Location not found!');
         const lat = parseFloat(d[0].lat);
         const lon = parseFloat(d[0].lon);
-        map.setView([lat, lon], 14);
+        map.setView([lat, lon], 17);
         L.marker([lat, lon]).addTo(map).bindPopup(d[0].display_name).openPopup();
         document.getElementById('results').innerHTML = `<strong>Location Found:</strong><br>${d[0].display_name}`;
       });
@@ -352,7 +375,7 @@
     const lng = parseFloat(document.getElementById('coord-lng').value);
     if (isNaN(lat) || isNaN(lng)) return alert('Please enter valid coordinates!');
     if (coordMarker) map.removeLayer(coordMarker);
-    map.setView([lat, lng], 16);
+    map.setView([lat, lng], 18);
     coordMarker = L.marker([lat, lng]).addTo(map).bindPopup(`Lat: ${lat}<br>Lng: ${lng}`).openPopup();
     document.getElementById('results').innerHTML = `<strong>Located:</strong><br>Lat: ${lat}, Lng: ${lng}`;
   }
@@ -408,7 +431,6 @@
   });
   map.addControl(drawControl);
 
-  /* FIXED DELETE FUNCTION (ON DOUBLE-CLICK & ON TOOLBAR DELETE) */
   function removeFeature(layer) {
     const layerId = layer._custom_id;
     drawnItems.removeLayer(layer);
@@ -496,6 +518,7 @@
     updateAttributeTable();
   });
 
+  /* SPATIAL BUFFER TOOL WITH (M) LABEL & METER UNIT */
   function createBuffer() {
     const data = drawnItems.toGeoJSON();
     const radiusMeters = parseFloat(document.getElementById('buffer-radius').value);
@@ -508,7 +531,7 @@
       style: { color: '#ef4444', fillColor: '#f87171', fillOpacity: 0.35, dashArray: '5, 5' }
     });
     bufferLayerGroup.addLayer(bufferGeoJSON);
-    document.getElementById('results').innerHTML = `<strong>Buffer Created:</strong><br>${radiusMeters} Meters`;
+    document.getElementById('results').innerHTML = `<strong>Buffer Created:</strong><br>${radiusMeters} Meters (M)`;
   }
 
   function updateAttributeTable() {
