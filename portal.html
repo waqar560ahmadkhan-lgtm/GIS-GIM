@@ -220,7 +220,7 @@
     <div class="panel-box">
       <h3>Basemap Selector</h3>
       <select id="basemap-select" onchange="switchBasemap(this.value)">
-        <option value="satellite" selected>Latest Google & Esri Satellite Hybrid</option>
+        <option value="satellite" selected>Latest Satellite + Village Names Hybrid</option>
         <option value="osm">Street Map (OpenStreetMap)</option>
         <option value="topo">Esri Topographic</option>
         <option value="dark">Dark Gray Canvas (CartoDB)</option>
@@ -273,7 +273,7 @@
   </div>
 
 <script>
-  /* UPDATED MAP WITH MAX ZOOM 22 FOR EXTREME HIGH-RES CLOSE-UP */
+  /* MAP WITH MAX ZOOM 22 FOR HIGH-RES CLOSE-UP & VILLAGE LABELS */
   const map = L.map('map', { 
     crossOrigin: true,
     maxZoom: 22,
@@ -284,17 +284,17 @@
   L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
 
   const basemaps = {
-    // Latest High-Res Satellite Hybrid Layer Combination (Esri World Imagery + Reference Overlay)
+    // High-Res Satellite Hybrid Layer Combined with Village and Place Names Overlay
     satellite: L.layerGroup([
       L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: '© Esri & Google Earth Integration',
+        attribution: '© Esri & Village Mapping Integration',
         maxZoom: 22,
         maxNativeZoom: 19
       }),
       L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 22,
         maxNativeZoom: 19,
-        opacity: 0.85
+        opacity: 0.95
       })
     ]),
     osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 22 }),
