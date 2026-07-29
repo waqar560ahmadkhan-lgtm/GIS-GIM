@@ -65,7 +65,7 @@
       color: #f8fafc; font-size: 12px; outline: none; margin-bottom: 6px;
     }
 
-    .coord-inputs { display: flex; gap: 6px; }
+    .coord-inputs, .style-inputs { display: flex; gap: 6px; }
 
     .btn {
       width: 100%; padding: 8px; border: none; border-radius: 6px;
@@ -104,6 +104,14 @@
       backdrop-filter: blur(8px);
     }
     #results strong { color: #d4af37; }
+
+    /* Cursor Coordinates HUD Overlay */
+    #cursor-hud {
+      position: absolute; bottom: 190px; right: 20px;
+      background: rgba(21, 24, 30, 0.85); color: #c5a059; padding: 6px 12px;
+      border-radius: 6px; font-size: 11px; border: 1px solid rgba(197, 160, 89, 0.3);
+      z-index: 500; pointer-events: none; font-family: monospace;
+    }
   </style>
 </head>
 <body>
@@ -138,7 +146,23 @@
       <button class="btn btn-gold" onclick="loadSpatialFile()">UPLOAD & VIEW</button>
     </div>
 
-    <!-- Basemap Selector -->
+    <!-- Spatial Buffer Tool -->
+    <div class="panel-box">
+      <h3>Spatial Buffer Tool</h3>
+      <input type="number" id="buffer-radius" placeholder="Buffer Distance (Meters)" value="100" />
+      <button class="btn btn-gold" onclick="createBuffer()">GENERATE BUFFER</button>
+    </div>
+
+    <!-- Custom Symbology Color Picker -->
+    <div class="panel-box">
+      <h3>Feature Styling</h3>
+      <div class="style-inputs">
+        <input type="color" id="fill-color" value="#c5a059" title="Fill Color" style="height:35px; cursor:pointer;" />
+        <input type="color" id="stroke-color" value="#d4af37" title="Stroke Color" style="height:35px; cursor:pointer;" />
+      </div>
+    </div>
+
+    <!-- Basemap Selector & Layer Opacity -->
     <div class="panel-box">
       <h3>Basemap Selector</h3>
       <select id="basemap-select" onchange="switchBasemap(this.value)">
@@ -147,6 +171,8 @@
         <option value="topo">Esri Topographic</option>
         <option value="dark">Dark Gray Canvas (CartoDB)</option>
       </select>
+      <label style="font-size: 10px; color: #c5a059; display:block; margin-top:4px;">Layer Opacity / Transparency:</label>
+      <input type="range" id="opacity-slider" min="0.1" max="1" step="0.1" value="1" oninput="changeOpacity(this.value)" style="width:100%; cursor:pointer;" />
     </div>
 
     <!-- Topology Check -->
@@ -159,6 +185,7 @@
     <div class="panel-box">
       <h3>Export Options</h3>
       <button class="btn btn-emerald" onclick="exportGeoJSON()" style="margin-bottom:6px;">Download GeoJSON</button>
+      <button class="btn btn-emerald" onclick="exportCSV()" style="margin-bottom:6px;">Download CSV Attributes</button>
       <button class="btn btn-dark" onclick="exportMapImage()" style="margin-bottom:6px;">Export PNG Image</button>
       <button class="btn btn-dark" onclick="exportMapPDF()">Export PDF Report</button>
     </div>
@@ -167,6 +194,7 @@
   <div id="main-container">
     <div id="map"></div>
     <div id="results"><strong>Spatial Inspector:</strong><br>Search a location or draw features on the map.</div>
+    <div id="cursor-hud">Lat: 0.0000 | Lng: 0.0000</div>
 
     <!-- Attribute Table Panel -->
     <div id="attribute-panel">
@@ -193,6 +221,9 @@
 <script>
   const map = L.map('map', { crossOrigin: true }).setView([34.0, 71.5], 8);
 
+  // Scale Bar
+  L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
+
   const basemaps = {
     osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }),
     satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri' }),
@@ -205,15 +236,26 @@
 
   let coordMarker = null;
   let uploadedLayerGroup = L.layerGroup().addTo(map);
+  let bufferLayerGroup = L.layerGroup().addTo(map);
   let featureCounter = 0;
   let featureRecords = [];
+
+  // Live Cursor Coordinates HUD
+  map.on('mousemove', function(e) {
+    document.getElementById('cursor-hud').innerHTML = `Lat: ${e.latlng.lat.toFixed(5)} | Lng: ${e.latlng.lng.toFixed(5)}`;
+  });
 
   function switchBasemap(key) {
     if (currentBasemap) map.removeLayer(currentBasemap);
     if (basemaps[key]) {
       currentBasemap = basemaps[key];
       currentBasemap.addTo(map);
+      currentBasemap.setOpacity(document.getElementById('opacity-slider').value);
     }
+  }
+
+  function changeOpacity(val) {
+    if (currentBasemap) currentBasemap.setOpacity(val);
   }
 
   function searchLocation() {
@@ -261,8 +303,10 @@
       const reader = new FileReader();
       reader.onload = function(e) {
         try {
+          const fillColor = document.getElementById('fill-color').value;
+          const strokeColor = document.getElementById('stroke-color').value;
           const layer = L.geoJSON(JSON.parse(e.target.result), {
-            style: { color: '#d4af37', fillColor: '#c5a059', fillOpacity: 0.4 }
+            style: { color: strokeColor, fillColor: fillColor, fillOpacity: 0.5 }
           });
           uploadedLayerGroup.addLayer(layer);
           map.fitBounds(layer.getBounds());
@@ -280,6 +324,13 @@
 
   map.on(L.Draw.Event.CREATED, function(e) {
     const layer = e.layer;
+    const fillColor = document.getElementById('fill-color').value;
+    const strokeColor = document.getElementById('stroke-color').value;
+
+    if (layer.setStyle) {
+      layer.setStyle({ color: strokeColor, fillColor: fillColor, fillOpacity: 0.5 });
+    }
+
     drawnItems.addLayer(layer);
     featureCounter++;
 
@@ -306,6 +357,24 @@
     featureRecords.push({ id: featureCounter, type: type.toUpperCase(), area, length, coords });
     updateAttributeTable();
   });
+
+  /* Spatial Buffer Generation */
+  function createBuffer() {
+    const data = drawnItems.toGeoJSON();
+    const radiusMeters = parseFloat(document.getElementById('buffer-radius').value);
+    if (!data.features.length) return alert('Please draw a feature on the map to create a buffer!');
+    if (isNaN(radiusMeters) || radiusMeters <= 0) return alert('Enter a valid buffer distance!');
+
+    bufferLayerGroup.clearLayers();
+    const buffered = turf.buffer(data, radiusMeters / 1000, { units: 'kilometers' });
+    
+    const bufferGeoJSON = L.geoJSON(buffered, {
+      style: { color: '#ef4444', fillColor: '#f87171', fillOpacity: 0.35, dashArray: '5, 5' }
+    });
+
+    bufferLayerGroup.addLayer(bufferGeoJSON);
+    document.getElementById('results').innerHTML = `<strong>Spatial Buffer Created:</strong><br>Radius: ${radiusMeters} Meters`;
+  }
 
   function updateAttributeTable() {
     const tbody = document.querySelector('#attr-table tbody');
@@ -339,6 +408,22 @@
     a.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));
     a.download = 'waqar_gis_data.geojson';
     a.click();
+  }
+
+  /* Export Attribute Data as CSV */
+  function exportCSV() {
+    if (featureRecords.length === 0) return alert('No attribute data to export!');
+    let csvContent = "data:text/csv;charset=utf-8,ID,Type,Area (Marla),Length,Coordinates\n";
+    featureRecords.forEach(f => {
+      csvContent += `${f.id},${f.type},${f.area},${f.length},"${f.coords}"\n`;
+    });
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "waqar_gis_attributes.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
   /* Export Map as PNG Image */
