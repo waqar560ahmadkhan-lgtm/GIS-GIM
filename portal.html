@@ -205,8 +205,8 @@
             <tr>
               <th>ID</th>
               <th>Type</th>
-              <th>Area (Marla)</th>
-              <th>Length (m / km)</th>
+              <th>Massavi Area (Kanal-Marla-SqFt)</th>
+              <th>Length / Perimeter</th>
               <th>Coordinates</th>
             </tr>
           </thead>
@@ -256,6 +256,39 @@
 
   function changeOpacity(val) {
     if (currentBasemap) currentBasemap.setOpacity(val);
+  }
+
+  /* AUTOMATIC MASSAVI AREA CALCULATION LOGIC */
+  function calculateMassaviArea(areaSqMeters) {
+    const SQFT_PER_SQM = 10.7639;
+    const SQFT_PER_KANAL = 5445.0;
+    const SQFT_PER_MARLA = 272.25;
+
+    let totalSqFt = areaSqMeters * SQFT_PER_SQM;
+
+    let kanals = Math.floor(totalSqFt / SQFT_PER_KANAL);
+    let remainingSqFt = totalSqFt % SQFT_PER_KANAL;
+
+    let marlas = Math.floor(remainingSqFt / SQFT_PER_MARLA);
+    let finalSqFt = Math.round(remainingSqFt % SQFT_PER_MARLA);
+
+    // Massavi Rollover Rules
+    if (finalSqFt >= 270) {
+      marlas += 1;
+      finalSqFt = 0;
+    }
+    if (marlas >= 20) {
+      kanals += 1;
+      marlas -= 20;
+    }
+
+    return {
+      totalSqFt: Math.round(totalSqFt),
+      kanals: kanals,
+      marlas: marlas,
+      finalSqFt: finalSqFt,
+      formattedText: `${kanals} Kanal, ${marlas} Marla, ${finalSqFt} SqFt`
+    };
   }
 
   function searchLocation() {
@@ -336,25 +369,54 @@
 
     const geojson = layer.toGeoJSON();
     const type = e.layerType;
-    let area = 'N/A', length = 'N/A', coords = '';
+    let massaviAreaText = 'N/A';
+    let length = 'N/A';
+    let coords = '';
 
     if (type === 'polygon') {
       const areaM2 = turf.area(geojson);
-      area = (areaM2 / 252.929).toFixed(2); // Converts sq meters to Marla
-      length = (turf.length(geojson, {units: 'kilometers'}) * 1000).toFixed(2) + ' m';
+      const massavi = calculateMassaviArea(areaM2);
+      massaviAreaText = massavi.formattedText;
+      
+      const perimeterMeters = (turf.length(geojson, {units: 'kilometers'}) * 1000).toFixed(2);
+      length = `${perimeterMeters} m`;
       coords = 'Polygon Boundary';
-      document.getElementById('results').innerHTML = `<strong>Last Drawn Feature:</strong><br>Type: Polygon<br>Area: ${area} Marla<br>Perimeter: ${length}`;
+
+      document.getElementById('results').innerHTML = `
+        <strong>Feature Calculated:</strong><br>
+        Type: Polygon<br>
+        Area: <b>${massaviAreaText}</b><br>
+        Perimeter: ${length}
+      `;
     } else if (type === 'polyline') {
-      length = turf.length(geojson, {units: 'kilometers'}).toFixed(2) + ' km';
+      const lineLen = turf.length(geojson, {units: 'kilometers'});
+      length = (lineLen >= 1) ? `${lineLen.toFixed(2)} km` : `${(lineLen * 1000).toFixed(2)} m`;
       coords = 'Line Path';
-      document.getElementById('results').innerHTML = `<strong>Last Drawn Feature:</strong><br>Type: Line<br>Length: ${length}`;
+
+      document.getElementById('results').innerHTML = `
+        <strong>Feature Calculated:</strong><br>
+        Type: Line<br>
+        Length: <b>${length}</b>
+      `;
     } else if (type === 'marker') {
       const c = geojson.geometry.coordinates;
-      coords = `${c[1].toFixed(4)}, ${c[0].toFixed(4)}`;
-      document.getElementById('results').innerHTML = `<strong>Last Drawn Feature:</strong><br>Type: Point<br>Coords: ${coords}`;
+      coords = `${c[1].toFixed(5)}, ${c[0].toFixed(5)}`;
+
+      document.getElementById('results').innerHTML = `
+        <strong>Feature Calculated:</strong><br>
+        Type: Point<br>
+        Coords: <b>${coords}</b>
+      `;
     }
 
-    featureRecords.push({ id: featureCounter, type: type.toUpperCase(), area, length, coords });
+    featureRecords.push({ 
+      id: featureCounter, 
+      type: type.toUpperCase(), 
+      massaviArea: massaviAreaText, 
+      length: length, 
+      coords: coords 
+    });
+
     updateAttributeTable();
   });
 
@@ -384,7 +446,7 @@
       <tr>
         <td>#${f.id}</td>
         <td><strong>${f.type}</strong></td>
-        <td>${f.area}</td>
+        <td style="color:#d4af37; font-weight:bold;">${f.massaviArea}</td>
         <td>${f.length}</td>
         <td>${f.coords}</td>
       </tr>
@@ -413,9 +475,9 @@
   /* Export Attribute Data as CSV */
   function exportCSV() {
     if (featureRecords.length === 0) return alert('No attribute data to export!');
-    let csvContent = "data:text/csv;charset=utf-8,ID,Type,Area (Marla),Length,Coordinates\n";
+    let csvContent = "data:text/csv;charset=utf-8,ID,Type,Massavi Area,Length,Coordinates\n";
     featureRecords.forEach(f => {
-      csvContent += `${f.id},${f.type},${f.area},${f.length},"${f.coords}"\n`;
+      csvContent += `${f.id},${f.type},"${f.massaviArea}",${f.length},"${f.coords}"\n`;
     });
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
