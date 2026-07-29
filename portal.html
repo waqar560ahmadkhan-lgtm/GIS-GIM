@@ -5,381 +5,269 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Waqar GIS Portal - Executive Spatial Suite</title>
 
-  <!-- Google Fonts: Cinzel & Plus Jakarta Sans -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Leaflet & Turf Libraries -->
+  <!-- Leaflet & Draw CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+
+  <!-- JS Libraries -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-omnivore/0.3.4/leaflet-omnivore.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="auth-guard.js"></script>
 
   <style>
-    * { 
-      box-sizing: border-box; 
-      margin: 0; 
-      padding: 0; 
-      font-family: 'Plus Jakarta Sans', sans-serif; 
-    }
-    
-    html, body { 
-      height: 100%; 
-      width: 100%; 
-      overflow: hidden; 
-      background: #15181e; 
-      display: flex; 
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    html, body { height: 100%; width: 100%; overflow: hidden; background: #15181e; display: flex; }
 
-    /* Architectural Fluted Left Sidebar */
+    /* Left Sidebar */
     .sidebar {
-      width: 300px;
-      min-width: 300px;
+      width: 310px; min-width: 310px;
       background: linear-gradient(180deg, #20242c 0%, #15181e 100%);
-      color: #f1f5f9;
-      padding: 22px 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      overflow-y: auto;
-      border-right: 2px solid #c5a059;
-      box-shadow: 6px 0 25px rgba(0, 0, 0, 0.6);
-      z-index: 1000;
-      position: relative;
+      color: #f1f5f9; padding: 20px 16px; display: flex; flex-direction: column;
+      gap: 14px; overflow-y: auto; border-right: 2px solid #c5a059;
+      box-shadow: 6px 0 25px rgba(0, 0, 0, 0.6); z-index: 1000; position: relative;
     }
 
-    .sidebar::before {
-      content: "";
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: repeating-linear-gradient(
-        90deg,
-        rgba(255,255,255,0.015),
-        rgba(255,255,255,0.015) 2px,
-        transparent 2px,
-        transparent 8px
-      );
-      pointer-events: none;
-    }
-
-    /* Arched Portal Brand Header */
     .portal-brand {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding-bottom: 16px;
+      display: flex; align-items: center; gap: 12px; padding-bottom: 12px;
       border-bottom: 1px solid rgba(197, 160, 89, 0.3);
-      position: relative;
     }
-
     .portal-icon-arch {
-      width: 42px;
-      height: 48px;
+      width: 40px; height: 44px;
       background: linear-gradient(135deg, #d4af37 0%, #8a6d2b 100%);
-      border-radius: 20px 20px 4px 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      color: #15181e;
-      box-shadow: 0 4px 12px rgba(197, 160, 89, 0.35);
-      border: 1px solid #f3e5ab;
+      border-radius: 16px 16px 4px 4px; display: flex; align-items: center;
+      justify-content: center; font-size: 18px; color: #15181e; border: 1px solid #f3e5ab;
     }
-
-    .portal-title {
-      font-family: 'Cinzel', serif;
-      font-size: 16px;
-      font-weight: 700;
-      color: #f8fafc;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
-    }
+    .portal-title { font-family: 'Cinzel', serif; font-size: 15px; font-weight: 700; color: #f8fafc; letter-spacing: 1px; }
 
     .sidebar h3 {
-      font-size: 10.5px;
-      color: #c5a059;
-      letter-spacing: 1.5px;
-      margin-bottom: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      font-size: 10px; color: #c5a059; letter-spacing: 1.2px; margin-bottom: 6px;
+      font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 5px;
     }
+    .sidebar h3::before { content: "◈"; font-size: 9px; color: #c5a059; }
 
-    .sidebar h3::before {
-      content: "◈";
-      font-size: 10px;
-      color: #c5a059;
-    }
-
-    /* Luxury Panel Boxes */
     .panel-box {
-      background: rgba(38, 43, 53, 0.7);
-      padding: 14px;
-      border-radius: 12px;
-      border: 1px solid rgba(197, 160, 89, 0.25);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-      backdrop-filter: blur(6px);
+      background: rgba(38, 43, 53, 0.7); padding: 10px; border-radius: 10px;
+      border: 1px solid rgba(197, 160, 89, 0.25); backdrop-filter: blur(6px);
     }
 
-    .panel-box input {
-      width: 100%;
-      padding: 9px 11px;
-      border-radius: 8px;
-      border: 1px solid rgba(197, 160, 89, 0.35);
-      background: #15181e;
-      color: #f8fafc;
-      font-size: 12.5px;
-      outline: none;
-      margin-bottom: 8px;
-      transition: all 0.3s ease;
+    .panel-box input, .panel-box select {
+      width: 100%; padding: 8px 10px; border-radius: 6px;
+      border: 1px solid rgba(197, 160, 89, 0.35); background: #15181e;
+      color: #f8fafc; font-size: 12px; outline: none; margin-bottom: 6px;
     }
 
-    .panel-box input:focus {
-      border-color: #d4af37;
-      box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
-    }
+    .coord-inputs { display: flex; gap: 6px; }
 
-    .panel-box input::placeholder { color: #788294; }
-
-    /* Dual Input Container for Coordinates */
-    .coord-inputs {
-      display: flex;
-      gap: 8px;
-    }
-
-    .coord-inputs input {
-      margin-bottom: 10px;
-    }
-
-    /* Metallic Gold & Dark Buttons */
     .btn {
-      width: 100%;
-      padding: 10px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 700;
-      transition: all 0.25s ease;
-      letter-spacing: 0.5px;
+      width: 100%; padding: 8px; border: none; border-radius: 6px;
+      cursor: pointer; font-size: 11px; font-weight: 700; transition: all 0.2s ease;
     }
+    .btn-gold { background: linear-gradient(135deg, #c5a059 0%, #967635 100%); color: #0f1217; border: 1px solid #f3e5ab; }
+    .btn-gold:hover { background: linear-gradient(135deg, #d4af37 0%, #a8843c 100%); }
+    .btn-dark { background: #252a34; color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.1); }
+    .btn-dark:hover { background: #2f3542; border-color: #c5a059; }
+    .btn-emerald { background: linear-gradient(135deg, #059669 0%, #046c51 100%); color: #fff; border: 1px solid #34d399; }
 
-    .btn-gold { 
-      background: linear-gradient(135deg, #c5a059 0%, #967635 100%); 
-      color: #0f1217; 
-      border: 1px solid #f3e5ab;
-      box-shadow: 0 4px 12px rgba(197, 160, 89, 0.25);
-    }
-    .btn-gold:hover { 
-      background: linear-gradient(135deg, #d4af37 0%, #a8843c 100%); 
-      transform: translateY(-1px);
-    }
+    /* Main Container */
+    #main-container { flex: 1; display: flex; flex-direction: column; position: relative; height: 100vh; }
+    #map { flex: 1; width: 100%; height: 100%; background: #1e232a; }
 
-    .btn-dark { 
-      background: #252a34; 
-      color: #e2e8f0; 
-      border: 1px solid rgba(255, 255, 255, 0.1); 
+    /* Attribute Table Panel (Bottom) */
+    #attribute-panel {
+      height: 180px; background: rgba(21, 24, 30, 0.95);
+      border-top: 2px solid #c5a059; padding: 10px 16px; overflow-y: auto;
+      backdrop-filter: blur(10px); z-index: 999;
     }
-    .btn-dark:hover { 
-      background: #2f3542; 
-      border-color: #c5a059; 
-    }
+    #attribute-panel h4 { color: #d4af37; font-size: 12px; margin-bottom: 8px; font-family: 'Cinzel', serif; }
+    
+    .table-wrapper { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; color: #e2e8f0; font-size: 11px; text-align: left; }
+    th { background: #2a303c; color: #c5a059; padding: 6px 10px; border: 1px solid rgba(197, 160, 89, 0.2); }
+    td { padding: 6px 10px; border: 1px solid rgba(255, 255, 255, 0.05); }
+    tr:nth-child(even) { background: rgba(255, 255, 255, 0.02); }
 
-    .btn-emerald { 
-      background: linear-gradient(135deg, #059669 0%, #046c51 100%); 
-      color: #fff; 
-      border: 1px solid #34d399;
-    }
-    .btn-emerald:hover { 
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
-    }
-
-    #map-wrapper {
-      flex: 1;
-      position: relative;
-      height: 100vh;
-      width: 100%;
-    }
-
-    #map { 
-      width: 100%; 
-      height: 100%; 
-      background: #e2e8f0; 
-    }
-
-    /* Float Auth Badge Override */
-    div[style*="position: fixed"], 
-    div[style*="position:absolute"] {
-      position: absolute !important;
-      top: 20px !important;
-      right: 20px !important;
-      left: auto !important;
-      bottom: auto !important;
-      z-index: 2000 !important;
-      background: rgba(21, 24, 30, 0.94) !important;
-      padding: 8px 20px !important;
-      border-radius: 30px !important;
-      border: 1px solid rgba(197, 160, 89, 0.5) !important;
-      backdrop-filter: blur(10px) !important;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.5) !important;
-      color: #f8fafc !important;
-      font-size: 13px !important;
-      font-weight: 600 !important;
-    }
-
+    /* Result Box Overlay */
     #results {
-      position: absolute;
-      bottom: 24px;
-      left: 24px;
-      background: rgba(21, 24, 30, 0.95);
-      color: #f8fafc;
-      padding: 16px 20px;
-      border-radius: 12px;
-      font-size: 13px;
-      border: 1px solid rgba(197, 160, 89, 0.4);
-      max-width: 360px;
-      z-index: 999;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.6);
-      backdrop-filter: blur(8px);
+      position: absolute; top: 20px; right: 20px;
+      background: rgba(21, 24, 30, 0.9); color: #f8fafc; padding: 10px 14px;
+      border-radius: 8px; font-size: 12px; border: 1px solid rgba(197, 160, 89, 0.4);
+      z-index: 999; max-width: 280px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     }
-
     #results strong { color: #d4af37; }
   </style>
 </head>
 <body>
 
   <div class="sidebar">
-    
-    <!-- Brand Title -->
     <div class="portal-brand">
       <div class="portal-icon-arch">🏛️</div>
       <div class="portal-title">Waqar GIS Portal</div>
     </div>
 
-    <!-- Search Box (District / Tehsil) -->
+    <!-- Location Search -->
     <div class="panel-box">
       <h3>Search Location</h3>
       <input type="text" id="sidebar-search" placeholder="District Or Tehsil..." />
-      <button class="btn btn-gold" onclick="searchLocation()">SEARCH LOCATION</button>
+      <button class="btn btn-gold" onclick="searchLocation()">SEARCH</button>
     </div>
 
-    <!-- NEW: Coordinates Search Panel (Lat / Long) -->
+    <!-- Go-To Coordinates -->
     <div class="panel-box">
       <h3>Go-To Coordinates</h3>
       <div class="coord-inputs">
-        <input type="number" id="coord-lat" step="any" placeholder="Latitude (e.g. 34.01)" />
-        <input type="number" id="coord-lng" step="any" placeholder="Longitude (e.g. 71.53)" />
+        <input type="number" id="coord-lat" step="any" placeholder="Lat (34.01)" />
+        <input type="number" id="coord-lng" step="any" placeholder="Lng (71.53)" />
       </div>
-      <button class="btn btn-gold" onclick="goToCoordinates()">LOCATE COORDINATES</button>
+      <button class="btn btn-gold" onclick="goToCoordinates()">LOCATE</button>
     </div>
 
-    <!-- Basemap Layer Controls -->
-    <div>
-      <h3>1. Basemap Layer</h3>
-      <button class="btn btn-gold" onclick="setBasemap('osm')" style="margin-bottom:8px;">Street Map (OSM)</button>
-      <button class="btn btn-dark" onclick="setBasemap('satellite')">Satellite Imagery</button>
+    <!-- Import Spatial File (.geojson / .kml) -->
+    <div class="panel-box">
+      <h3>Import GeoJSON / KML</h3>
+      <input type="file" id="file-input" accept=".geojson, .json, .kml" />
+      <button class="btn btn-gold" onclick="loadSpatialFile()">UPLOAD & VIEW</button>
+    </div>
+
+    <!-- Basemap Selector -->
+    <div class="panel-box">
+      <h3>Basemap Selector</h3>
+      <select id="basemap-select" onchange="switchBasemap(this.value)">
+        <option value="osm">Street Map (OpenStreetMap)</option>
+        <option value="satellite">Satellite Imagery (Esri)</option>
+        <option value="topo">Esri Topographic</option>
+        <option value="dark">Dark Gray Canvas (CartoDB)</option>
+      </select>
     </div>
 
     <!-- Topology Check -->
     <div>
-      <h3>2. Topology Check</h3>
+      <h3>Topology Check</h3>
       <button class="btn btn-dark" onclick="checkTopology()">Validate Topology</button>
     </div>
 
-    <!-- Mensuration Panel -->
-    <div>
-      <h3>3. Mensuration Panel</h3>
-      <p style="font-size:11.5px; color:#94a3b8; line-height:1.4;">Use map toolbar to measure distance and area in Marla.</p>
+    <!-- Export Panel -->
+    <div class="panel-box">
+      <h3>Export Options</h3>
+      <button class="btn btn-emerald" onclick="exportGeoJSON()" style="margin-bottom:6px;">Download GeoJSON</button>
+      <button class="btn btn-dark" onclick="exportMapImage()" style="margin-bottom:6px;">Export PNG Image</button>
+      <button class="btn btn-dark" onclick="exportMapPDF()">Export PDF Report</button>
     </div>
-
-    <!-- Export Data -->
-    <div>
-      <h3>4. Export Data</h3>
-      <button class="btn btn-emerald" onclick="exportGeoJSON()">Download GeoJSON</button>
-    </div>
-
   </div>
 
-  <div id="map-wrapper">
+  <div id="main-container">
     <div id="map"></div>
-    <div id="results">Measurement details will appear here...</div>
+    <div id="results">Draw or search to inspect attributes...</div>
+
+    <!-- Attribute Table Panel -->
+    <div id="attribute-panel">
+      <h4>◈ Attribute Table Viewer</h4>
+      <div class="table-wrapper">
+        <table id="attr-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Type</th>
+              <th>Area (Marla)</th>
+              <th>Length (m / km)</th>
+              <th>Coordinates</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="5" style="text-align:center; color:#788294;">No digitization features added yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
 <script>
-  const map = L.map('map').setView([34.0, 71.5], 8);
+  const map = L.map('map', { crossOrigin: true }).setView([34.0, 71.5], 8);
 
-  let osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors'
-  });
+  const basemaps = {
+    osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }),
+    satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri' }),
+    topo: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri Topo' }),
+    dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© CartoDB' })
+  };
 
-  let satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    attribution: '© Esri'
-  });
-
-  osmLayer.addTo(map);
+  let currentBasemap = basemaps.osm;
+  currentBasemap.addTo(map);
 
   let coordMarker = null;
+  let uploadedLayerGroup = L.layerGroup().addTo(map);
+  let featureCounter = 0;
+  let featureRecords = [];
 
-  setTimeout(() => { map.invalidateSize(); }, 300);
-
-  function setBasemap(type) {
-    if (type === 'osm') {
-      map.removeLayer(satelliteLayer);
-      osmLayer.addTo(map);
-    } else {
-      map.removeLayer(osmLayer);
-      satelliteLayer.addTo(map);
+  function switchBasemap(key) {
+    if (currentBasemap) map.removeLayer(currentBasemap);
+    if (basemaps[key]) {
+      currentBasemap = basemaps[key];
+      currentBasemap.addTo(map);
     }
   }
 
   function searchLocation() {
     const query = document.getElementById('sidebar-search').value;
-    if (!query) { alert('Please enter a location name!'); return; }
+    if (!query) return alert('Enter location name!');
     fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=pk`)
-      .then(res => res.json())
-      .then(data => {
-        if (!data || data.length === 0) { alert('Location not found!'); return; }
-        const place = data[0];
-        map.setView([parseFloat(place.lat), parseFloat(place.lon)], 12);
-        L.marker([parseFloat(place.lat), parseFloat(place.lon)]).addTo(map).bindPopup(place.display_name).openPopup();
-      })
-      .catch(() => alert('Search error! Please check internet connection.'));
+      .then(r => r.json())
+      .then(d => {
+        if (!d.length) return alert('Location not found!');
+        map.setView([parseFloat(d[0].lat), parseFloat(d[0].lon)], 12);
+        L.marker([parseFloat(d[0].lat), parseFloat(d[0].lon)]).addTo(map).bindPopup(d[0].display_name).openPopup();
+      });
   }
 
-  /* Go-To Coordinates Functionality */
   function goToCoordinates() {
     const lat = parseFloat(document.getElementById('coord-lat').value);
     const lng = parseFloat(document.getElementById('coord-lng').value);
-
-    if (isNaN(lat) || isNaN(lng)) {
-      alert('Please enter valid Latitude and Longitude values!');
-      return;
-    }
-
-    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-      alert('Latitude must be between -90 and 90, Longitude between -180 and 180!');
-      return;
-    }
-
+    if (isNaN(lat) || isNaN(lng)) return alert('Enter valid coordinates!');
     if (coordMarker) map.removeLayer(coordMarker);
-
     map.setView([lat, lng], 15);
-    coordMarker = L.marker([lat, lng]).addTo(map)
-      .bindPopup(`<b>Coordinate Point</b><br>Lat: ${lat.toFixed(5)}<br>Lng: ${lng.toFixed(5)}`)
-      .openPopup();
-
-    document.getElementById('results').innerHTML = `<strong>Location Found:</strong><br>Latitude: ${lat.toFixed(5)}<br>Longitude: ${lng.toFixed(5)}`;
+    coordMarker = L.marker([lat, lng]).addTo(map).bindPopup(`Lat: ${lat}<br>Lng: ${lng}`).openPopup();
   }
 
-  document.getElementById('sidebar-search').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') searchLocation();
-  });
+  /* Upload GeoJSON or KML File */
+  function loadSpatialFile() {
+    const file = document.getElementById('file-input').files[0];
+    if (!file) return alert('Select a .geojson or .kml file!');
 
+    const fileName = file.name.toLowerCase();
+    uploadedLayerGroup.clearLayers();
+
+    if (fileName.endsWith('.kml')) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const runLayer = omnivore.kml.parse(e.target.result);
+        runLayer.addTo(uploadedLayerGroup);
+        map.fitBounds(runLayer.getBounds());
+      };
+      reader.readAsText(file);
+    } else {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const layer = L.geoJSON(JSON.parse(e.target.result), {
+            style: { color: '#d4af37', fillColor: '#c5a059', fillOpacity: 0.4 }
+          });
+          uploadedLayerGroup.addLayer(layer);
+          map.fitBounds(layer.getBounds());
+        } catch(err) { alert('Invalid GeoJSON format!'); }
+      };
+      reader.readAsText(file);
+    }
+  }
+
+  /* Leaflet Draw & Attribute Table Logic */
   const drawnItems = new L.FeatureGroup();
   map.addLayer(drawnItems);
   const drawControl = new L.Control.Draw({ edit: { featureGroup: drawnItems } });
@@ -388,48 +276,86 @@
   map.on(L.Draw.Event.CREATED, function(e) {
     const layer = e.layer;
     drawnItems.addLayer(layer);
-    const type = e.layerType;
-    let html = '';
+    featureCounter++;
+
     const geojson = layer.toGeoJSON();
+    const type = e.layerType;
+    let area = 'N/A', length = 'N/A', coords = '';
+
     if (type === 'polygon') {
       const areaM2 = turf.area(geojson);
-      const areaMa = (areaM2 / 4047).toFixed(2);
-      const perimeter = turf.length(geojson, { units: 'kilometers' }) * 1000;
-      html = `<strong>Area:</strong> ${areaMa} Marla<br><strong>Perimeter:</strong> ${perimeter.toFixed(2)} meters`;
+      area = (areaM2 / 4047).toFixed(2);
+      length = (turf.length(geojson, {units: 'kilometers'}) * 1000).toFixed(2) + ' m';
+      coords = 'Polygon Bounds';
     } else if (type === 'polyline') {
-      const lengthKM = turf.length(geojson, { units: 'kilometers' });
-      html = `<strong>Type:</strong> Line<br><strong>Length:</strong> ${lengthKM.toFixed(2)} km`;
+      length = turf.length(geojson, {units: 'kilometers'}).toFixed(2) + ' km';
+      coords = 'Line Path';
     } else if (type === 'marker') {
       const c = geojson.geometry.coordinates;
-      html = `<strong>Type:</strong> Point<br><strong>Lat:</strong> ${c[1].toFixed(5)}<br><strong>Lng:</strong> ${c[0].toFixed(5)}`;
+      coords = `${c[1].toFixed(4)}, ${c[0].toFixed(4)}`;
     }
-    document.getElementById('results').innerHTML = html;
+
+    featureRecords.push({ id: featureCounter, type: type.toUpperCase(), area, length, coords });
+    updateAttributeTable();
   });
+
+  function updateAttributeTable() {
+    const tbody = document.querySelector('#attr-table tbody');
+    if (featureRecords.length === 0) return;
+    
+    tbody.innerHTML = featureRecords.map(f => `
+      <tr>
+        <td>#${f.id}</td>
+        <td><strong>${f.type}</strong></td>
+        <td>${f.area}</td>
+        <td>${f.length}</td>
+        <td>${f.coords}</td>
+      </tr>
+    `).join('');
+  }
 
   function checkTopology() {
     const data = drawnItems.toGeoJSON();
-    if (data.features.length === 0) { alert('Please draw a shape on the map first!'); return; }
+    if (!data.features.length) return alert('Draw a shape first!');
     let errors = 0;
     data.features.forEach(f => {
-      if (f.geometry.type === 'Polygon') {
-        const kinks = turf.kinks(f);
-        errors += kinks.features.length;
-      }
+      if (f.geometry.type === 'Polygon') errors += turf.kinks(f).features.length;
     });
-    alert(errors > 0 ? `Topology Error! Found ${errors} self-intersection(s).` : 'Topology Valid! All features are correct.');
+    alert(errors > 0 ? `Found ${errors} self-intersection errors!` : 'Topology Valid!');
   }
 
   function exportGeoJSON() {
     const data = drawnItems.toGeoJSON();
-    if (data.features.length === 0) { alert('Please digitize a feature first!'); return; }
+    if (!data.features.length) return alert('No features drawn!');
     const a = document.createElement('a');
     a.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));
-    a.download = 'waqar_gis_layer.geojson';
-    document.body.appendChild(a);
+    a.download = 'gis_data.geojson';
     a.click();
-    a.remove();
+  }
+
+  /* Export Map as PNG Image */
+  function exportMapImage() {
+    html2canvas(document.getElementById('map-wrapper') || document.getElementById('map')).then(canvas => {
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = 'Waqar_GIS_Map.png';
+      a.click();
+    });
+  }
+
+  /* Export Map as PDF Report */
+  function exportMapPDF() {
+    html2canvas(document.getElementById('map-wrapper') || document.getElementById('map')).then(canvas => {
+      const imgData = canvas.toDataURL('image/png');
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('landscape');
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(16);
+      pdf.text('Waqar GIS Portal - Spatial Analysis Report', 14, 15);
+      pdf.addImage(imgData, 'PNG', 14, 25, 260, 150);
+      pdf.save('Waqar_GIS_Report.pdf');
+    });
   }
 </script>
-
 </body>
 </html>
