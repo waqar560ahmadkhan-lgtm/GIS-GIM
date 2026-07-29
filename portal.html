@@ -220,7 +220,8 @@
     <div class="panel-box">
       <h3>Basemap Selector</h3>
       <select id="basemap-select" onchange="switchBasemap(this.value)">
-        <option value="satellite" selected>Latest Satellite + Village Names Hybrid</option>
+        <option value="googleSat" selected>Google Satellite Hybrid (Latest)</option>
+        <option value="esriSat">Esri World Imagery (Standard)</option>
         <option value="osm">Street Map (OpenStreetMap)</option>
         <option value="topo">Esri Topographic</option>
         <option value="dark">Dark Gray Canvas (CartoDB)</option>
@@ -273,10 +274,10 @@
   </div>
 
 <script>
-  /* MAP WITH SEAMLESS TILE SCALING AND AUTO-FALLBACK */
+  /* MAP WITH GOOGLE SATELLITE HYBRID INTEGRATION */
   const map = L.map('map', { 
     crossOrigin: true,
-    maxZoom: 19,
+    maxZoom: 20,
     zoomControl: true
   }).setView([34.0, 71.5], 13);
 
@@ -284,17 +285,20 @@
   L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
 
   const basemaps = {
-    // Satellite Hybrid with village names and stable max zoom matching native data
-    satellite: L.layerGroup([
+    // Google Satellite Hybrid (Latest Imagery & Roads/Labels)
+    googleSat: L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+      maxZoom: 20,
+      subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+      attribution: '© Google Maps & Satellite Integration'
+    }),
+    // Esri World Imagery fallback
+    esriSat: L.layerGroup([
       L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: '© Esri & Village Mapping Integration',
-        maxZoom: 19,
-        maxNativeZoom: 19,
-        keepBuffer: 4
+        attribution: '© Esri',
+        maxZoom: 19
       }),
       L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 19,
-        maxNativeZoom: 19,
         opacity: 0.95
       })
     ]),
@@ -303,7 +307,7 @@
     dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© CartoDB', maxZoom: 19 })
   };
 
-  let currentBasemap = basemaps.satellite;
+  let currentBasemap = basemaps.googleSat;
   currentBasemap.addTo(map);
 
   let coordMarker = null;
