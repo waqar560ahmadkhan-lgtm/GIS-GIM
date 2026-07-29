@@ -13,13 +13,14 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
 
-  <!-- Turf.js for Topology & Mensuration -->
+  <!-- Turf.js -->
   <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 
-  <!-- Auth Guard - redirects to login if not logged in -->
-  <script src="auth-guard.js"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.0.0/dist/geosearch.css"/>
-<script src="https://unpkg.com/leaflet-geosearch@3.0.0/dist/geosearch.umd.js"></script>
+  <!-- Nominatim Search -->
+  <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+
+  <!-- Auth Guard -->
   <script src="auth-guard.js"></script>
 
   <style>
@@ -27,16 +28,16 @@
     body { display: flex; flex-direction: column; height: 100vh; background-color: #1a1a24; color: #ffffff; }
 
     header {
-      background: #0b0e15;
+      background: #00be15;
       padding: 12px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 2px solid #2a2c3d;
+      border-bottom: 2px solid #2e2c3d;
     }
-    header h1 { font-size: 20px; color: #00d2ff; letter-spacing: 1px; }
+    header h1 { font-size: 20px; color: #00b2ff; letter-spacing: 1px; }
     .status-badge {
-      background: #0d2a1a;
+      background: #002a1a;
       color: #2ecc8f;
       padding: 4px 12px;
       border-radius: 20px;
@@ -47,181 +48,248 @@
     .container { display: flex; flex: 1; overflow: hidden; }
 
     .sidebar {
-      width: 320px;
+      width: 220px;
       background: #14151e;
       padding: 20px;
       display: flex;
       flex-direction: column;
-      gap: 15px;
-      border-right: 1px solid #2a2c3d;
+      gap: 20px;
       overflow-y: auto;
     }
 
-    .tool-group {
-      background: #1e202d;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #2a2c3d;
+    .sidebar h3 {
+      font-size: 11px;
+      color: #888;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
     }
 
-    .tool-group h3 { font-size: 13px; text-transform: uppercase; color: #8892b0; margin-bottom: 10px; }
+    /* Search Box Style */
+    .search-section {
+      background: #1e1f2e;
+      border-radius: 8px;
+      padding: 10px;
+      border: 1px solid #2ecc8f44;
+    }
+    .search-section h3 {
+      color: #2ecc8f;
+      margin-bottom: 8px;
+    }
+    #search-input {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid #2ecc8f;
+      background: #0d0e17;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+    }
+    #search-input::placeholder { color: #666; }
+    #search-btn {
+      width: 100%;
+      margin-top: 8px;
+      padding: 8px;
+      background: #2ecc8f;
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #search-btn:hover { background: #27ae7a; }
 
-    button {
+    .btn {
       width: 100%;
       padding: 10px;
-      margin-bottom: 8px;
-      background: #2a2042;
-      color: #fff;
-      border: 1px solid #3d4155;
-      border-radius: 5px;
+      border: none;
+      border-radius: 6px;
       cursor: pointer;
-      font-weight: 600;
-      transition: all 0.2s ease;
-    }
-    button:hover { background: #00d2ff; color: #000; border-color: #00d2ff; }
-
-    .output-card {
-      background: #0d0e15;
-      padding: 10px;
-      border-radius: 5px;
-      color: #a0b2d3;
       font-size: 13px;
-      min-height: 80px;
-      line-height: 1.5;
+      font-weight: 600;
+      transition: all 0.2s;
     }
+    .btn-primary { background: #2ecc8f; color: #000; }
+    .btn-secondary { background: #1e1f2e; color: #fff; border: 1px solid #333; }
+    .btn:hover { opacity: 0.85; }
 
-    #map { flex: 1; height: 100%; background: #0a0b10; }
+    #map { flex: 1; }
+
+    #results {
+      position: absolute;
+      bottom: 30px;
+      left: 230px;
+      background: #1a1a24ee;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      border: 1px solid #2ecc8f44;
+      max-width: 400px;
+      z-index: 999;
+    }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>🗺 Waqar GIS Portal</h1>
-    <span class="status-badge">● Active Engine</span>
-  </header>
+<header>
+  <h1>🗺️ Waqar GIS Portal</h1>
+  <div style="display:flex; gap:10px; align-items:center;">
+    <span class="status-badge">Waqar (Admin)</span>
+    <span class="status-badge">Admin</span>
+    <button class="btn btn-secondary" style="width:auto; padding:6px 14px;" onclick="logout()">Logout</button>
+  </div>
+</header>
 
-  <div class="container">
-    <div class="sidebar">
+<div class="container">
+  <div class="sidebar">
 
-      <!-- Basemap -->
-      <div class="tool-group">
-        <h3>1. Basemap Layer</h3>
-        <button onclick="setBasemap('osm')">Street Map (OSM)</button>
-        <button onclick="setBasemap('sat')">Satellite Imagery</button>
-      </div>
-
-      <!-- Topology -->
-      <div class="tool-group">
-        <h3>2. Topology Check</h3>
-        <button onclick="checkTopology()">Validate Topology</button>
-      </div>
-
-      <!-- Mensuration -->
-      <div class="tool-group">
-        <h3>3. Mensuration Panel</h3>
-        <div class="output-card" id="results">
-          <em>Draw any Point, Line, or Polygon using the toolbar on the map to calculate measurements.</em>
-        </div>
-      </div>
-
-      <!-- Export -->
-      <div class="tool-group">
-        <h3>4. Export Data</h3>
-        <button onclick="exportGeoJSON()" style="background:#1d4a2b; border-color:#2a7343;">Download GeoJSON</button>
-      </div>
-
+    <!-- SEARCH -->
+    <div class="search-section">
+      <h3>🔍 SEARCH LOCATION</h3>
+      <input type="text" id="search-input" placeholder="Tehsil ya District..." />
+      <button class="btn" id="search-btn" onclick="searchLocation()">Search</button>
     </div>
 
-    <div id="map"></div>
+    <!-- BASEMAP -->
+    <div>
+      <h3>1. BASEMAP LAYER</h3>
+      <button class="btn btn-primary" onclick="setBasemap('osm')" style="margin-bottom:8px;">Street Map (OSM)</button>
+      <button class="btn btn-secondary" onclick="setBasemap('satellite')">Satellite Imagery</button>
+    </div>
+
+    <!-- TOPOLOGY -->
+    <div>
+      <h3>2. TOPOLOGY CHECK</h3>
+      <button class="btn btn-secondary" onclick="checkTopology()">Validate Topology</button>
+    </div>
+
+    <!-- MENSURATION -->
+    <div>
+      <h3>3. MENSURATION PANEL</h3>
+      <p style="font-size:12px; color:#888; line-height:1.5;">Draw any Point, Line, or Polygon using the toolbar on the map to calculate measurements.</p>
+    </div>
+
+    <!-- EXPORT -->
+    <div>
+      <h3>4. EXPORT DATA</h3>
+      <button class="btn btn-primary" onclick="exportGeoJSON()">Download GeoJSON</button>
+    </div>
+
   </div>
 
-  <script>
-    // Map init
-    const map = L.map('map').setView([34.0151, 71.5249], 13);
+  <div id="map"></div>
+  <div id="results"></div>
+</div>
 
-    const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
-    const satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 });
+<script>
+  const map = L.map('map').setView([34.0, 71.5], 8);
 
-    osmLayer.addTo(map);
+  let osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  });
 
-    function setBasemap(type) {
-      if (type === 'sat') { map.removeLayer(osmLayer); satLayer.addTo(map); }
-      else { map.removeLayer(satLayer); osmLayer.addTo(map); }
+  let satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: '© Esri'
+  });
+
+  osmLayer.addTo(map);
+
+  function setBasemap(type) {
+    if (type === 'osm') {
+      map.removeLayer(satelliteLayer);
+      osmLayer.addTo(map);
+    } else {
+      map.removeLayer(osmLayer);
+      satelliteLayer.addTo(map);
     }
+  }
 
-    const drawnItems = new L.FeatureGroup();
-    map.addLayer(drawnItems);
+  // Search Function
+  function searchLocation() {
+    const query = document.getElementById('search-input').value;
+    if (!query) { alert('Kuch likhen search box mein!'); return; }
 
-    const drawControl = new L.Control.Draw({
-      edit: { featureGroup: drawnItems },
-      draw: { polygon: true, polyline: true, circle: false, rectangle: true, marker: true, circlemarker: false }
-    });
-    map.addControl(drawControl);
-
-    map.on(L.Draw.Event.CREATED, function (e) {
-      drawnItems.addLayer(e.layer);
-      calculateLayerMensuration(e.layer);
-    });
-
-    function calculateLayerMensuration(layer) {
-      const geojson = layer.toGeoJSON();
-      const type = geojson.geometry.type;
-      let html = '';
-
-      if (type === 'Polygon') {
-        const areaM2 = turf.area(geojson);
-        const areaHa = (areaM2 / 10000).toFixed(2);
-        const areaMarla = (areaM2 / 25.2929).toFixed(2);
-        const perimeterM = turf.length(geojson, { units: 'kilometers' }) * 1000;
-        html = `<strong>Type:</strong> Polygon<br>
-                <strong>Area:</strong> ${areaM2.toFixed(2)} m² (${areaHa} ha / ${areaMarla} Marla)<br>
-                <strong>Perimeter:</strong> ${perimeterM.toFixed(2)} meters`;
-      } else if (type === 'LineString') {
-        const lengthM = turf.length(geojson, { units: 'kilometers' }) * 1000;
-        html = `<strong>Type:</strong> Line<br>
-                <strong>Length:</strong> ${lengthM.toFixed(2)} m (${(lengthM/1000).toFixed(2)} km)`;
-      } else if (type === 'Point') {
-        const c = geojson.geometry.coordinates;
-        html = `<strong>Type:</strong> Point<br>
-                <strong>Lat:</strong> ${c[1].toFixed(5)}<br>
-                <strong>Lng:</strong> ${c[0].toFixed(5)}`;
-      }
-      document.getElementById('results').innerHTML = html;
-    }
-
-    function checkTopology() {
-      const data = drawnItems.toGeoJSON();
-      if (data.features.length === 0) { alert('Pehle map par koi shape draw karein!'); return; }
-      let errors = 0;
-      data.features.forEach(f => {
-        if (f.geometry.type === 'Polygon') {
-          const kinks = turf.kinks(f);
-          errors += kinks.features.length;
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=pk`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.length === 0) {
+          alert('Koi jagah nahi mili! Dobara try karein.');
+          return;
         }
-      });
-      alert(errors > 0 ? `Topology Error! ${errors} self-intersection(s) mili hain.` : 'Topology Valid! Sab features sahi hain.');
-    }
+        const place = data[0];
+        const lat = parseFloat(place.lat);
+        const lon = parseFloat(place.lon);
+        map.setView([lat, lon], 12);
+        L.marker([lat, lon]).addTo(map).bindPopup(place.display_name).openPopup();
+      })
+      .catch(() => alert('Search error! Internet check karein.'));
+  }
 
-    function exportGeoJSON() {
-      const data = drawnItems.toGeoJSON();
-      if (data.features.length === 0) { alert('Pehle kuch digitize karein!'); return; }
-      const a = document.createElement('a');
-      a.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));
-      a.download = 'waqar_gis_layer.geojson';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+  // Enter key se bhi search ho
+  document.getElementById('search-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') searchLocation();
+  });
+
+  // Draw
+  const drawnItems = new L.FeatureGroup();
+  map.addLayer(drawnItems);
+  const drawControl = new L.Control.Draw({
+    edit: { featureGroup: drawnItems }
+  });
+  map.addControl(drawControl);
+
+  map.on(L.Draw.Event.CREATED, function(e) {
+    const layer = e.layer;
+    drawnItems.addLayer(layer);
+    const type = e.layerType;
+    let html = '';
+    const geojson = layer.toGeoJSON();
+    if (type === 'polygon') {
+      const areaM2 = turf.area(geojson);
+      const areaMa = (areaM2 / 4047).toFixed(2);
+      const perimeter = turf.length(geojson, { units: 'kilometers' }) * 1000;
+      html = `<strong>Area:</strong> ${areaMa} ha / ${areaMa} Marla<br><strong>Perimeter:</strong> ${perimeter.toFixed(2)} meters`;
+    } else if (type === 'polyline') {
+      const lengthKM = turf.length(geojson, { units: 'kilometers' }) * 1000;
+      html = `<strong>Type:</strong> Line<br><strong>Length:</strong> ${(lengthKM / 1000).toFixed(2)} km`;
+    } else if (type === 'marker') {
+      const c = geojson.geometry.coordinates;
+      html = `<strong>Type:</strong> Point<br><strong>Lat:</strong> ${c[1].toFixed(5)}<br><strong>Lng:</strong> ${c[0].toFixed(5)}`;
     }
-  </script>
-  <script>
-const provider = new GeoSearch.OpenStreetMapProvider();
-const searchControl = new GeoSearch.GeoSearchControl({
-  provider: provider,
-  style: 'bar',
-  placeholder: 'Tehsil ya District dhundein...',
-  autoComplete: true,
-});
-map.addControl(searchControl);
+    document.getElementById('results').innerHTML = html;
+  });
+
+  function checkTopology() {
+    const data = drawnItems.toGeoJSON();
+    if (data.features.length === 0) { alert('Pehle map par koi shape draw karein!'); return; }
+    let errors = 0;
+    data.features.forEach(f => {
+      if (f.geometry.type === 'Polygon') {
+        const kinks = turf.kinks(f);
+        errors += kinks.features.length;
+      }
+    });
+    alert(errors > 0 ? `Topology Error! ${errors} self-intersection(s) mili hain.` : 'Topology Valid! Sab features sami hain.');
+  }
+
+  function exportGeoJSON() {
+    const data = drawnItems.toGeoJSON();
+    if (data.features.length === 0) { alert('Pehle kuch digitize karein!'); return; }
+    const a = document.createElement('a');
+    a.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));
+    a.download = 'waqar_gis_layer.geojson';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  function logout() {
+    localStorage.clear();
+    window.location.href = 'index.html';
+  }
 </script>
+
 </body>
 </html>
