@@ -18,6 +18,9 @@
 
   <!-- Auth Guard - redirects to login if not logged in -->
   <script src="auth-guard.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.0.0/dist/geosearch.css"/>
+<script src="https://unpkg.com/leaflet-geosearch@3.0.0/dist/geosearch.umd.js"></script>
+  <script src="auth-guard.js"></script>
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -210,5 +213,15 @@
       a.remove();
     }
   </script>
+  <script>
+const provider = new GeoSearch.OpenStreetMapProvider();
+const searchControl = new GeoSearch.GeoSearchControl({
+  provider: provider,
+  style: 'bar',
+  placeholder: 'Tehsil ya District dhundein...',
+  autoComplete: true,
+});
+map.addControl(searchControl);
+</script>
 </body>
 </html>
