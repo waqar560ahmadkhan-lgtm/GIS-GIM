@@ -13,10 +13,13 @@
   <!-- Leaflet & Draw CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+  <!-- Leaflet Side-by-Side CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-side-by-side@2.4.0/leaflet-side-by-side.min.css" />
 
   <!-- JS Libraries -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet-side-by-side@2.4.0/leaflet-side-by-side.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-omnivore/0.3.4/leaflet-omnivore.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -28,7 +31,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
     html, body { height: 100%; width: 100%; overflow: hidden; background: #15181e; display: flex; }
 
-    /* Left Sidebar */
+    /* Left Luxury Sidebar */
     .sidebar {
       width: 310px; min-width: 310px;
       background: linear-gradient(180deg, #20242c 0%, #15181e 100%);
@@ -77,6 +80,7 @@
     .btn-dark { background: #252a34; color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.1); }
     .btn-dark:hover { background: #2f3542; border-color: #c5a059; }
     .btn-emerald { background: linear-gradient(135deg, #059669 0%, #046c51 100%); color: #fff; border: 1px solid #34d399; }
+    .btn-active { background: #ef4444 !important; color: #fff !important; }
 
     /* Bookmark list */
     .bookmark-item {
@@ -102,29 +106,22 @@
       box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
       overflow: hidden;
     }
-
     .leaflet-draw-toolbar a {
       background-color: #ffffff !important;
       border-bottom: 1px solid #f0e6d2 !important;
       color: #15181e !important;
     }
-
     .leaflet-draw-toolbar a:hover {
       background-color: #d4af37 !important;
       color: #ffffff !important;
     }
-
-    .leaflet-draw-actions {
-      left: 32px !important;
-    }
-
+    .leaflet-draw-actions { left: 32px !important; }
     .leaflet-draw-actions a {
       background-color: #ffffff !important;
       color: #8a6d2b !important;
       border-left: 1px solid #d4af37 !important;
       font-weight: bold;
     }
-
     .leaflet-draw-actions a:hover {
       background-color: #d4af37 !important;
       color: #ffffff !important;
@@ -136,12 +133,9 @@
       border: 2px solid #ffffff !important;
       border-radius: 50% !important;
       box-shadow: 0 0 8px rgba(212, 175, 55, 1) !important;
-      width: 12px !important;
-      height: 12px !important;
-      margin-left: -6px !important;
-      margin-top: -6px !important;
+      width: 12px !important; height: 12px !important;
+      margin-left: -6px !important; margin-top: -6px !important;
     }
-
     .leaflet-editing-icon {
       background: #ffffff !important;
       border: 2px solid #d4af37 !important;
@@ -180,15 +174,12 @@
       z-index: 500; pointer-events: none; font-family: monospace; line-height: 1.5;
     }
 
-    /* TOP RIGHT CONTROLS: Neeche shift kar diya hai taake nazar aaye */
+    /* TOP RIGHT CONTROLS */
     #top-right-controls {
       position: absolute; top: 65px; right: 15px; z-index: 1000;
       display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
     }
-
-    .note-action-row {
-      display: flex; gap: 6px;
-    }
+    .note-action-row { display: flex; gap: 6px; }
     #note-mode-btn {
       background: linear-gradient(135deg, #c5a059 0%, #967635 100%); color: #0f1217; border: 1px solid #f3e5ab;
       border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
@@ -228,6 +219,35 @@
         <input type="number" id="coord-lng" step="any" placeholder="Lng (71.53)" />
       </div>
       <button class="btn btn-gold" onclick="goToCoordinates()">LOCATE</button>
+    </div>
+
+    <!-- Split-Screen Comparison Slider Tool -->
+    <div class="panel-box" style="border-color: #059669;">
+      <h3 style="color:#34d399;">Split-Screen Compare</h3>
+      <select id="left-layer-select" style="margin-bottom:6px;">
+        <option value="googleSat" selected>Left Side: Google Satellite</option>
+        <option value="sentinel2">Left Side: Sentinel-2</option>
+        <option value="osm">Left Side: OpenStreetMap</option>
+      </select>
+      <select id="right-layer-select" style="margin-bottom:8px;">
+        <option value="esriSat">Right Side: Esri Imagery</option>
+        <option value="dark" selected>Right Side: Dark Canvas</option>
+        <option value="topo">Right Side: Topographic</option>
+      </select>
+      <button id="slider-toggle-btn" class="btn btn-emerald" onclick="toggleSplitScreen()">ENABLE SLIDER COMPARISON</button>
+    </div>
+
+    <!-- NEW ADDITION: Real-time Weather & Climate Overlays -->
+    <div class="panel-box" style="border-color: #38bdf8;">
+      <h3 style="color:#38bdf8;">Live Weather Overlays</h3>
+      <select id="weather-layer-select" style="margin-bottom:8px;">
+        <option value="none" selected>-- Select Weather Layer --</option>
+        <option value="temp">Temperature Layer</option>
+        <option value="precip">Precipitation / Rain Radar</option>
+        <option value="clouds">Cloud Cover Layer</option>
+        <option value="wind">Wind Speed Layer</option>
+      </select>
+      <button id="weather-toggle-btn" class="btn btn-dark" onclick="toggleWeatherLayer()">ENABLE WEATHER OVERLAY</button>
     </div>
 
     <!-- Bookmarks / Saved Locations -->
@@ -295,7 +315,7 @@
   <div id="main-container">
     <div id="map"></div>
 
-    <!-- Top Right Controls Wrapper (Neeche shift kiya hua) -->
+    <!-- Top Right Controls Wrapper -->
     <div id="top-right-controls">
       <div class="note-action-row">
         <button id="note-mode-btn" onclick="toggleNoteMode()">📍 Add Note</button>
@@ -366,6 +386,90 @@
   let currentBasemap = basemaps.googleSat;
   currentBasemap.addTo(map);
 
+  // Split-Screen variables
+  let splitControl = null;
+  let leftLayerObj = null;
+  let rightLayerObj = null;
+  let isSplitActive = false;
+
+  function toggleSplitScreen() {
+    const btn = document.getElementById('slider-toggle-btn');
+    const leftKey = document.getElementById('left-layer-select').value;
+    const rightKey = document.getElementById('right-layer-select').value;
+
+    if (!isSplitActive) {
+      if (currentBasemap) map.removeLayer(currentBasemap);
+      
+      leftLayerObj = basemaps[leftKey] || basemaps.googleSat;
+      rightLayerObj = basemaps[rightKey] || basemaps.dark;
+
+      leftLayerObj.addTo(map);
+      rightLayerObj.addTo(map);
+
+      splitControl = L.control.sideBySide(leftLayerObj, rightLayerObj);
+      splitControl.addTo(map);
+
+      isSplitActive = true;
+      btn.innerText = "DISABLE SLIDER COMPARISON";
+      btn.classList.add('btn-active');
+    } else {
+      if (splitControl) {
+        map.removeControl(splitControl);
+        splitControl = null;
+      }
+      if (leftLayerObj) map.removeLayer(leftLayerObj);
+      if (rightLayerObj) map.removeLayer(rightLayerObj);
+
+      isSplitActive = false;
+      switchBasemap(document.getElementById('basemap-select').value);
+      btn.innerText = "ENABLE SLIDER COMPARISON";
+      btn.classList.remove('btn-active');
+    }
+  }
+
+  // Weather / Climate Overlay variables
+  let weatherLayerObj = null;
+  let isWeatherActive = false;
+
+  function toggleWeatherLayer() {
+    const btn = document.getElementById('weather-toggle-btn');
+    const weatherKey = document.getElementById('weather-layer-select').value;
+
+    if (weatherKey === 'none') {
+      return alert('Please select a valid weather layer first!');
+    }
+
+    if (!isWeatherActive) {
+      let weatherUrl = '';
+      // Using standard open weather tile layers (Demo OpenWeather WMS templates)
+      const owmKey = 'b1b15e88fa797225412429c1c50c122a'; // standard public demo key
+      if (weatherKey === 'temp') {
+        weatherUrl = `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${owmKey}`;
+      } else if (weatherKey === 'precip') {
+        weatherUrl = `https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${owmKey}`;
+      } else if (weatherKey === 'clouds') {
+        weatherUrl = `https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=${owmKey}`;
+      } else if (weatherKey === 'wind') {
+        weatherUrl = `https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=${owmKey}`;
+      }
+
+      weatherLayerObj = L.tileLayer(weatherUrl, { maxZoom: 19, opacity: 0.7, attribution: '© OpenWeatherMap' });
+      weatherLayerObj.addTo(map);
+
+      isWeatherActive = true;
+      btn.innerText = "DISABLE WEATHER OVERLAY";
+      btn.classList.add('btn-active');
+    } else {
+      if (weatherLayerObj) {
+        map.removeLayer(weatherLayerObj);
+        weatherLayerObj = null;
+      }
+      isWeatherActive = false;
+      btn.innerText = "ENABLE WEATHER OVERLAY";
+      btn.classList.remove('btn-active');
+    }
+  }
+
   let coordMarker = null;
   let uploadedLayerGroup = L.layerGroup().addTo(map);
   let bufferLayerGroup = L.layerGroup().addTo(map);
@@ -395,6 +499,7 @@
   });
 
   function switchBasemap(key) {
+    if (isSplitActive) return; // Ignore if split-screen is running
     if (currentBasemap) map.removeLayer(currentBasemap);
     if (basemaps[key]) {
       currentBasemap = basemaps[key];
@@ -404,7 +509,7 @@
   }
 
   function changeOpacity(val) {
-    if (currentBasemap) {
+    if (currentBasemap && !isSplitActive) {
       if (typeof currentBasemap.setOpacity === 'function') {
         currentBasemap.setOpacity(val);
       } else if (currentBasemap.getLayers) {
@@ -493,7 +598,7 @@
 
   loadBookmarks();
 
-  /* NOTES / ANNOTATION TOOL */
+  /* NOTES / ANNOTATION TOOL (Double click to delete individual pin) */
   function toggleNoteMode() {
     noteMode = !noteMode;
     const btn = document.getElementById('note-mode-btn');
