@@ -155,21 +155,24 @@
     }
     #clear-notes-btn:hover { background: #ef4444; color: #fff; border-color: #f87171; }
 
+    /* Modal Styles with Clear White Text */
     .custom-modal {
       display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7); z-index: 2000; justify-content: center; align-items: center;
+      background: rgba(0,0,0,0.75); z-index: 2000; justify-content: center; align-items: center;
       backdrop-filter: blur(5px);
     }
     .modal-content {
-      background: #1a1f29; border: 2px solid #c5a059; border-radius: 12px;
-      width: 90%; max-width: 500px; padding: 24px; color: #f1f5f9; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      background: #1a1f29 !important; border: 2px solid #c5a059 !important; border-radius: 12px;
+      width: 90%; max-width: 550px; padding: 26px; color: #ffffff !important; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
       position: relative; max-height: 80vh; overflow-y: auto;
     }
-    .modal-content h2 { font-family: 'Cinzel', serif; color: #d4af37; margin-bottom: 12px; font-size: 18px; }
-    .modal-content p, .modal-content ul { font-size: 13px; color: #cbd5e1; line-height: 1.6; margin-bottom: 12px; }
+    .modal-content h2 { font-family: 'Cinzel', serif; color: #d4af37 !important; margin-bottom: 14px; font-size: 20px; border-bottom: 1px solid rgba(197,160,89,0.3); padding-bottom: 8px; }
+    .modal-content p, .modal-content ul { font-size: 13px; color: #f1f5f9 !important; line-height: 1.6; margin-bottom: 12px; }
+    .modal-content ul { padding-left: 20px; }
+    .modal-content li { margin-bottom: 6px; color: #cbd5e1 !important; }
     .modal-close {
       position: absolute; top: 15px; right: 15px; background: none; border: none;
-      color: #f87171; font-size: 18px; font-weight: bold; cursor: pointer;
+      color: #f87171; font-size: 20px; font-weight: bold; cursor: pointer;
     }
   </style>
 </head>
@@ -279,7 +282,7 @@
       <button class="btn btn-dark" onclick="exportMapPDF()">Export PDF Report</button>
     </div>
 
-    <!-- 🌟 AT THE VERY END OF SIDEBAR: Main Pages, Account & Support -->
+    <!-- Main Pages & Settings at the very end -->
     <div class="panel-box">
       <h3>Main Pages</h3>
       <button class="btn btn-dark" onclick="openModal('homeModal')" style="margin-bottom:6px;">🏠 Home</button>
@@ -334,15 +337,109 @@
     </div>
   </div>
 
-  <!-- MODALS FOR PAGES -->
-  <div id="homeModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('homeModal')">×</button><h2>Home</h2><p>Welcome back to Waqar GIS Portal! Aap apne main map page par hain jahan se aap spatial digitization aur mapping perform kar sakte hain.</p></div></div>
-  <div id="aboutModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('aboutModal')">×</button><h2>About Us / Introduction</h2><p>Waqar GIS Portal ek advanced web-based Geographic Information System application hai jo mapping, remote sensing, aur spatial analysis ke liye banayi gayi hai.</p></div></div>
-  <div id="servicesModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('servicesModal')">×</button><h2>Services / Products</h2><p>Aap yahan निम्नलिखित khidmat faraham kar rahe hain:</p><ul><li>Spatial Data Digitization & Massavi Calculations</li><li>Satellite Imagery Comparison & Analysis</li><li>Custom GeoJSON/KML Processing & Export</li></ul></div></div>
-  <div id="contactModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('contactModal')">×</button><h2>Contact Us</h2><p>For support and queries, you can reach out via developer portal or email.</p></div></div>
-  <div id="profileModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('profileModal')">×</button><h2>Profile / My Account</h2><p>Aapki personal account details aur session history yahan show hoti hai.</p></div></div>
-  <div id="settingsModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('settingsModal')">×</button><h2>Settings</h2><p>Language, theme, aur notifications preferences customize karne ke options.</p></div></div>
-  <div id="faqModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('faqModal')">×</button><h2>Help / Support / FAQ</h2><p>Frequently Asked Questions aur portal use karne ka tareeqa.</p></div></div>
-  <div id="privacyModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('privacyModal')">×</button><h2>Privacy Policy</h2><p>Aapka data secure hai aur privacy ke tamam usoolon par amal kiya jata hai.</p></div></div>
+  <!-- MODALS WITH FULL DETAILED DATA -->
+  <div id="homeModal" class="custom-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('homeModal')">×</button>
+      <h2>🏠 Welcome to Waqar GIS Portal</h2>
+      <p>Aap apne Executive Spatial Suite ke main dashboard par hain. Yeh portal advanced Geographic Information System (GIS) aur Remote Sensing operations ke liye design kiya gaya hai.</p>
+      <p><strong>Quick Features:</strong></p>
+      <ul>
+        <li>District & Tehsil fast location finder.</li>
+        <li>Precise Area calculations in Kanal, Marla, and SqFt (Massavi format).</li>
+        <li>Split-screen satellite comparison slider.</li>
+        <li>GeoJSON, CSV, PNG, and PDF map reports generation.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="aboutModal" class="custom-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('aboutModal')">×</button>
+      <h2>ℹ️ About Waqar GIS Portal</h2>
+      <p><strong>Waqar GIS Portal</strong> ek professional web-based spatial analysis aur mapping application hai jo Geomatics aur spatial engineering standards ke mutabiq tayyar ki gayi hai.</p>
+      <p>Is portal ka maqsad modern satellite imagery (Google, Sentinel-2, Esri) aur interactive vector digitization tools ko aik hi platform par yakja karna hai taake zamin aurraqabjaat ka hesab, buffering, aur topology validation asani se ki ja sakay.</p>
+    </div>
+  </div>
+
+  <div id="servicesModal" class="custom-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('servicesModal')">×</button>
+      <h2>🛠️ Services & Spatial Solutions</h2>
+      <p>Aapka portal darj-zail advanced khidmat faraham karta hai:</p>
+      <ul>
+        <li><strong>Spatial Digitization:</strong> Polygon aur Line features draw kar ke unka area aur length nikalna.</li>
+        <li><strong>Massavi Conversion:</strong> Sq.Meters ko automatically Kanal, Marla, aur Square Feet mein convert karna.</li>
+        <li><strong>Buffer Analysis:</strong> Spatial features ke gird mukhtalaf meters ka buffer zone create karna.</li>
+        <li><strong>Multi-Source Basemaps:</strong> Google Satellite, Sentinel-2, OSM, aur Dark Canvas switching.</li>
+        <li><strong>Professional Reports:</strong> Map ko high-resolution PNG aur PDF report ki shakal mein export karna.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="contactModal" class="custom-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('contactModal')">×</button>
+      <h2>📞 Contact Us & Support</h2>
+      <p>Agar aapko portal ke istemal mein koi sawal ya technical madad darkar ho, toh aap rabta kar sakte hain:</p>
+      <ul>
+        <li><strong>Developer:</strong> Waqar Ahmad (Geomatics Specialist)</li>
+        <li><strong>Phone Number:</strong> 03201975800</li>
+        <li><strong>Email Address:</strong> waqar560ahmad@gmail.com</li>
+        <li><strong>Platform:</strong> Waqar GIS Portal (GitHub Web Suite)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="profileModal" class="custom-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('profileModal')">×</button>
+      <h2>👤 User Profile & Session</h2>
+      <p>Aapki account details aur session preferences yahan mojood hain:</p>
+      <ul>
+        <li><strong>Username:</strong> Waqar (Admin)</li>
+        <li><strong>Role:</strong> GIS Analyst / Spatial Developer</li>
+        <li><strong>Phone Number:</strong> 03201975800</li>
+        <li><strong>Email Address:</strong> waqar560ahmad@gmail.com</li>
+        <li><strong>Workspace:</strong> Peshawar / Khyber Pakhtunkhwa Region</li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="settingsModal" class="custom-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('settingsModal')">×</button>
+      <h2>⚙️ Portal Settings</h2>
+      <p>Aap apne portal ki settings yahan se customize kar sakte hain:</p>
+      <ul>
+        <li><strong>Map Engine:</strong> Leaflet v1.9.4 Spatial Renderer (Active)</li>
+        <li><strong>Coordinate System:</strong> WGS84 / UTM Zone Mapping (Active)</li>
+        <li><strong>Theme:</strong> Executive Dark & Gold Luxury UI</li>
+        <li><strong>Cache Storage:</strong> Browser LocalStorage enabled for Bookmarks</li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="faqModal" class="custom-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('faqModal')">×</button>
+      <h2>❓ Help & FAQ</h2>
+      <p><strong>Q1: Main naya polygon kaisay draw karoon?</strong><br>A: Map ke upper left corner par Leaflet Draw toolbar se polygon icon select kar ke map par click karein.</p>
+      <p><strong>Q2: Massavi area kahan show hota hai?</strong><br>A: Feature draw karne ke baad niche attribute table mein Kanal, Marla, aur SqFt show ho jata hai.</p>
+    </div>
+  </div>
+
+  <div id="privacyModal" class="custom-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('privacyModal')">×</button>
+      <h2>🔒 Privacy Policy</h2>
+      <p>Waqar GIS Portal aapki privacy aur data security ko mukammal ahmiyat deta hai.</p>
+      <ul>
+        <li>Aapke draw kiye gaye features aur bookmarks sirf aapke browser ke LocalStorage mein mehfooz rehte hain.</li>
+        <li>Koi bhi personal spatial data kisi third-party server par share nahi kiya jata.</li>
+      </ul>
+    </div>
+  </div>
 
 <script>
   function openModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
