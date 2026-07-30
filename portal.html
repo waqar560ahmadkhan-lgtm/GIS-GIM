@@ -21,6 +21,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-omnivore/0.3.4/leaflet-omnivore.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/proj4@2.9.0/dist/proj4.js"></script>
   <script src="auth-guard.js"></script>
 
   <style>
@@ -76,6 +77,18 @@
     .btn-dark { background: #252a34; color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.1); }
     .btn-dark:hover { background: #2f3542; border-color: #c5a059; }
     .btn-emerald { background: linear-gradient(135deg, #059669 0%, #046c51 100%); color: #fff; border: 1px solid #34d399; }
+
+    /* Bookmark list */
+    .bookmark-item {
+      display: flex; justify-content: space-between; align-items: center;
+      background: #15181e; border: 1px solid rgba(197,160,89,0.25); border-radius: 6px;
+      padding: 6px 8px; margin-bottom: 6px; font-size: 11px; color: #e2e8f0;
+    }
+    .bookmark-item span { cursor: pointer; flex: 1; }
+    .bookmark-item span:hover { color: #d4af37; }
+    .bookmark-item button {
+      background: none; border: none; color: #f87171; cursor: pointer; font-size: 12px; padding: 0 4px;
+    }
 
     /* Main Map Container */
     #main-container { flex: 1; display: flex; flex-direction: column; position: relative; height: 100vh; }
@@ -135,6 +148,16 @@
       border-radius: 50% !important;
     }
 
+    /* Annotation pin popup */
+    .note-popup-input {
+      width: 200px; padding: 6px; border-radius: 4px; border: 1px solid #c5a059;
+      font-size: 12px; margin-bottom: 6px;
+    }
+    .note-popup-save {
+      background: #c5a059; color: #15181e; border: none; padding: 5px 10px;
+      border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer;
+    }
+
     /* Attribute Table Panel (Bottom) */
     #attribute-panel {
       height: 180px; background: rgba(21, 24, 30, 0.95);
@@ -142,7 +165,7 @@
       backdrop-filter: blur(10px); z-index: 10;
     }
     #attribute-panel h4 { color: #d4af37; font-size: 12px; margin-bottom: 8px; font-family: 'Cinzel', serif; }
-    
+
     .table-wrapper { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; color: #e2e8f0; font-size: 11px; text-align: left; }
     th { background: #2a303c; color: #c5a059; padding: 6px 10px; border: 1px solid rgba(197, 160, 89, 0.2); }
@@ -159,13 +182,24 @@
     }
     #results strong { color: #d4af37; }
 
-    /* Cursor Coordinates HUD Overlay */
+    /* Cursor Coordinates HUD Overlay (now shows Lat/Lng AND UTM) */
     #cursor-hud {
       position: absolute; bottom: 190px; right: 20px;
       background: rgba(21, 24, 30, 0.85); color: #c5a059; padding: 6px 12px;
       border-radius: 6px; font-size: 11px; border: 1px solid rgba(197, 160, 89, 0.3);
-      z-index: 500; pointer-events: none; font-family: monospace;
+      z-index: 500; pointer-events: none; font-family: monospace; line-height: 1.5;
     }
+
+    /* Toolbar for annotation mode toggle (top-left of map) */
+    #map-toolbar {
+      position: absolute; top: 20px; left: 20px; z-index: 500;
+      display: flex; gap: 8px;
+    }
+    #map-toolbar button {
+      background: rgba(21,24,30,0.9); color: #c5a059; border: 1px solid rgba(197,160,89,0.5);
+      border-radius: 6px; padding: 8px 12px; font-size: 11px; font-weight: 700; cursor: pointer;
+    }
+    #map-toolbar button.active { background: #c5a059; color: #15181e; }
   </style>
 </head>
 <body>
@@ -191,6 +225,14 @@
         <input type="number" id="coord-lng" step="any" placeholder="Lng (71.53)" />
       </div>
       <button class="btn btn-gold" onclick="goToCoordinates()">LOCATE</button>
+    </div>
+
+    <!-- Bookmarks / Saved Locations -->
+    <div class="panel-box">
+      <h3>Bookmarks</h3>
+      <input type="text" id="bookmark-name" placeholder="Name this view..." />
+      <button class="btn btn-gold" onclick="saveBookmark()" style="margin-bottom:8px;">SAVE CURRENT VIEW</button>
+      <div id="bookmark-list"></div>
     </div>
 
     <!-- Import Spatial File (.geojson / .kml) -->
@@ -221,6 +263,7 @@
       <h3>Basemap Selector</h3>
       <select id="basemap-select" onchange="switchBasemap(this.value)">
         <option value="googleSat" selected>Google Satellite Hybrid (Latest)</option>
+        <option value="sentinel2">Sentinel-2 Cloudless (Free, Updated)</option>
         <option value="esriSat">Esri World Imagery (Standard)</option>
         <option value="osm">Street Map (OpenStreetMap)</option>
         <option value="topo">Esri Topographic</option>
@@ -248,8 +291,13 @@
 
   <div id="main-container">
     <div id="map"></div>
+
+    <div id="map-toolbar">
+      <button id="note-mode-btn" onclick="toggleNoteMode()">📍 Add Note</button>
+    </div>
+
     <div id="results"><strong>Spatial Inspector:</strong><br>Double click any feature on the map to remove it.</div>
-    <div id="cursor-hud">Lat: 0.0000 | Lng: 0.0000</div>
+    <div id="cursor-hud">Lat: 0.00000 | Lng: 0.00000<br>UTM: --</div>
 
     <!-- Attribute Table Panel -->
     <div id="attribute-panel">
@@ -260,7 +308,7 @@
             <tr>
               <th>ID</th>
               <th>Type</th>
-              <th>Massavi Area (Kanal-Marla-SqFt)</th>
+              <th>Area (Kanal-Marla-SqFt)</th>
               <th>Length / Perimeter</th>
               <th>Coordinates</th>
             </tr>
@@ -275,7 +323,7 @@
 
 <script>
   /* MAP WITH GOOGLE SATELLITE HYBRID INTEGRATION */
-  const map = L.map('map', { 
+  const map = L.map('map', {
     crossOrigin: true,
     maxZoom: 20,
     zoomControl: true
@@ -285,13 +333,15 @@
   L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
 
   const basemaps = {
-    // Google Satellite Hybrid (Latest Imagery & Roads/Labels)
     googleSat: L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
       maxZoom: 20,
       subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
       attribution: '© Google Maps & Satellite Integration'
     }),
-    // Esri World Imagery fallback
+    sentinel2: L.tileLayer('https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2023_3857/default/g/{z}/{y}/{x}.jpg', {
+      maxZoom: 18,
+      attribution: '© EOX Sentinel-2 Cloudless 2023'
+    }),
     esriSat: L.layerGroup([
       L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         attribution: '© Esri',
@@ -313,12 +363,30 @@
   let coordMarker = null;
   let uploadedLayerGroup = L.layerGroup().addTo(map);
   let bufferLayerGroup = L.layerGroup().addTo(map);
+  let notesLayerGroup = L.layerGroup().addTo(map);
   let featureCounter = 0;
   let featureRecords = [];
+  let noteMode = false;
+  let noteCounter = 0;
 
-  // Live Cursor Coordinates HUD
+  /* UTM ZONE CALCULATION (proj4-based, WGS84 -> UTM auto zone for Pakistan/global use) */
+  function toUTM(lat, lng) {
+    const zone = Math.floor((lng + 180) / 6) + 1;
+    const hemisphere = lat >= 0 ? 'north' : 'south';
+    const utmDef = `+proj=utm +zone=${zone} +${hemisphere === 'south' ? 'south ' : ''}+datum=WGS84 +units=m +no_defs`;
+    try {
+      const [easting, northing] = proj4('WGS84', utmDef, [lng, lat]);
+      return `Zone ${zone}${hemisphere === 'north' ? 'N' : 'S'} | E: ${easting.toFixed(1)} N: ${northing.toFixed(1)}`;
+    } catch (e) {
+      return '--';
+    }
+  }
+
+  // Live Cursor Coordinates HUD (Lat/Lng + UTM)
   map.on('mousemove', function(e) {
-    document.getElementById('cursor-hud').innerHTML = `Lat: ${e.latlng.lat.toFixed(5)} | Lng: ${e.latlng.lng.toFixed(5)}`;
+    const utmText = toUTM(e.latlng.lat, e.latlng.lng);
+    document.getElementById('cursor-hud').innerHTML =
+      `Lat: ${e.latlng.lat.toFixed(5)} | Lng: ${e.latlng.lng.toFixed(5)}<br>UTM: ${utmText}`;
   });
 
   function switchBasemap(key) {
@@ -384,6 +452,80 @@
     coordMarker = L.marker([lat, lng]).addTo(map).bindPopup(`Lat: ${lat}<br>Lng: ${lng}`).openPopup();
     document.getElementById('results').innerHTML = `<strong>Located:</strong><br>Lat: ${lat}, Lng: ${lng}`;
   }
+
+  /* BOOKMARKS / SAVED LOCATIONS (persisted in localStorage) */
+  function loadBookmarks() {
+    const saved = JSON.parse(localStorage.getItem('waqar_gis_bookmarks') || '[]');
+    const list = document.getElementById('bookmark-list');
+    list.innerHTML = '';
+    saved.forEach((b, idx) => {
+      const row = document.createElement('div');
+      row.className = 'bookmark-item';
+      row.innerHTML = `<span onclick="goToBookmark(${idx})">📌 ${b.name}</span><button onclick="deleteBookmark(${idx})">✕</button>`;
+      list.appendChild(row);
+    });
+  }
+
+  function saveBookmark() {
+    const nameInput = document.getElementById('bookmark-name');
+    const name = nameInput.value.trim() || `View ${new Date().toLocaleTimeString()}`;
+    const center = map.getCenter();
+    const saved = JSON.parse(localStorage.getItem('waqar_gis_bookmarks') || '[]');
+    saved.push({ name: name, lat: center.lat, lng: center.lng, zoom: map.getZoom() });
+    localStorage.setItem('waqar_gis_bookmarks', JSON.stringify(saved));
+    nameInput.value = '';
+    loadBookmarks();
+    document.getElementById('results').innerHTML = `<strong>Bookmark Saved:</strong><br>${name}`;
+  }
+
+  function goToBookmark(idx) {
+    const saved = JSON.parse(localStorage.getItem('waqar_gis_bookmarks') || '[]');
+    const b = saved[idx];
+    if (b) map.setView([b.lat, b.lng], b.zoom);
+  }
+
+  function deleteBookmark(idx) {
+    const saved = JSON.parse(localStorage.getItem('waqar_gis_bookmarks') || '[]');
+    saved.splice(idx, 1);
+    localStorage.setItem('waqar_gis_bookmarks', JSON.stringify(saved));
+    loadBookmarks();
+  }
+
+  loadBookmarks();
+
+  /* NOTES / ANNOTATION TOOL */
+  function toggleNoteMode() {
+    noteMode = !noteMode;
+    const btn = document.getElementById('note-mode-btn');
+    btn.classList.toggle('active', noteMode);
+    map.getContainer().style.cursor = noteMode ? 'crosshair' : '';
+  }
+
+  map.on('click', function(e) {
+    if (!noteMode) return;
+    noteCounter++;
+    const marker = L.marker(e.latlng, {
+      icon: L.divIcon({
+        className: '',
+        html: '<div style="background:#c5a059;border:2px solid #fff;border-radius:50% 50% 50% 0;width:16px;height:16px;transform:rotate(-45deg);box-shadow:0 0 6px rgba(0,0,0,0.6);"></div>',
+        iconSize: [16, 16]
+      })
+    }).addTo(notesLayerGroup);
+
+    const popupContent = document.createElement('div');
+    popupContent.innerHTML = `
+      <textarea class="note-popup-input" rows="3" placeholder="Write inspection note...">Note #${noteCounter}</textarea><br>
+      <button class="note-popup-save">Save Note</button>
+    `;
+    const textarea = popupContent.querySelector('textarea');
+    const saveBtn = popupContent.querySelector('button');
+    saveBtn.onclick = function() {
+      marker.bindPopup(`<strong>Note #${noteCounter}</strong><br>${textarea.value}`).openPopup();
+    };
+
+    marker.bindPopup(popupContent).openPopup();
+    toggleNoteMode();
+  });
 
   function loadSpatialFile() {
     const file = document.getElementById('file-input').files[0];
@@ -464,7 +606,6 @@
     layer._custom_id = featureCounter;
     drawnItems.addLayer(layer);
 
-    // Attach Direct Double Click Delete to Layer
     layer.on('dblclick', function(ev) {
       L.DomEvent.stopPropagation(ev);
       removeFeature(layer);
@@ -512,12 +653,12 @@
       `;
     }
 
-    featureRecords.push({ 
-      id: featureCounter, 
-      type: type.toUpperCase(), 
-      massaviArea: massaviAreaText, 
-      length: length, 
-      coords: coords 
+    featureRecords.push({
+      id: featureCounter,
+      type: type.toUpperCase(),
+      massaviArea: massaviAreaText,
+      length: length,
+      coords: coords
     });
 
     updateAttributeTable();
@@ -545,7 +686,7 @@
       tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#788294;">No digitization features added yet.</td></tr>`;
       return;
     }
-    
+
     tbody.innerHTML = featureRecords.map(f => `
       <tr>
         <td>#${f.id}</td>
@@ -578,7 +719,7 @@
 
   function exportCSV() {
     if (featureRecords.length === 0) return alert('No data to export!');
-    let csvContent = "data:text/csv;charset=utf-8,ID,Type,Massavi Area,Length,Coordinates\n";
+    let csvContent = "data:text/csv;charset=utf-8,ID,Type,Area,Length,Coordinates\n";
     featureRecords.forEach(f => {
       csvContent += `${f.id},${f.type},"${f.massaviArea}",${f.length},"${f.coords}"\n`;
     });
