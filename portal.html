@@ -13,7 +13,6 @@
   <!-- Leaflet & Draw CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
-  <!-- Leaflet Side-by-Side CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-side-by-side@2.4.0/leaflet-side-by-side.min.css" />
 
   <!-- JS Libraries -->
@@ -31,7 +30,6 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
     html, body { height: 100%; width: 100%; overflow: hidden; background: #15181e; display: flex; }
 
-    /* Luxury Sidebar / Drawer */
     .sidebar {
       width: 310px; min-width: 310px;
       background: linear-gradient(180deg, #20242c 0%, #15181e 100%);
@@ -40,11 +38,7 @@
       box-shadow: 6px 0 25px rgba(0, 0, 0, 0.6); z-index: 1001; position: relative;
       transition: transform 0.3s ease;
     }
-    .sidebar.closed {
-      transform: translateX(-310px);
-      position: absolute;
-      height: 100%;
-    }
+    .sidebar.closed { transform: translateX(-310px); position: absolute; height: 100%; }
 
     .portal-brand {
       display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px;
@@ -52,8 +46,7 @@
     }
     .brand-left { display: flex; align-items: center; gap: 10px; }
     .portal-icon-arch {
-      width: 36px; height: 40px;
-      background: linear-gradient(135deg, #d4af37 0%, #8a6d2b 100%);
+      width: 36px; height: 40px; background: linear-gradient(135deg, #d4af37 0%, #8a6d2b 100%);
       border-radius: 14px 14px 4px 4px; display: flex; align-items: center;
       justify-content: center; font-size: 16px; color: #15181e; border: 1px solid #f3e5ab;
     }
@@ -113,16 +106,12 @@
     }
     .bookmark-item span { cursor: pointer; flex: 1; }
     .bookmark-item span:hover { color: #d4af37; }
-    .bookmark-item button {
-      background: none; border: none; color: #f87171; cursor: pointer; font-size: 12px; padding: 0 4px;
-    }
+    .bookmark-item button { background: none; border: none; color: #f87171; cursor: pointer; font-size: 12px; padding: 0 4px; }
 
     #main-container { flex: 1; display: flex; flex-direction: column; position: relative; height: 100vh; }
     #map { flex: 1; width: 100%; height: 100%; background: #1e232a; z-index: 1; }
 
-    .leaflet-draw-toolbar {
-      background: #ffffff !important; border: 2px solid #d4af37 !important; border-radius: 8px !important; box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important; overflow: hidden;
-    }
+    .leaflet-draw-toolbar { background: #ffffff !important; border: 2px solid #d4af37 !important; border-radius: 8px !important; box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important; overflow: hidden; }
     .leaflet-draw-toolbar a { background-color: #ffffff !important; border-bottom: 1px solid #f0e6d2 !important; color: #15181e !important; }
     .leaflet-draw-toolbar a:hover { background-color: #d4af37 !important; color: #ffffff !important; }
     .leaflet-draw-actions { left: 32px !important; }
@@ -166,7 +155,6 @@
     }
     #clear-notes-btn:hover { background: #ef4444; color: #fff; border-color: #f87171; }
 
-    /* Modal Styles for Pages */
     .custom-modal {
       display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.7); z-index: 2000; justify-content: center; align-items: center;
@@ -196,29 +184,6 @@
         <div class="portal-title">Waqar GIS Portal</div>
       </div>
       <button class="menu-toggle-btn" onclick="toggleSidebar()" title="Close Menu">✕</button>
-    </div>
-
-    <!-- Main Categories & Pages -->
-    <div class="panel-box">
-      <h3>Main Pages</h3>
-      <button class="btn btn-dark" onclick="openModal('homeModal')" style="margin-bottom:6px;">🏠 Home</button>
-      <button class="btn btn-dark" onclick="openModal('aboutModal')" style="margin-bottom:6px;">ℹ️ About Us</button>
-      <button class="btn btn-dark" onclick="openModal('servicesModal')" style="margin-bottom:6px;">🛠️ Services</button>
-      <button class="btn btn-dark" onclick="openModal('contactModal')" style="margin-bottom:6px;">📞 Contact Us</button>
-    </div>
-
-    <!-- User Account & Settings -->
-    <div class="panel-box">
-      <h3>Account & Settings</h3>
-      <button class="btn btn-dark" onclick="openModal('profileModal')" style="margin-bottom:6px;">👤 My Account / Profile</button>
-      <button class="btn btn-dark" onclick="openModal('settingsModal')" style="margin-bottom:6px;">⚙️ Settings</button>
-    </div>
-
-    <!-- Extra Features -->
-    <div class="panel-box">
-      <h3>Support & Policy</h3>
-      <button class="btn btn-dark" onclick="openModal('faqModal')" style="margin-bottom:6px;">❓ Help / FAQ</button>
-      <button class="btn btn-dark" onclick="openModal('privacyModal')" style="margin-bottom:6px;">🔒 Privacy Policy</button>
     </div>
 
     <!-- Location Search -->
@@ -300,7 +265,7 @@
       <input type="range" id="opacity-slider" min="0.1" max="1" step="0.1" value="1" oninput="changeOpacity(this.value)" style="width:100%; cursor:pointer;" />
     </div>
 
-    <div>
+    <div class="panel-box">
       <h3>Topology Check</h3>
       <button class="btn btn-dark" onclick="checkTopology()">Validate Topology</button>
     </div>
@@ -312,6 +277,27 @@
       <button class="btn btn-emerald" onclick="exportCSV()" style="margin-bottom:6px;">Download CSV Attributes</button>
       <button class="btn btn-dark" onclick="exportMapImage()" style="margin-bottom:6px;">Export PNG Image</button>
       <button class="btn btn-dark" onclick="exportMapPDF()">Export PDF Report</button>
+    </div>
+
+    <!-- 🌟 AT THE VERY END OF SIDEBAR: Main Pages, Account & Support -->
+    <div class="panel-box">
+      <h3>Main Pages</h3>
+      <button class="btn btn-dark" onclick="openModal('homeModal')" style="margin-bottom:6px;">🏠 Home</button>
+      <button class="btn btn-dark" onclick="openModal('aboutModal')" style="margin-bottom:6px;">ℹ️ About Us</button>
+      <button class="btn btn-dark" onclick="openModal('servicesModal')" style="margin-bottom:6px;">🛠️ Services</button>
+      <button class="btn btn-dark" onclick="openModal('contactModal')" style="margin-bottom:6px;">📞 Contact Us</button>
+    </div>
+
+    <div class="panel-box">
+      <h3>Account & Settings</h3>
+      <button class="btn btn-dark" onclick="openModal('profileModal')" style="margin-bottom:6px;">👤 My Account / Profile</button>
+      <button class="btn btn-dark" onclick="openModal('settingsModal')" style="margin-bottom:6px;">⚙️ Settings</button>
+    </div>
+
+    <div class="panel-box">
+      <h3>Support & Policy</h3>
+      <button class="btn btn-dark" onclick="openModal('faqModal')" style="margin-bottom:6px;">❓ Help / FAQ</button>
+      <button class="btn btn-dark" onclick="openModal('privacyModal')" style="margin-bottom:6px;">🔒 Privacy Policy</button>
     </div>
   </div>
 
