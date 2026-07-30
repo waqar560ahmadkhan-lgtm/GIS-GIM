@@ -172,16 +172,6 @@
     td { padding: 6px 10px; border: 1px solid rgba(255, 255, 255, 0.05); }
     tr:nth-child(even) { background: rgba(255, 255, 255, 0.02); }
 
-    /* Result Box Overlay - moved down to clear top-right user profile bar completely */
-    #results {
-      position: absolute; top: 75px; right: 20px;
-      background: rgba(21, 24, 30, 0.92); color: #f8fafc; padding: 10px 14px;
-      border-radius: 8px; font-size: 11px; border: 1px solid rgba(197, 160, 89, 0.5);
-      z-index: 500; max-width: 280px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-      backdrop-filter: blur(8px);
-    }
-    #results strong { color: #d4af37; }
-
     /* Cursor Coordinates HUD Overlay */
     #cursor-hud {
       position: absolute; bottom: 190px; right: 20px;
@@ -190,16 +180,18 @@
       z-index: 500; pointer-events: none; font-family: monospace; line-height: 1.5;
     }
 
-    /* Toolbar for annotation mode toggle & clear notes (positioned below leaflet zoom controls safely) */
-    #map-toolbar {
-      position: absolute; top: 135px; left: 10px; z-index: 500;
-      display: flex; flex-direction: column; gap: 8px;
+    /* Top Right Add Note & Profile Bar Container */
+    #top-right-controls {
+      position: absolute; top: 15px; right: 20px; z-index: 1000;
+      display: flex; align-items: center; gap: 12px;
     }
-    #map-toolbar button {
-      background: rgba(21,24,30,0.9); color: #c5a059; border: 1px solid rgba(197,160,89,0.5);
-      border-radius: 6px; padding: 8px 12px; font-size: 11px; font-weight: 700; cursor: pointer; text-align: left;
+    #note-mode-btn {
+      background: linear-gradient(135deg, #c5a059 0%, #967635 100%); color: #0f1217; border: 1px solid #f3e5ab;
+      border-radius: 6px; padding: 8px 14px; font-size: 11px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      transition: all 0.2s ease;
     }
-    #map-toolbar button.active { background: #c5a059; color: #15181e; }
+    #note-mode-btn:hover { background: linear-gradient(135deg, #d4af37 0%, #a8843c 100%); }
+    #note-mode-btn.active { background: #ef4444; color: #fff; border-color: #f87171; }
   </style>
 </head>
 <body>
@@ -292,11 +284,11 @@
   <div id="main-container">
     <div id="map"></div>
 
-    <div id="map-toolbar">
+    <div id="top-right-controls">
       <button id="note-mode-btn" onclick="toggleNoteMode()">📍 Add Note</button>
+      <!-- auth-guard.js injects user info & logout button dynamically right here -->
     </div>
 
-    <div id="results"><strong>Spatial Inspector:</strong><br>Double-click drawn feature or note pin to delete.</div>
     <div id="cursor-hud">Lat: 0.00000 | Lng: 0.00000<br>UTM: --</div>
 
     <!-- Attribute Table Panel -->
@@ -437,7 +429,6 @@
         const lon = parseFloat(d[0].lon);
         map.setView([lat, lon], 16);
         L.marker([lat, lon]).addTo(map).bindPopup(d[0].display_name).openPopup();
-        document.getElementById('results').innerHTML = `<strong>Location Found:</strong><br>${d[0].display_name}`;
       });
   }
 
@@ -448,7 +439,6 @@
     if (coordMarker) map.removeLayer(coordMarker);
     map.setView([lat, lng], 17);
     coordMarker = L.marker([lat, lng]).addTo(map).bindPopup(`Lat: ${lat}<br>Lng: ${lng}`).openPopup();
-    document.getElementById('results').innerHTML = `<strong>Located:</strong><br>Lat: ${lat}, Lng: ${lng}`;
   }
 
   function loadBookmarks() {
@@ -472,7 +462,6 @@
     localStorage.setItem('waqar_gis_bookmarks', JSON.stringify(saved));
     nameInput.value = '';
     loadBookmarks();
-    document.getElementById('results').innerHTML = `<strong>Bookmark Saved:</strong><br>${name}`;
   }
 
   function goToBookmark(idx) {
@@ -513,7 +502,6 @@
     marker.on('dblclick', function(ev) {
       L.DomEvent.stopPropagation(ev);
       notesLayerGroup.removeLayer(marker);
-      document.getElementById('results').innerHTML = `<strong>Status:</strong><br>Note pin removed successfully.`;
     });
 
     const popupContent = document.createElement('div');
@@ -587,7 +575,6 @@
     drawnItems.removeLayer(layer);
     featureRecords = featureRecords.filter(f => f.id !== layerId);
     updateAttributeTable();
-    document.getElementById('results').innerHTML = `<strong>Status:</strong><br>Feature #${layerId} deleted successfully.`;
   }
 
   map.on(L.Draw.Event.DELETED, function(e) {
@@ -627,33 +614,13 @@
       const perimeterMeters = (turf.length(geojson, {units: 'kilometers'}) * 1000).toFixed(2);
       length = `${perimeterMeters} m`;
       coords = 'Polygon Boundary';
-
-      document.getElementById('results').innerHTML = `
-        <strong>Feature Calculated (#${featureCounter}):</strong><br>
-        Type: Polygon<br>
-        Area: <b>${massaviAreaText}</b><br>
-        Perimeter: ${length}<br>
-        <small style="color:#d4af37;">(Double-click polygon to delete)</small>
-      `;
     } else if (type === 'polyline') {
       const lineLen = turf.length(geojson, {units: 'kilometers'});
       length = (lineLen >= 1) ? `${lineLen.toFixed(2)} km` : `${(lineLen * 1000).toFixed(2)} m`;
       coords = 'Line Path';
-
-      document.getElementById('results').innerHTML = `
-        <strong>Feature Calculated (#${featureCounter}):</strong><br>
-        Type: Line<br>
-        Length: <b>${length}</b><br>
-        <small style="color:#d4af37;">(Double-click line to delete)</small>
-      `;
     } else if (type === 'marker') {
       const c = geojson.geometry.coordinates;
       coords = `${c[1].toFixed(5)}, ${c[0].toFixed(5)}`;
-
-      document.getElementById('results').innerHTML = `
-        <strong>Feature Calculated (#${featureCounter}):**<br>
-        Type: Point<br>Coords: <b>${coords}</b>
-      `;
     }
 
     featureRecords.push({
@@ -679,7 +646,6 @@
       style: { color: '#ef4444', fillColor: '#f87171', fillOpacity: 0.35, dashArray: '5, 5' }
     });
     bufferLayerGroup.addLayer(bufferGeoJSON);
-    document.getElementById('results').innerHTML = `<strong>Buffer Created:</strong><br>${radiusMeters} Meters (M)`;
   }
 
   function updateAttributeTable() {
