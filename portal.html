@@ -180,18 +180,28 @@
       z-index: 500; pointer-events: none; font-family: monospace; line-height: 1.5;
     }
 
-    /* Top Right Controls Container: Stacked vertically to prevent overlapping */
+    /* Top Right Controls Container: Stacked vertically with action row */
     #top-right-controls {
       position: absolute; top: 15px; right: 20px; z-index: 1000;
       display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
     }
+    .note-action-row {
+      display: flex; gap: 6px;
+    }
     #note-mode-btn {
       background: linear-gradient(135deg, #c5a059 0%, #967635 100%); color: #0f1217; border: 1px solid #f3e5ab;
-      border-radius: 6px; padding: 7px 14px; font-size: 11px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      border-radius: 6px; padding: 7px 12px; font-size: 11px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
       transition: all 0.2s ease;
     }
     #note-mode-btn:hover { background: linear-gradient(135deg, #d4af37 0%, #a8843c 100%); }
     #note-mode-btn.active { background: #ef4444; color: #fff; border-color: #f87171; }
+
+    #clear-notes-btn {
+      background: #252a34; color: #f87171; border: 1px solid rgba(248, 113, 113, 0.4);
+      border-radius: 6px; padding: 7px 10px; font-size: 11px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      transition: all 0.2s ease;
+    }
+    #clear-notes-btn:hover { background: #ef4444; color: #fff; border-color: #f87171; }
   </style>
 </head>
 <body>
@@ -286,7 +296,10 @@
 
     <div id="top-right-controls">
       <!-- auth-guard.js injects user info & logout button dynamically right here as the top row -->
-      <button id="note-mode-btn" onclick="toggleNoteMode()">📍 Add Note</button>
+      <div class="note-action-row">
+        <button id="note-mode-btn" onclick="toggleNoteMode()">📍 Add Note</button>
+        <button id="clear-notes-btn" onclick="clearAllNotes()" title="Delete All Notes">🗑️ Clear Notes</button>
+      </div>
     </div>
 
     <div id="cursor-hud">Lat: 0.00000 | Lng: 0.00000<br>UTM: --</div>
@@ -479,12 +492,18 @@
 
   loadBookmarks();
 
-  /* NOTES / ANNOTATION TOOL (With Double-Click Removal) */
+  /* NOTES / ANNOTATION TOOL (With Double-Click Removal & Clear All) */
   function toggleNoteMode() {
     noteMode = !noteMode;
     const btn = document.getElementById('note-mode-btn');
     btn.classList.toggle('active', noteMode);
     map.getContainer().style.cursor = noteMode ? 'crosshair' : '';
+  }
+
+  function clearAllNotes() {
+    if (confirm('Are you sure you want to delete all notes/pins?')) {
+      notesLayerGroup.clearLayers();
+    }
   }
 
   map.on('click', function(e) {
@@ -498,7 +517,7 @@
       })
     }).addTo(notesLayerGroup);
 
-    // Double-click to delete note pin
+    // Double-click to delete note pin individually
     marker.on('dblclick', function(ev) {
       L.DomEvent.stopPropagation(ev);
       notesLayerGroup.removeLayer(marker);
