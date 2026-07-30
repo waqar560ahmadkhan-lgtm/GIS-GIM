@@ -59,7 +59,6 @@
     }
     .portal-title { font-family: 'Cinzel', serif; font-size: 14px; font-weight: 700; color: #f8fafc; letter-spacing: 0.5px; }
 
-    /* Menu Close Button inside Brand Header */
     .menu-toggle-btn {
       background: #252a34; color: #c5a059; border: 1px solid rgba(197, 160, 89, 0.4);
       border-radius: 6px; padding: 6px 10px; font-size: 13px; font-weight: 700; cursor: pointer;
@@ -97,7 +96,6 @@
     .btn-emerald { background: linear-gradient(135deg, #059669 0%, #046c51 100%); color: #fff; border: 1px solid #34d399; }
     .btn-active { background: #ef4444 !important; color: #fff !important; }
 
-    /* Floating Symbol-Only Menu Button with Proper Spacing from Zoom Control */
     #floating-menu-btn {
       position: absolute; top: 15px; left: 60px; z-index: 1000;
       background: #15181e; color: #c5a059; border: 2px solid #c5a059;
@@ -108,7 +106,6 @@
     }
     #floating-menu-btn:hover { background: #c5a059; color: #15181e; }
 
-    /* Bookmark list */
     .bookmark-item {
       display: flex; justify-content: space-between; align-items: center;
       background: #15181e; border: 1px solid rgba(197,160,89,0.25); border-radius: 6px;
@@ -120,111 +117,76 @@
       background: none; border: none; color: #f87171; cursor: pointer; font-size: 12px; padding: 0 4px;
     }
 
-    /* Main Map Container */
     #main-container { flex: 1; display: flex; flex-direction: column; position: relative; height: 100vh; }
     #map { flex: 1; width: 100%; height: 100%; background: #1e232a; z-index: 1; }
 
-    /* LUXURY GOLD & WHITE TOOLBAR & VERTEX HANDLES */
     .leaflet-draw-toolbar {
-      background: #ffffff !important;
-      border: 2px solid #d4af37 !important;
-      border-radius: 8px !important;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
-      overflow: hidden;
+      background: #ffffff !important; border: 2px solid #d4af37 !important; border-radius: 8px !important; box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important; overflow: hidden;
     }
-    .leaflet-draw-toolbar a {
-      background-color: #ffffff !important;
-      border-bottom: 1px solid #f0e6d2 !important;
-      color: #15181e !important;
-    }
-    .leaflet-draw-toolbar a:hover {
-      background-color: #d4af37 !important;
-      color: #ffffff !important;
-    }
+    .leaflet-draw-toolbar a { background-color: #ffffff !important; border-bottom: 1px solid #f0e6d2 !important; color: #15181e !important; }
+    .leaflet-draw-toolbar a:hover { background-color: #d4af37 !important; color: #ffffff !important; }
     .leaflet-draw-actions { left: 32px !important; }
-    .leaflet-draw-actions a {
-      background-color: #ffffff !important;
-      color: #8a6d2b !important;
-      border-left: 1px solid #d4af37 !important;
-      font-weight: bold;
-    }
-    .leaflet-draw-actions a:hover {
-      background-color: #d4af37 !important;
-      color: #ffffff !important;
-    }
+    .leaflet-draw-actions a { background-color: #ffffff !important; color: #8a6d2b !important; border-left: 1px solid #d4af37 !important; font-weight: bold; }
+    .leaflet-draw-actions a:hover { background-color: #d4af37 !important; color: #ffffff !important; }
 
-    /* Vertex Gold Circles */
     .leaflet-div-icon {
-      background: #d4af37 !important;
-      border: 2px solid #ffffff !important;
-      border-radius: 50% !important;
-      box-shadow: 0 0 8px rgba(212, 175, 55, 1) !important;
-      width: 12px !important; height: 12px !important;
-      margin-left: -6px !important; margin-top: -6px !important;
+      background: #d4af37 !important; border: 2px solid #ffffff !important; border-radius: 50% !important; box-shadow: 0 0 8px rgba(212, 175, 55, 1) !important; width: 12px !important; height: 12px !important; margin-left: -6px !important; margin-top: -6px !important;
     }
-    .leaflet-editing-icon {
-      background: #ffffff !important;
-      border: 2px solid #d4af37 !important;
-      border-radius: 50% !important;
-    }
+    .leaflet-editing-icon { background: #ffffff !important; border: 2px solid #d4af37 !important; border-radius: 50% !important; }
 
-    /* Annotation pin popup */
-    .note-popup-input {
-      width: 200px; padding: 6px; border-radius: 4px; border: 1px solid #c5a059;
-      font-size: 12px; margin-bottom: 6px;
-    }
-    .note-popup-save {
-      background: #c5a059; color: #15181e; border: none; padding: 5px 10px;
-      border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer;
-    }
+    .note-popup-input { width: 200px; padding: 6px; border-radius: 4px; border: 1px solid #c5a059; font-size: 12px; margin-bottom: 6px; }
+    .note-popup-save { background: #c5a059; color: #15181e; border: none; padding: 5px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer; }
 
-    /* Attribute Table Panel (Bottom) */
     #attribute-panel {
-      height: 180px; background: rgba(21, 24, 30, 0.95);
-      border-top: 2px solid #c5a059; padding: 10px 16px; overflow-y: auto;
-      backdrop-filter: blur(10px); z-index: 10;
+      height: 180px; background: rgba(21, 24, 30, 0.95); border-top: 2px solid #c5a059; padding: 10px 16px; overflow-y: auto; backdrop-filter: blur(10px); z-index: 10;
     }
     #attribute-panel h4 { color: #d4af37; font-size: 12px; margin-bottom: 8px; font-family: 'Cinzel', serif; }
-
     .table-wrapper { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; color: #e2e8f0; font-size: 11px; text-align: left; }
     th { background: #2a303c; color: #c5a059; padding: 6px 10px; border: 1px solid rgba(197, 160, 89, 0.2); }
     td { padding: 6px 10px; border: 1px solid rgba(255, 255, 255, 0.05); }
     tr:nth-child(even) { background: rgba(255, 255, 255, 0.02); }
 
-    /* Cursor Coordinates HUD Overlay */
     #cursor-hud {
-      position: absolute; bottom: 190px; right: 20px;
-      background: rgba(21, 24, 30, 0.85); color: #c5a059; padding: 6px 12px;
-      border-radius: 6px; font-size: 11px; border: 1px solid rgba(197, 160, 89, 0.3);
-      z-index: 500; pointer-events: none; font-family: monospace; line-height: 1.5;
+      position: absolute; bottom: 190px; right: 20px; background: rgba(21, 24, 30, 0.85); color: #c5a059; padding: 6px 12px; border-radius: 6px; font-size: 11px; border: 1px solid rgba(197, 160, 89, 0.3); z-index: 500; pointer-events: none; font-family: monospace; line-height: 1.5;
     }
 
-    /* TOP RIGHT CONTROLS - Moved further down below login bar */
     #top-right-controls {
-      position: absolute; top: 75px; right: 15px; z-index: 1000;
-      display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+      position: absolute; top: 75px; right: 15px; z-index: 1000; display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
     }
     .note-action-row { display: flex; gap: 6px; }
     #note-mode-btn {
-      background: linear-gradient(135deg, #c5a059 0%, #967635 100%); color: #0f1217; border: 1px solid #f3e5ab;
-      border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-      transition: all 0.2s ease;
+      background: linear-gradient(135deg, #c5a059 0%, #967635 100%); color: #0f1217; border: 1px solid #f3e5ab; border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4); transition: all 0.2s ease;
     }
     #note-mode-btn:hover { background: linear-gradient(135deg, #d4af37 0%, #a8843c 100%); }
     #note-mode-btn.active { background: #ef4444; color: #fff; border-color: #f87171; }
 
     #clear-notes-btn {
-      background: #252a34; color: #f87171; border: 1px solid rgba(248, 113, 113, 0.4);
-      border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-      transition: all 0.2s ease;
+      background: #252a34; color: #f87171; border: 1px solid rgba(248, 113, 113, 0.4); border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4); transition: all 0.2s ease;
     }
     #clear-notes-btn:hover { background: #ef4444; color: #fff; border-color: #f87171; }
+
+    /* Modal Styles for Pages */
+    .custom-modal {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7); z-index: 2000; justify-content: center; align-items: center;
+      backdrop-filter: blur(5px);
+    }
+    .modal-content {
+      background: #1a1f29; border: 2px solid #c5a059; border-radius: 12px;
+      width: 90%; max-width: 500px; padding: 24px; color: #f1f5f9; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      position: relative; max-height: 80vh; overflow-y: auto;
+    }
+    .modal-content h2 { font-family: 'Cinzel', serif; color: #d4af37; margin-bottom: 12px; font-size: 18px; }
+    .modal-content p, .modal-content ul { font-size: 13px; color: #cbd5e1; line-height: 1.6; margin-bottom: 12px; }
+    .modal-close {
+      position: absolute; top: 15px; right: 15px; background: none; border: none;
+      color: #f87171; font-size: 18px; font-weight: bold; cursor: pointer;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Floating Symbol-Only Menu Button with Spacing -->
   <button id="floating-menu-btn" onclick="toggleSidebar()" title="Open Menu">☰</button>
 
   <div class="sidebar" id="app-sidebar">
@@ -234,6 +196,29 @@
         <div class="portal-title">Waqar GIS Portal</div>
       </div>
       <button class="menu-toggle-btn" onclick="toggleSidebar()" title="Close Menu">✕</button>
+    </div>
+
+    <!-- Main Categories & Pages -->
+    <div class="panel-box">
+      <h3>Main Pages</h3>
+      <button class="btn btn-dark" onclick="openModal('homeModal')" style="margin-bottom:6px;">🏠 Home</button>
+      <button class="btn btn-dark" onclick="openModal('aboutModal')" style="margin-bottom:6px;">ℹ️ About Us</button>
+      <button class="btn btn-dark" onclick="openModal('servicesModal')" style="margin-bottom:6px;">🛠️ Services</button>
+      <button class="btn btn-dark" onclick="openModal('contactModal')" style="margin-bottom:6px;">📞 Contact Us</button>
+    </div>
+
+    <!-- User Account & Settings -->
+    <div class="panel-box">
+      <h3>Account & Settings</h3>
+      <button class="btn btn-dark" onclick="openModal('profileModal')" style="margin-bottom:6px;">👤 My Account / Profile</button>
+      <button class="btn btn-dark" onclick="openModal('settingsModal')" style="margin-bottom:6px;">⚙️ Settings</button>
+    </div>
+
+    <!-- Extra Features -->
+    <div class="panel-box">
+      <h3>Support & Policy</h3>
+      <button class="btn btn-dark" onclick="openModal('faqModal')" style="margin-bottom:6px;">❓ Help / FAQ</button>
+      <button class="btn btn-dark" onclick="openModal('privacyModal')" style="margin-bottom:6px;">🔒 Privacy Policy</button>
     </div>
 
     <!-- Location Search -->
@@ -315,7 +300,6 @@
       <input type="range" id="opacity-slider" min="0.1" max="1" step="0.1" value="1" oninput="changeOpacity(this.value)" style="width:100%; cursor:pointer;" />
     </div>
 
-    <!-- Topology Check -->
     <div>
       <h3>Topology Check</h3>
       <button class="btn btn-dark" onclick="checkTopology()">Validate Topology</button>
@@ -334,7 +318,6 @@
   <div id="main-container">
     <div id="map"></div>
 
-    <!-- Top Right Controls Wrapper -->
     <div id="top-right-controls">
       <div class="note-action-row">
         <button id="note-mode-btn" onclick="toggleNoteMode()">📍 Add Note</button>
@@ -344,7 +327,6 @@
 
     <div id="cursor-hud">Lat: 0.00000 | Lng: 0.00000<br>UTM: --</div>
 
-    <!-- Attribute Table Panel -->
     <div id="attribute-panel">
       <h4>◈ Attribute Table Viewer</h4>
       <div class="table-wrapper">
@@ -366,92 +348,65 @@
     </div>
   </div>
 
-<script>
-  /* MAP WITH GOOGLE SATELLITE HYBRID INTEGRATION */
-  const map = L.map('map', {
-    crossOrigin: true,
-    maxZoom: 20,
-    zoomControl: true
-  }).setView([34.0, 71.5], 13);
+  <!-- MODALS FOR PAGES -->
+  <div id="homeModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('homeModal')">×</button><h2>Home</h2><p>Welcome back to Waqar GIS Portal! Aap apne main map page par hain jahan se aap spatial digitization aur mapping perform kar sakte hain.</p></div></div>
+  <div id="aboutModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('aboutModal')">×</button><h2>About Us / Introduction</h2><p>Waqar GIS Portal ek advanced web-based Geographic Information System application hai jo mapping, remote sensing, aur spatial analysis ke liye banayi gayi hai.</p></div></div>
+  <div id="servicesModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('servicesModal')">×</button><h2>Services / Products</h2><p>Aap yahan निम्नलिखित khidmat faraham kar rahe hain:</p><ul><li>Spatial Data Digitization & Massavi Calculations</li><li>Satellite Imagery Comparison & Analysis</li><li>Custom GeoJSON/KML Processing & Export</li></ul></div></div>
+  <div id="contactModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('contactModal')">×</button><h2>Contact Us</h2><p>For support and queries, you can reach out via developer portal or email.</p></div></div>
+  <div id="profileModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('profileModal')">×</button><h2>Profile / My Account</h2><p>Aapki personal account details aur session history yahan show hoti hai.</p></div></div>
+  <div id="settingsModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('settingsModal')">×</button><h2>Settings</h2><p>Language, theme, aur notifications preferences customize karne ke options.</p></div></div>
+  <div id="faqModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('faqModal')">×</button><h2>Help / Support / FAQ</h2><p>Frequently Asked Questions aur portal use karne ka tareeqa.</p></div></div>
+  <div id="privacyModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('privacyModal')">×</button><h2>Privacy Policy</h2><p>Aapka data secure hai aur privacy ke tamam usoolon par amal kiya jata hai.</p></div></div>
 
-  // Scale Bar
+<script>
+  function openModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
+  function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+
+  const map = L.map('map', { crossOrigin: true, maxZoom: 20, zoomControl: true }).setView([34.0, 71.5], 13);
   L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
 
   const basemaps = {
-    googleSat: L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
-      maxZoom: 20,
-      subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-      attribution: '© Google Maps & Satellite Integration'
-    }),
-    sentinel2: L.tileLayer('https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2023_3857/default/g/{z}/{y}/{x}.jpg', {
-      maxZoom: 18,
-      attribution: '© EOX Sentinel-2 Cloudless 2023'
-    }),
+    googleSat: L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: '© Google' }),
+    sentinel2: L.tileLayer('https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2023_3857/default/g/{z}/{y}/{x}.jpg', { maxZoom: 18, attribution: '© EOX' }),
     esriSat: L.layerGroup([
-      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: '© Esri',
-        maxZoom: 19
-      }),
-      L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
-        maxZoom: 19,
-        opacity: 0.95
-      })
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }),
+      L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, opacity: 0.95 })
     ]),
-    osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }),
-    topo: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri Topo', maxZoom: 19 }),
-    dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© CartoDB', maxZoom: 19 })
+    osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }),
+    topo: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }),
+    dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 })
   };
 
   let currentBasemap = basemaps.googleSat;
   currentBasemap.addTo(map);
 
-  // Sidebar Toggle Function
   function toggleSidebar() {
     const sidebar = document.getElementById('app-sidebar');
     const floatBtn = document.getElementById('floating-menu-btn');
     sidebar.classList.toggle('closed');
-    if (sidebar.classList.contains('closed')) {
-      floatBtn.style.display = 'flex';
-    } else {
-      floatBtn.style.display = 'none';
-    }
+    floatBtn.style.display = sidebar.classList.contains('closed') ? 'flex' : 'none';
     setTimeout(() => { map.invalidateSize(); }, 300);
   }
 
-  // Split-Screen variables
-  let splitControl = null;
-  let leftLayerObj = null;
-  let rightLayerObj = null;
-  let isSplitActive = false;
-
+  let splitControl = null, leftLayerObj = null, rightLayerObj = null, isSplitActive = false;
   function toggleSplitScreen() {
     const btn = document.getElementById('slider-toggle-btn');
     const leftKey = document.getElementById('left-layer-select').value;
     const rightKey = document.getElementById('right-layer-select').value;
-
     if (!isSplitActive) {
       if (currentBasemap) map.removeLayer(currentBasemap);
-      
       leftLayerObj = basemaps[leftKey] || basemaps.googleSat;
       rightLayerObj = basemaps[rightKey] || basemaps.dark;
-
-      leftLayerObj.addTo(map);
-      rightLayerObj.addTo(map);
-
+      leftLayerObj.addTo(map); rightLayerObj.addTo(map);
       splitControl = L.control.sideBySide(leftLayerObj, rightLayerObj);
       splitControl.addTo(map);
-
       isSplitActive = true;
       btn.innerText = "DISABLE SLIDER COMPARISON";
       btn.classList.add('btn-active');
     } else {
-      if (splitControl) {
-        map.removeControl(splitControl);
-        splitControl = null;
-      }
+      if (splitControl) { map.removeControl(splitControl); splitControl = null; }
       if (leftLayerObj) map.removeLayer(leftLayerObj);
       if (rightLayerObj) map.removeLayer(rightLayerObj);
-
       isSplitActive = false;
       switchBasemap(document.getElementById('basemap-select').value);
       btn.innerText = "ENABLE SLIDER COMPARISON";
@@ -459,16 +414,9 @@
     }
   }
 
-  let coordMarker = null;
-  let uploadedLayerGroup = L.layerGroup().addTo(map);
-  let bufferLayerGroup = L.layerGroup().addTo(map);
-  let notesLayerGroup = L.layerGroup().addTo(map);
-  let featureCounter = 0;
-  let featureRecords = [];
-  let noteMode = false;
-  let noteCounter = 0;
+  let coordMarker = null, uploadedLayerGroup = L.layerGroup().addTo(map), bufferLayerGroup = L.layerGroup().addTo(map), notesLayerGroup = L.layerGroup().addTo(map);
+  let featureCounter = 0, featureRecords = [], noteMode = false, noteCounter = 0;
 
-  /* UTM ZONE CALCULATION */
   function toUTM(lat, lng) {
     const zone = Math.floor((lng + 180) / 6) + 1;
     const hemisphere = lat >= 0 ? 'north' : 'south';
@@ -476,74 +424,53 @@
     try {
       const [easting, northing] = proj4('WGS84', utmDef, [lng, lat]);
       return `Zone ${zone}${hemisphere === 'north' ? 'N' : 'S'} | E: ${easting.toFixed(1)} N: ${northing.toFixed(1)}`;
-    } catch (e) {
-      return '--';
-    }
+    } catch (e) { return '--'; }
   }
 
   map.on('mousemove', function(e) {
-    const utmText = toUTM(e.latlng.lat, e.latlng.lng);
-    document.getElementById('cursor-hud').innerHTML =
-      `Lat: ${e.latlng.lat.toFixed(5)} | Lng: ${e.latlng.lng.toFixed(5)}<br>UTM: ${utmText}`;
+    document.getElementById('cursor-hud').innerHTML = `Lat: ${e.latlng.lat.toFixed(5)} | Lng: ${e.latlng.lng.toFixed(5)}<br>UTM: ${toUTM(e.latlng.lat, e.latlng.lng)}`;
   });
 
   function switchBasemap(key) {
-    if (isSplitActive) return; 
+    if (isSplitActive) return;
     if (currentBasemap) map.removeLayer(currentBasemap);
-    if (basemaps[key]) {
-      currentBasemap = basemaps[key];
-      currentBasemap.addTo(map);
-      changeOpacity(document.getElementById('opacity-slider').value);
-    }
+    if (basemaps[key]) { currentBasemap = basemaps[key]; currentBasemap.addTo(map); changeOpacity(document.getElementById('opacity-slider').value); }
   }
 
   function changeOpacity(val) {
     if (currentBasemap && !isSplitActive) {
-      if (typeof currentBasemap.setOpacity === 'function') {
-        currentBasemap.setOpacity(val);
-      } else if (currentBasemap.getLayers) {
-        currentBasemap.getLayers().forEach(l => { if (l.setOpacity) l.setOpacity(val); });
-      }
+      if (typeof currentBasemap.setOpacity === 'function') currentBasemap.setOpacity(val);
+      else if (currentBasemap.getLayers) currentBasemap.getLayers().forEach(l => { if (l.setOpacity) l.setOpacity(val); });
     }
   }
 
   function calculateMassaviArea(areaSqMeters) {
-    const SQFT_PER_SQM = 10.7639;
-    const SQFT_PER_KANAL = 5445.0;
-    const SQFT_PER_MARLA = 272.25;
-
-    let totalSqFt = areaSqMeters * SQFT_PER_SQM;
-    let kanals = Math.floor(totalSqFt / SQFT_PER_KANAL);
-    let remainingSqFt = totalSqFt % SQFT_PER_KANAL;
-    let marlas = Math.floor(remainingSqFt / SQFT_PER_MARLA);
-    let finalSqFt = Math.round(remainingSqFt % SQFT_PER_MARLA);
-
+    let totalSqFt = areaSqMeters * 10.7639;
+    let kanals = Math.floor(totalSqFt / 5445.0);
+    let remainingSqFt = totalSqFt % 5445.0;
+    let marlas = Math.floor(remainingSqFt / 272.25);
+    let finalSqFt = Math.round(remainingSqFt % 272.25);
     if (finalSqFt >= 270) { marlas += 1; finalSqFt = 0; }
     if (marlas >= 20) { kanals += 1; marlas -= 20; }
-
-    return {
-      formattedText: `${kanals} Kanal, ${marlas} Marla, ${finalSqFt} SqFt`
-    };
+    return { formattedText: `${kanals} Kanal, ${marlas} Marla, ${finalSqFt} SqFt` };
   }
 
   function searchLocation() {
     const query = document.getElementById('sidebar-search').value;
-    if (!query) return alert('Please enter a location name!');
+    if (!query) return alert('Please enter location!');
     fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=pk`)
       .then(r => r.json())
       .then(d => {
-        if (!d.length) return alert('Location not found!');
-        const lat = parseFloat(d[0].lat);
-        const lon = parseFloat(d[0].lon);
-        map.setView([lat, lon], 16);
-        L.marker([lat, lon]).addTo(map).bindPopup(d[0].display_name).openPopup();
+        if (!d.length) return alert('Not found!');
+        map.setView([parseFloat(d[0].lat), parseFloat(d[0].lon)], 16);
+        L.marker([parseFloat(d[0].lat), parseFloat(d[0].lon)]).addTo(map).bindPopup(d[0].display_name).openPopup();
       });
   }
 
   function goToCoordinates() {
     const lat = parseFloat(document.getElementById('coord-lat').value);
     const lng = parseFloat(document.getElementById('coord-lng').value);
-    if (isNaN(lat) || isNaN(lng)) return alert('Please enter valid coordinates!');
+    if (isNaN(lat) || isNaN(lng)) return alert('Valid coordinates required!');
     if (coordMarker) map.removeLayer(coordMarker);
     map.setView([lat, lng], 17);
     coordMarker = L.marker([lat, lng]).addTo(map).bindPopup(`Lat: ${lat}<br>Lng: ${lng}`).openPopup();
@@ -574,8 +501,7 @@
 
   function goToBookmark(idx) {
     const saved = JSON.parse(localStorage.getItem('waqar_gis_bookmarks') || '[]');
-    const b = saved[idx];
-    if (b) map.setView([b.lat, b.lng], b.zoom);
+    if (saved[idx]) map.setView([saved[idx].lat, saved[idx].lng], saved[idx].zoom);
   }
 
   function deleteBookmark(idx) {
@@ -584,214 +510,122 @@
     localStorage.setItem('waqar_gis_bookmarks', JSON.stringify(saved));
     loadBookmarks();
   }
-
   loadBookmarks();
 
-  /* NOTES / ANNOTATION TOOL (Double click to delete individual pin) */
   function toggleNoteMode() {
     noteMode = !noteMode;
-    const btn = document.getElementById('note-mode-btn');
-    btn.classList.toggle('active', noteMode);
+    document.getElementById('note-mode-btn').classList.toggle('active', noteMode);
     map.getContainer().style.cursor = noteMode ? 'crosshair' : '';
   }
 
   function clearAllNotes() {
-    if (confirm('Are you sure you want to delete all notes/pins?')) {
-      notesLayerGroup.clearLayers();
-    }
+    if (confirm('Delete all notes?')) notesLayerGroup.clearLayers();
   }
 
   map.on('click', function(e) {
     if (!noteMode) return;
     noteCounter++;
     const marker = L.marker(e.latlng, {
-      icon: L.divIcon({
-        className: '',
-        html: '<div style="background:#c5a059;border:2px solid #fff;border-radius:50% 50% 50% 0;width:16px;height:16px;transform:rotate(-45deg);box-shadow:0 0 6px rgba(0,0,0,0.6);"></div>',
-        iconSize: [16, 16]
-      })
+      icon: L.divIcon({ className: '', html: '<div style="background:#c5a059;border:2px solid #fff;border-radius:50% 50% 50% 0;width:16px;height:16px;transform:rotate(-45deg);box-shadow:0 0 6px rgba(0,0,0,0.6);"></div>', iconSize: [16, 16] })
     }).addTo(notesLayerGroup);
 
-    marker.on('dblclick', function(ev) {
-      L.DomEvent.stopPropagation(ev);
-      notesLayerGroup.removeLayer(marker);
-    });
-
-    const popupContent = document.createElement('div');
-    popupContent.innerHTML = `
-      <textarea class="note-popup-input" rows="3" placeholder="Write inspection note...">Note #${noteCounter}</textarea><br>
-      <button class="note-popup-save">Save Note</button>
-    `;
-    const textarea = popupContent.querySelector('textarea');
-    const saveBtn = popupContent.querySelector('button');
-    saveBtn.onclick = function() {
-      marker.bindPopup(`<strong>Note #${noteCounter}</strong><br>${textarea.value}`).openPopup();
-    };
-
-    marker.bindPopup(popupContent).openPopup();
+    marker.on('dblclick', (ev) => { L.DomEvent.stopPropagation(ev); notesLayerGroup.removeLayer(marker); });
+    const pc = document.createElement('div');
+    pc.innerHTML = `<textarea class="note-popup-input" rows="3">Note #${noteCounter}</textarea><br><button class="note-popup-save">Save</button>`;
+    pc.querySelector('button').onclick = () => marker.bindPopup(`<strong>Note #${noteCounter}</strong><br>${pc.querySelector('textarea').value}`).openPopup();
+    marker.bindPopup(pc).openPopup();
     toggleNoteMode();
   });
 
   function loadSpatialFile() {
     const file = document.getElementById('file-input').files[0];
-    if (!file) return alert('Please select a file first!');
-    const fileName = file.name.toLowerCase();
+    if (!file) return alert('Select a file!');
+    const reader = new FileReader();
     uploadedLayerGroup.clearLayers();
-
-    if (fileName.endsWith('.kml')) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const runLayer = omnivore.kml.parse(e.target.result);
-        runLayer.addTo(uploadedLayerGroup);
-        map.fitBounds(runLayer.getBounds());
-      };
-      reader.readAsText(file);
-    } else {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const fillColor = document.getElementById('fill-color').value;
-          const strokeColor = document.getElementById('stroke-color').value;
-          const layer = L.geoJSON(JSON.parse(e.target.result), {
-            style: { color: strokeColor, fillColor: fillColor, fillOpacity: 0.5 }
-          });
-          uploadedLayerGroup.addLayer(layer);
-          map.fitBounds(layer.getBounds());
-        } catch(err) { alert('Invalid GeoJSON!'); }
-      };
-      reader.readAsText(file);
-    }
+    reader.onload = function(e) {
+      try {
+        const fc = document.getElementById('fill-color').value;
+        const sc = document.getElementById('stroke-color').value;
+        const layer = L.geoJSON(JSON.parse(e.target.result), { style: { color: sc, fillColor: fc, fillOpacity: 0.5 } });
+        uploadedLayerGroup.addLayer(layer);
+        map.fitBounds(layer.getBounds());
+      } catch(err) { alert('Invalid file!'); }
+    };
+    reader.readAsText(file);
   }
 
-  /* Leaflet Draw Setup */
   const drawnItems = new L.FeatureGroup();
   map.addLayer(drawnItems);
-
   const drawControl = new L.Control.Draw({
-    draw: {
-      polygon: {
-        allowIntersection: false,
-        showArea: true,
-        shapeOptions: { color: '#d4af37', fillColor: '#c5a059', fillOpacity: 0.45, weight: 2 }
-      },
-      polyline: { shapeOptions: { color: '#d4af37', weight: 3 } },
-      rectangle: false,
-      circle: false,
-      circlemarker: false
-    },
+    draw: { polygon: { allowIntersection: false, showArea: true, shapeOptions: { color: '#d4af37', fillColor: '#c5a059', fillOpacity: 0.45, weight: 2 } }, polyline: { shapeOptions: { color: '#d4af37', weight: 3 } }, rectangle: false, circle: false, circlemarker: false },
     edit: { featureGroup: drawnItems, remove: true }
   });
   map.addControl(drawControl);
 
   function removeFeature(layer) {
-    const layerId = layer._custom_id;
     drawnItems.removeLayer(layer);
-    featureRecords = featureRecords.filter(f => f.id !== layerId);
+    featureRecords = featureRecords.filter(f => f.id !== layer._custom_id);
     updateAttributeTable();
   }
 
-  map.on(L.Draw.Event.DELETED, function(e) {
-    e.layers.eachLayer(function(layer) {
-      removeFeature(layer);
-    });
-  });
+  map.on(L.Draw.Event.DELETED, (e) => e.layers.eachLayer(layer => removeFeature(layer)));
 
   map.on(L.Draw.Event.CREATED, function(e) {
     const layer = e.layer;
-    const fillColor = document.getElementById('fill-color').value;
-    const strokeColor = document.getElementById('stroke-color').value;
-
-    if (layer.setStyle) {
-      layer.setStyle({ color: strokeColor, fillColor: fillColor, fillOpacity: 0.5, weight: 2.5 });
-    }
-
+    if (layer.setStyle) layer.setStyle({ color: document.getElementById('stroke-color').value, fillColor: document.getElementById('fill-color').value, fillOpacity: 0.5, weight: 2.5 });
     featureCounter++;
     layer._custom_id = featureCounter;
     drawnItems.addLayer(layer);
-
-    layer.on('dblclick', function(ev) {
-      L.DomEvent.stopPropagation(ev);
-      removeFeature(layer);
-    });
+    layer.on('dblclick', (ev) => { L.DomEvent.stopPropagation(ev); removeFeature(layer); });
 
     const geojson = layer.toGeoJSON();
     const type = e.layerType;
-    let massaviAreaText = 'N/A';
-    let length = 'N/A';
-    let coords = '';
+    let areaText = 'N/A', lenText = 'N/A', coordsText = '';
 
     if (type === 'polygon') {
-      const areaM2 = turf.area(geojson);
-      const massavi = calculateMassaviArea(areaM2);
-      massaviAreaText = massavi.formattedText;
-      const perimeterMeters = (turf.length(geojson, {units: 'kilometers'}) * 1000).toFixed(2);
-      length = `${perimeterMeters} m`;
-      coords = 'Polygon Boundary';
+      areaText = calculateMassaviArea(turf.area(geojson)).formattedText;
+      lenText = `${(turf.length(geojson, {units: 'kilometers'}) * 1000).toFixed(2)} m`;
+      coordsText = 'Polygon';
     } else if (type === 'polyline') {
-      const lineLen = turf.length(geojson, {units: 'kilometers'});
-      length = (lineLen >= 1) ? `${lineLen.toFixed(2)} km` : `${(lineLen * 1000).toFixed(2)} m`;
-      coords = 'Line Path';
+      let l = turf.length(geojson, {units: 'kilometers'});
+      lenText = l >= 1 ? `${l.toFixed(2)} km` : `${(l * 1000).toFixed(2)} m`;
+      coordsText = 'Line';
     } else if (type === 'marker') {
-      const c = geojson.geometry.coordinates;
-      coords = `${c[1].toFixed(5)}, ${c[0].toFixed(5)}`;
+      coordsText = `${geojson.geometry.coordinates[1].toFixed(5)}, ${geojson.geometry.coordinates[0].toFixed(5)}`;
     }
 
-    featureRecords.push({
-      id: featureCounter,
-      type: type.toUpperCase(),
-      massaviArea: massaviAreaText,
-      length: length,
-      coords: coords
-    });
-
+    featureRecords.push({ id: featureCounter, type: type.toUpperCase(), massaviArea: areaText, length: lenText, coords: coordsText });
     updateAttributeTable();
   });
 
   function createBuffer() {
     const data = drawnItems.toGeoJSON();
-    const radiusMeters = parseFloat(document.getElementById('buffer-radius').value);
-    if (!data.features.length) return alert('Please draw a feature on map first!');
-    if (isNaN(radiusMeters) || radiusMeters <= 0) return alert('Enter valid buffer meters!');
-
+    const radius = parseFloat(document.getElementById('buffer-radius').value);
+    if (!data.features.length) return alert('Draw a feature first!');
     bufferLayerGroup.clearLayers();
-    const buffered = turf.buffer(data, radiusMeters / 1000, { units: 'kilometers' });
-    const bufferGeoJSON = L.geoJSON(buffered, {
-      style: { color: '#ef4444', fillColor: '#f87171', fillOpacity: 0.35, dashArray: '5, 5' }
-    });
-    bufferLayerGroup.addLayer(bufferGeoJSON);
+    bufferLayerGroup.addLayer(L.geoJSON(turf.buffer(data, radius / 1000, { units: 'kilometers' }), { style: { color: '#ef4444', fillColor: '#f87171', fillOpacity: 0.35, dashArray: '5, 5' } }));
   }
 
   function updateAttributeTable() {
     const tbody = document.querySelector('#attr-table tbody');
-    if (featureRecords.length === 0) {
+    if (!featureRecords.length) {
       tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#788294;">No digitization features added yet.</td></tr>`;
       return;
     }
-
-    tbody.innerHTML = featureRecords.map(f => `
-      <tr>
-        <td>#${f.id}</td>
-        <td><strong>${f.type}</strong></td>
-        <td style="color:#d4af37; font-weight:bold;">${f.massaviArea}</td>
-        <td>${f.length}</td>
-        <td>${f.coords}</td>
-      </tr>
-    `).join('');
+    tbody.innerHTML = featureRecords.map(f => `<tr><td>#${f.id}</td><td><strong>${f.type}</strong></td><td style="color:#d4af37; font-weight:bold;">${f.massaviArea}</td><td>${f.length}</td><td>${f.coords}</td></tr>`).join('');
   }
 
   function checkTopology() {
     const data = drawnItems.toGeoJSON();
-    if (!data.features.length) return alert('Please draw a feature first!');
-    let errors = 0;
-    data.features.forEach(f => {
-      if (f.geometry.type === 'Polygon') errors += turf.kinks(f).features.length;
-    });
-    alert(errors > 0 ? `Topology Error: ${errors} intersections found!` : 'Topology Valid! No errors.');
+    if (!data.features.length) return alert('Draw a feature first!');
+    let errs = 0;
+    data.features.forEach(f => { if (f.geometry.type === 'Polygon') errs += turf.kinks(f).features.length; });
+    alert(errs > 0 ? `Topology Error: ${errs} intersections found!` : 'Topology Valid! No errors.');
   }
 
   function exportGeoJSON() {
     const data = drawnItems.toGeoJSON();
-    if (!data.features.length) return alert('No features to export!');
+    if (!data.features.length) return alert('No features!');
     const a = document.createElement('a');
     a.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));
     a.download = 'waqar_gis_data.geojson';
@@ -799,18 +633,13 @@
   }
 
   function exportCSV() {
-    if (featureRecords.length === 0) return alert('No data to export!');
-    let csvContent = "data:text/csv;charset=utf-8,ID,Type,Area,Length,Coordinates\n";
-    featureRecords.forEach(f => {
-      csvContent += `${f.id},${f.type},"${f.massaviArea}",${f.length},"${f.coords}"\n`;
-    });
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "waqar_gis_attributes.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if (!featureRecords.length) return alert('No data!');
+    let csv = "ID,Type,Area,Length,Coordinates\n";
+    featureRecords.forEach(f => { csv += `${f.id},${f.type},"${f.massaviArea}",${f.length},"${f.coords}"\n`; });
+    const a = document.createElement('a');
+    a.href = encodeURI("data:text/csv;charset=utf-8," + csv);
+    a.download = 'waqar_gis_attributes.csv';
+    a.click();
   }
 
   function exportMapImage() {
@@ -824,13 +653,12 @@
 
   function exportMapPDF() {
     html2canvas(document.getElementById('map')).then(canvas => {
-      const imgData = canvas.toDataURL('image/png');
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF('landscape');
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(16);
-      pdf.text('Waqar GIS Portal - Spatial Analysis Report', 14, 15);
-      pdf.addImage(imgData, 'PNG', 14, 25, 260, 150);
+      pdf.text('Waqar GIS Portal - Report', 14, 15);
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 14, 25, 260, 150);
       pdf.save('Waqar_GIS_Report.pdf');
     });
   }
