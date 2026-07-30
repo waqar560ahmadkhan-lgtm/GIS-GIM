@@ -190,14 +190,14 @@
       z-index: 500; pointer-events: none; font-family: monospace; line-height: 1.5;
     }
 
-    /* Toolbar for annotation mode toggle (top-left of map) */
+    /* Toolbar for annotation mode toggle & clear notes (positioned cleanly below default zoom controls to prevent overlap) */
     #map-toolbar {
-      position: absolute; top: 20px; left: 20px; z-index: 500;
-      display: flex; gap: 8px;
+      position: absolute; top: 95px; left: 10px; z-index: 500;
+      display: flex; flex-direction: column; gap: 8px;
     }
     #map-toolbar button {
       background: rgba(21,24,30,0.9); color: #c5a059; border: 1px solid rgba(197,160,89,0.5);
-      border-radius: 6px; padding: 8px 12px; font-size: 11px; font-weight: 700; cursor: pointer;
+      border-radius: 6px; padding: 8px 12px; font-size: 11px; font-weight: 700; cursor: pointer; text-align: left;
     }
     #map-toolbar button.active { background: #c5a059; color: #15181e; }
   </style>
@@ -296,7 +296,7 @@
       <button id="note-mode-btn" onclick="toggleNoteMode()">📍 Add Note</button>
     </div>
 
-    <div id="results"><strong>Spatial Inspector:</strong><br>Double click any feature on the map to remove it.</div>
+    <div id="results"><strong>Spatial Inspector:</strong><br>Double-click any drawn feature or note pin on the map to remove it.</div>
     <div id="cursor-hud">Lat: 0.00000 | Lng: 0.00000<br>UTM: --</div>
 
     <!-- Attribute Table Panel -->
@@ -511,6 +511,13 @@
         iconSize: [16, 16]
       })
     }).addTo(notesLayerGroup);
+
+    // Enable double-click deletion for note markers
+    marker.on('dblclick', function(ev) {
+      L.DomEvent.stopPropagation(ev);
+      notesLayerGroup.removeLayer(marker);
+      document.getElementById('results').innerHTML = `<strong>Status:</strong><br>Note pin removed successfully.`;
+    });
 
     const popupContent = document.createElement('div');
     popupContent.innerHTML = `
