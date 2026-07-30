@@ -31,26 +31,41 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
     html, body { height: 100%; width: 100%; overflow: hidden; background: #15181e; display: flex; }
 
-    /* Left Luxury Sidebar */
+    /* Luxury Sidebar / Drawer */
     .sidebar {
       width: 310px; min-width: 310px;
       background: linear-gradient(180deg, #20242c 0%, #15181e 100%);
       color: #f1f5f9; padding: 20px 16px; display: flex; flex-direction: column;
       gap: 14px; overflow-y: auto; border-right: 2px solid #c5a059;
-      box-shadow: 6px 0 25px rgba(0, 0, 0, 0.6); z-index: 10; position: relative;
+      box-shadow: 6px 0 25px rgba(0, 0, 0, 0.6); z-index: 1001; position: relative;
+      transition: transform 0.3s ease;
+    }
+    .sidebar.closed {
+      transform: translateX(-310px);
+      position: absolute;
+      height: 100%;
     }
 
     .portal-brand {
-      display: flex; align-items: center; gap: 12px; padding-bottom: 12px;
+      display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px;
       border-bottom: 1px solid rgba(197, 160, 89, 0.3);
     }
+    .brand-left { display: flex; align-items: center; gap: 10px; }
     .portal-icon-arch {
-      width: 40px; height: 44px;
+      width: 36px; height: 40px;
       background: linear-gradient(135deg, #d4af37 0%, #8a6d2b 100%);
-      border-radius: 16px 16px 4px 4px; display: flex; align-items: center;
-      justify-content: center; font-size: 18px; color: #15181e; border: 1px solid #f3e5ab;
+      border-radius: 14px 14px 4px 4px; display: flex; align-items: center;
+      justify-content: center; font-size: 16px; color: #15181e; border: 1px solid #f3e5ab;
     }
-    .portal-title { font-family: 'Cinzel', serif; font-size: 15px; font-weight: 700; color: #f8fafc; letter-spacing: 1px; }
+    .portal-title { font-family: 'Cinzel', serif; font-size: 14px; font-weight: 700; color: #f8fafc; letter-spacing: 0.5px; }
+
+    /* Menu Close Button inside Brand Header */
+    .menu-toggle-btn {
+      background: #252a34; color: #c5a059; border: 1px solid rgba(197, 160, 89, 0.4);
+      border-radius: 6px; padding: 6px 10px; font-size: 13px; font-weight: 700; cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .menu-toggle-btn:hover { background: #c5a059; color: #15181e; }
 
     .sidebar h3 {
       font-size: 10px; color: #c5a059; letter-spacing: 1.2px; margin-bottom: 6px;
@@ -81,6 +96,15 @@
     .btn-dark:hover { background: #2f3542; border-color: #c5a059; }
     .btn-emerald { background: linear-gradient(135deg, #059669 0%, #046c51 100%); color: #fff; border: 1px solid #34d399; }
     .btn-active { background: #ef4444 !important; color: #fff !important; }
+
+    /* Floating Open Menu Button */
+    #floating-menu-btn {
+      position: absolute; top: 15px; left: 15px; z-index: 1000;
+      background: #15181e; color: #c5a059; border: 2px solid #c5a059;
+      border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 700;
+      cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.6); display: none;
+    }
+    #floating-menu-btn:hover { background: #c5a059; color: #15181e; }
 
     /* Bookmark list */
     .bookmark-item {
@@ -176,7 +200,7 @@
 
     /* TOP RIGHT CONTROLS */
     #top-right-controls {
-      position: absolute; top: 65px; right: 15px; z-index: 1000;
+      position: absolute; top: 15px; right: 15px; z-index: 1000;
       display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
     }
     .note-action-row { display: flex; gap: 6px; }
@@ -198,10 +222,16 @@
 </head>
 <body>
 
-  <div class="sidebar">
+  <!-- Floating Open Menu Button -->
+  <button id="floating-menu-btn" onclick="toggleSidebar()">☰ OPEN MENU</button>
+
+  <div class="sidebar" id="app-sidebar">
     <div class="portal-brand">
-      <div class="portal-icon-arch">🏛️</div>
-      <div class="portal-title">Waqar GIS Portal</div>
+      <div class="brand-left">
+        <div class="portal-icon-arch">🏛️</div>
+        <div class="portal-title">Waqar GIS Portal</div>
+      </div>
+      <button class="menu-toggle-btn" onclick="toggleSidebar()" title="Close Menu">✕</button>
     </div>
 
     <!-- Location Search -->
@@ -372,6 +402,19 @@
 
   let currentBasemap = basemaps.googleSat;
   currentBasemap.addTo(map);
+
+  // Sidebar Toggle Function
+  function toggleSidebar() {
+    const sidebar = document.getElementById('app-sidebar');
+    const floatBtn = document.getElementById('floating-menu-btn');
+    sidebar.classList.toggle('closed');
+    if (sidebar.classList.contains('closed')) {
+      floatBtn.style.display = 'block';
+    } else {
+      floatBtn.style.display = 'none';
+    }
+    setTimeout(() => { map.invalidateSize(); }, 300);
+  }
 
   // Split-Screen variables
   let splitControl = null;
