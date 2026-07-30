@@ -180,14 +180,14 @@
       z-index: 500; pointer-events: none; font-family: monospace; line-height: 1.5;
     }
 
-    /* Top Right Add Note & Profile Bar Container */
+    /* Top Right Controls Container: Stacked vertically to prevent overlapping */
     #top-right-controls {
       position: absolute; top: 15px; right: 20px; z-index: 1000;
-      display: flex; align-items: center; gap: 12px;
+      display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
     }
     #note-mode-btn {
       background: linear-gradient(135deg, #c5a059 0%, #967635 100%); color: #0f1217; border: 1px solid #f3e5ab;
-      border-radius: 6px; padding: 8px 14px; font-size: 11px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      border-radius: 6px; padding: 7px 14px; font-size: 11px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
       transition: all 0.2s ease;
     }
     #note-mode-btn:hover { background: linear-gradient(135deg, #d4af37 0%, #a8843c 100%); }
@@ -285,8 +285,8 @@
     <div id="map"></div>
 
     <div id="top-right-controls">
+      <!-- auth-guard.js injects user info & logout button dynamically right here as the top row -->
       <button id="note-mode-btn" onclick="toggleNoteMode()">📍 Add Note</button>
-      <!-- auth-guard.js injects user info & logout button dynamically right here -->
     </div>
 
     <div id="cursor-hud">Lat: 0.00000 | Lng: 0.00000<br>UTM: --</div>
