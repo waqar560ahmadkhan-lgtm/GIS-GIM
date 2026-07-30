@@ -237,15 +237,13 @@
       <button id="slider-toggle-btn" class="btn btn-emerald" onclick="toggleSplitScreen()">ENABLE SLIDER COMPARISON</button>
     </div>
 
-    <!-- NEW ADDITION: Real-time Weather & Climate Overlays -->
+    <!-- Live Weather Overlays (Fixed & Reliable) -->
     <div class="panel-box" style="border-color: #38bdf8;">
       <h3 style="color:#38bdf8;">Live Weather Overlays</h3>
       <select id="weather-layer-select" style="margin-bottom:8px;">
-        <option value="none" selected>-- Select Weather Layer --</option>
-        <option value="temp">Temperature Layer</option>
-        <option value="precip">Precipitation / Rain Radar</option>
-        <option value="clouds">Cloud Cover Layer</option>
-        <option value="wind">Wind Speed Layer</option>
+        <option value="radar" selected>Rain Radar & Precipitation</option>
+        <option value="wind">Wind Speed & Direction</option>
+        <option value="clouds">Global Cloud Cover</option>
       </select>
       <button id="weather-toggle-btn" class="btn btn-dark" onclick="toggleWeatherLayer()">ENABLE WEATHER OVERLAY</button>
     </div>
@@ -427,7 +425,7 @@
     }
   }
 
-  // Weather / Climate Overlay variables
+  // Reliable Weather / Climate Overlay variables (Using RainViewer & OpenWeather public tile feeds)
   let weatherLayerObj = null;
   let isWeatherActive = false;
 
@@ -435,25 +433,20 @@
     const btn = document.getElementById('weather-toggle-btn');
     const weatherKey = document.getElementById('weather-layer-select').value;
 
-    if (weatherKey === 'none') {
-      return alert('Please select a valid weather layer first!');
-    }
-
     if (!isWeatherActive) {
       let weatherUrl = '';
-      // Using standard open weather tile layers (Demo OpenWeather WMS templates)
-      const owmKey = 'b1b15e88fa797225412429c1c50c122a'; // standard public demo key
-      if (weatherKey === 'temp') {
-        weatherUrl = `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${owmKey}`;
-      } else if (weatherKey === 'precip') {
-        weatherUrl = `https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${owmKey}`;
-      } else if (weatherKey === 'clouds') {
-        weatherUrl = `https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=${owmKey}`;
+      if (weatherKey === 'radar') {
+        // RainViewer Public Live Radar API
+        weatherUrl = 'https://tilecache.rainviewer.com/v2/radar/nowcast_150/{z}/{x}/{y}/2/1_1.png';
       } else if (weatherKey === 'wind') {
-        weatherUrl = `https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=${owmKey}`;
+        // OpenWeather standard wind map tile
+        weatherUrl = 'https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=9d71343714241680d2916b71e8609a32';
+      } else if (weatherKey === 'clouds') {
+        // OpenWeather standard cloud cover tile
+        weatherUrl = 'https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=9d71343714241680d2916b71e8609a32';
       }
 
-      weatherLayerObj = L.tileLayer(weatherUrl, { maxZoom: 19, opacity: 0.7, attribution: '© OpenWeatherMap' });
+      weatherLayerObj = L.tileLayer(weatherUrl, { maxZoom: 19, opacity: 0.65, attribution: '© Live Weather & Radar' });
       weatherLayerObj.addTo(map);
 
       isWeatherActive = true;
@@ -499,7 +492,7 @@
   });
 
   function switchBasemap(key) {
-    if (isSplitActive) return; // Ignore if split-screen is running
+    if (isSplitActive) return; 
     if (currentBasemap) map.removeLayer(currentBasemap);
     if (basemaps[key]) {
       currentBasemap = basemaps[key];
