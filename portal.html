@@ -180,13 +180,13 @@
       z-index: 500; pointer-events: none; font-family: monospace; line-height: 1.5;
     }
 
-    /* Top Right Controls Container: Stacked vertically with action row */
+    /* Top Right Controls Container: Fixed positioning to stay clean inside the yellow circle area */
     #top-right-controls {
       position: absolute; top: 15px; right: 20px; z-index: 1000;
       display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
     }
     .note-action-row {
-      display: flex; gap: 6px;
+      display: flex; gap: 6px; margin-top: 4px;
     }
     #note-mode-btn {
       background: linear-gradient(135deg, #c5a059 0%, #967635 100%); color: #0f1217; border: 1px solid #f3e5ab;
@@ -295,7 +295,7 @@
     <div id="map"></div>
 
     <div id="top-right-controls">
-      <!-- auth-guard.js injects user info & logout button dynamically right here as the top row -->
+      <!-- auth-guard.js injects user info & logout button dynamically right here -->
       <div class="note-action-row">
         <button id="note-mode-btn" onclick="toggleNoteMode()">📍 Add Note</button>
         <button id="clear-notes-btn" onclick="clearAllNotes()" title="Delete All Notes">🗑️ Clear Notes</button>
