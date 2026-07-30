@@ -180,15 +180,10 @@
       z-index: 500; pointer-events: none; font-family: monospace; line-height: 1.5;
     }
 
-    /* TOP RIGHT CONTROLS: Clear separation so auth-guard and notes buttons don't overlap */
+    /* TOP RIGHT CONTROLS: Neeche shift kar diya hai taake nazar aaye */
     #top-right-controls {
-      position: absolute; top: 12px; right: 15px; z-index: 1000;
+      position: absolute; top: 65px; right: 15px; z-index: 1000;
       display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
-    }
-
-    /* Style for auth-guard injected elements if they appear here */
-    #top-right-controls > div:first-child {
-      margin-bottom: 2px;
     }
 
     .note-action-row {
@@ -300,9 +295,8 @@
   <div id="main-container">
     <div id="map"></div>
 
-    <!-- Top Right Controls Wrapper -->
+    <!-- Top Right Controls Wrapper (Neeche shift kiya hua) -->
     <div id="top-right-controls">
-      <!-- auth-guard.js elements will sit cleanly at the top -->
       <div class="note-action-row">
         <button id="note-mode-btn" onclick="toggleNoteMode()">📍 Add Note</button>
         <button id="clear-notes-btn" onclick="clearAllNotes()" title="Delete All Notes">🗑️ Clear Notes</button>
