@@ -172,17 +172,17 @@
     td { padding: 6px 10px; border: 1px solid rgba(255, 255, 255, 0.05); }
     tr:nth-child(even) { background: rgba(255, 255, 255, 0.02); }
 
-    /* Result Box Overlay */
+    /* Result Box Overlay - moved down to clear top-right user profile bar completely */
     #results {
-      position: absolute; top: 20px; right: 20px;
-      background: rgba(21, 24, 30, 0.92); color: #f8fafc; padding: 12px 16px;
-      border-radius: 8px; font-size: 12px; border: 1px solid rgba(197, 160, 89, 0.5);
-      z-index: 500; max-width: 300px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      position: absolute; top: 75px; right: 20px;
+      background: rgba(21, 24, 30, 0.92); color: #f8fafc; padding: 10px 14px;
+      border-radius: 8px; font-size: 11px; border: 1px solid rgba(197, 160, 89, 0.5);
+      z-index: 500; max-width: 280px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);
       backdrop-filter: blur(8px);
     }
     #results strong { color: #d4af37; }
 
-    /* Cursor Coordinates HUD Overlay (now shows Lat/Lng AND UTM) */
+    /* Cursor Coordinates HUD Overlay */
     #cursor-hud {
       position: absolute; bottom: 190px; right: 20px;
       background: rgba(21, 24, 30, 0.85); color: #c5a059; padding: 6px 12px;
@@ -190,9 +190,9 @@
       z-index: 500; pointer-events: none; font-family: monospace; line-height: 1.5;
     }
 
-    /* Toolbar for annotation mode toggle & clear notes (positioned cleanly below default zoom controls to prevent overlap) */
+    /* Toolbar for annotation mode toggle & clear notes (positioned below leaflet zoom controls safely) */
     #map-toolbar {
-      position: absolute; top: 95px; left: 10px; z-index: 500;
+      position: absolute; top: 135px; left: 10px; z-index: 500;
       display: flex; flex-direction: column; gap: 8px;
     }
     #map-toolbar button {
@@ -296,7 +296,7 @@
       <button id="note-mode-btn" onclick="toggleNoteMode()">📍 Add Note</button>
     </div>
 
-    <div id="results"><strong>Spatial Inspector:</strong><br>Double-click any drawn feature or note pin on the map to remove it.</div>
+    <div id="results"><strong>Spatial Inspector:</strong><br>Double-click drawn feature or note pin to delete.</div>
     <div id="cursor-hud">Lat: 0.00000 | Lng: 0.00000<br>UTM: --</div>
 
     <!-- Attribute Table Panel -->
@@ -369,7 +369,7 @@
   let noteMode = false;
   let noteCounter = 0;
 
-  /* UTM ZONE CALCULATION (proj4-based, WGS84 -> UTM auto zone for Pakistan/global use) */
+  /* UTM ZONE CALCULATION */
   function toUTM(lat, lng) {
     const zone = Math.floor((lng + 180) / 6) + 1;
     const hemisphere = lat >= 0 ? 'north' : 'south';
@@ -382,7 +382,6 @@
     }
   }
 
-  // Live Cursor Coordinates HUD (Lat/Lng + UTM)
   map.on('mousemove', function(e) {
     const utmText = toUTM(e.latlng.lat, e.latlng.lng);
     document.getElementById('cursor-hud').innerHTML =
@@ -408,7 +407,6 @@
     }
   }
 
-  /* AUTOMATIC MASSAVI AREA CALCULATION LOGIC */
   function calculateMassaviArea(areaSqMeters) {
     const SQFT_PER_SQM = 10.7639;
     const SQFT_PER_KANAL = 5445.0;
@@ -453,7 +451,6 @@
     document.getElementById('results').innerHTML = `<strong>Located:</strong><br>Lat: ${lat}, Lng: ${lng}`;
   }
 
-  /* BOOKMARKS / SAVED LOCATIONS (persisted in localStorage) */
   function loadBookmarks() {
     const saved = JSON.parse(localStorage.getItem('waqar_gis_bookmarks') || '[]');
     const list = document.getElementById('bookmark-list');
@@ -493,7 +490,7 @@
 
   loadBookmarks();
 
-  /* NOTES / ANNOTATION TOOL */
+  /* NOTES / ANNOTATION TOOL (With Double-Click Removal) */
   function toggleNoteMode() {
     noteMode = !noteMode;
     const btn = document.getElementById('note-mode-btn');
@@ -512,7 +509,7 @@
       })
     }).addTo(notesLayerGroup);
 
-    // Enable double-click deletion for note markers
+    // Double-click to delete note pin
     marker.on('dblclick', function(ev) {
       L.DomEvent.stopPropagation(ev);
       notesLayerGroup.removeLayer(marker);
@@ -599,7 +596,6 @@
     });
   });
 
-  /* Drawing Creation Function */
   map.on(L.Draw.Event.CREATED, function(e) {
     const layer = e.layer;
     const fillColor = document.getElementById('fill-color').value;
@@ -637,7 +633,7 @@
         Type: Polygon<br>
         Area: <b>${massaviAreaText}</b><br>
         Perimeter: ${length}<br>
-        <small style="color:#d4af37;">(Tip: Double-click polygon to delete)</small>
+        <small style="color:#d4af37;">(Double-click polygon to delete)</small>
       `;
     } else if (type === 'polyline') {
       const lineLen = turf.length(geojson, {units: 'kilometers'});
@@ -648,14 +644,14 @@
         <strong>Feature Calculated (#${featureCounter}):</strong><br>
         Type: Line<br>
         Length: <b>${length}</b><br>
-        <small style="color:#d4af37;">(Tip: Double-click line to delete)</small>
+        <small style="color:#d4af37;">(Double-click line to delete)</small>
       `;
     } else if (type === 'marker') {
       const c = geojson.geometry.coordinates;
       coords = `${c[1].toFixed(5)}, ${c[0].toFixed(5)}`;
 
       document.getElementById('results').innerHTML = `
-        <strong>Feature Calculated (#${featureCounter}):</strong><br>
+        <strong>Feature Calculated (#${featureCounter}):**<br>
         Type: Point<br>Coords: <b>${coords}</b>
       `;
     }
@@ -671,7 +667,6 @@
     updateAttributeTable();
   });
 
-  /* SPATIAL BUFFER TOOL WITH (M) LABEL & METER UNIT */
   function createBuffer() {
     const data = drawnItems.toGeoJSON();
     const radiusMeters = parseFloat(document.getElementById('buffer-radius').value);
