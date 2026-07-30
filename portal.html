@@ -97,12 +97,14 @@
     .btn-emerald { background: linear-gradient(135deg, #059669 0%, #046c51 100%); color: #fff; border: 1px solid #34d399; }
     .btn-active { background: #ef4444 !important; color: #fff !important; }
 
-    /* Floating Open Menu Button */
+    /* Floating Symbol-Only Menu Button with Proper Spacing from Zoom Control */
     #floating-menu-btn {
-      position: absolute; top: 15px; left: 15px; z-index: 1000;
+      position: absolute; top: 15px; left: 60px; z-index: 1000;
       background: #15181e; color: #c5a059; border: 2px solid #c5a059;
-      border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 700;
+      border-radius: 8px; width: 38px; height: 38px; font-size: 18px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
       cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.6); display: none;
+      transition: all 0.2s ease;
     }
     #floating-menu-btn:hover { background: #c5a059; color: #15181e; }
 
@@ -222,8 +224,8 @@
 </head>
 <body>
 
-  <!-- Floating Open Menu Button -->
-  <button id="floating-menu-btn" onclick="toggleSidebar()">☰ OPEN MENU</button>
+  <!-- Floating Symbol-Only Menu Button with Spacing -->
+  <button id="floating-menu-btn" onclick="toggleSidebar()" title="Open Menu">☰</button>
 
   <div class="sidebar" id="app-sidebar">
     <div class="portal-brand">
@@ -409,7 +411,7 @@
     const floatBtn = document.getElementById('floating-menu-btn');
     sidebar.classList.toggle('closed');
     if (sidebar.classList.contains('closed')) {
-      floatBtn.style.display = 'block';
+      floatBtn.style.display = 'flex';
     } else {
       floatBtn.style.display = 'none';
     }
