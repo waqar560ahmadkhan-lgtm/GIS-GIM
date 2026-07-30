@@ -237,17 +237,6 @@
       <button id="slider-toggle-btn" class="btn btn-emerald" onclick="toggleSplitScreen()">ENABLE SLIDER COMPARISON</button>
     </div>
 
-    <!-- Live Weather Overlays (Fixed & Reliable) -->
-    <div class="panel-box" style="border-color: #38bdf8;">
-      <h3 style="color:#38bdf8;">Live Weather Overlays</h3>
-      <select id="weather-layer-select" style="margin-bottom:8px;">
-        <option value="radar" selected>Rain Radar & Precipitation</option>
-        <option value="wind">Wind Speed & Direction</option>
-        <option value="clouds">Global Cloud Cover</option>
-      </select>
-      <button id="weather-toggle-btn" class="btn btn-dark" onclick="toggleWeatherLayer()">ENABLE WEATHER OVERLAY</button>
-    </div>
-
     <!-- Bookmarks / Saved Locations -->
     <div class="panel-box">
       <h3>Bookmarks</h3>
@@ -421,44 +410,6 @@
       isSplitActive = false;
       switchBasemap(document.getElementById('basemap-select').value);
       btn.innerText = "ENABLE SLIDER COMPARISON";
-      btn.classList.remove('btn-active');
-    }
-  }
-
-  // Reliable Weather / Climate Overlay variables (Using RainViewer & OpenWeather public tile feeds)
-  let weatherLayerObj = null;
-  let isWeatherActive = false;
-
-  function toggleWeatherLayer() {
-    const btn = document.getElementById('weather-toggle-btn');
-    const weatherKey = document.getElementById('weather-layer-select').value;
-
-    if (!isWeatherActive) {
-      let weatherUrl = '';
-      if (weatherKey === 'radar') {
-        // RainViewer Public Live Radar API
-        weatherUrl = 'https://tilecache.rainviewer.com/v2/radar/nowcast_150/{z}/{x}/{y}/2/1_1.png';
-      } else if (weatherKey === 'wind') {
-        // OpenWeather standard wind map tile
-        weatherUrl = 'https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=9d71343714241680d2916b71e8609a32';
-      } else if (weatherKey === 'clouds') {
-        // OpenWeather standard cloud cover tile
-        weatherUrl = 'https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=9d71343714241680d2916b71e8609a32';
-      }
-
-      weatherLayerObj = L.tileLayer(weatherUrl, { maxZoom: 19, opacity: 0.65, attribution: '© Live Weather & Radar' });
-      weatherLayerObj.addTo(map);
-
-      isWeatherActive = true;
-      btn.innerText = "DISABLE WEATHER OVERLAY";
-      btn.classList.add('btn-active');
-    } else {
-      if (weatherLayerObj) {
-        map.removeLayer(weatherLayerObj);
-        weatherLayerObj = null;
-      }
-      isWeatherActive = false;
-      btn.innerText = "ENABLE WEATHER OVERLAY";
       btn.classList.remove('btn-active');
     }
   }
