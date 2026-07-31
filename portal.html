@@ -34,6 +34,7 @@
     }
     .header-left { display: flex; align-items: center; gap: 12px; }
     .header-center { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
+    .header-right { display: flex; align-items: center; gap: 12px; }
     
     .header-btn {
       background: #252a34; color: #c5a059; border: 1px solid rgba(197, 160, 89, 0.4);
@@ -190,10 +191,14 @@
       <button class="header-btn" onclick="undoLastAction()" title="Undo Last Feature">↩️ Undo</button>
       <button class="header-btn" onclick="redoLastAction()" title="Redo Feature">🔁 Redo</button>
       <button class="header-btn" onclick="exportMapImage()" title="Print/Export Map">🖨️ Print Map</button>
+      <!-- Shifted Profile & Logout Buttons Here -->
       <div class="user-badge" style="margin-left: 8px;">
         <span>👤</span> Waqar (Admin)
       </div>
       <button class="header-btn logout-btn" onclick="handleLogout()" title="Logout Session">Logout</button>
+    </div>
+    <div class="header-right">
+      <!-- Right side left clean -->
     </div>
   </header>
   <button id="floating-menu-btn" onclick="toggleSidebar()" title="Open Menu">☰</button>
