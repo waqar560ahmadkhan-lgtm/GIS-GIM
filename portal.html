@@ -1,933 +1,746 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Waqar GIS Portal — Enterprise Professional GIS System</title>
-  
-  <!-- Leaflet CSS -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Waqar GIS Portal - Executive Spatial Suite</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Leaflet & Draw CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <!-- Leaflet Draw CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
-  <!-- Leaflet MarkerCluster CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <!-- Google Fonts: Cinzel & Inter -->
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-side-by-side@2.4.0/leaflet-side-by-side.min.css" />
+
+  <!-- JS Libraries -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet-side-by-side@2.4.0/leaflet-side-by-side.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-omnivore/0.3.4/leaflet-omnivore.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/proj4@2.9.0/dist/proj4.js"></script>
+  <script src="auth-guard.js"></script>
 
   <style>
-    :root {
-      --bg-main: #0c1017;
-      --bg-panel: rgba(15, 22, 36, 0.94);
-      --bg-glass: rgba(20, 30, 48, 0.8);
-      --border-color: rgba(212, 175, 55, 0.25);
-      --accent-gold: #d4af37;
-      --accent-gold-hover: #f3e5ab;
-      --text-main: #f1f5f9;
-      --text-muted: #94a3b8;
-      --sidebar-width: 380px;
-      --header-height: 60px;
-      --transition-speed: 0.25s;
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    html, body { height: 100%; width: 100%; overflow: hidden; background: #15181e; display: flex; }
+
+    .sidebar {
+      width: 310px; min-width: 310px;
+      background: linear-gradient(180deg, #20242c 0%, #15181e 100%);
+      color: #f1f5f9; padding: 20px 16px; display: flex; flex-direction: column;
+      gap: 14px; overflow-y: auto; border-right: 2px solid #c5a059;
+      box-shadow: 6px 0 25px rgba(0, 0, 0, 0.6); z-index: 1001; position: relative;
+      transition: transform 0.3s ease;
+    }
+    .sidebar.closed { transform: translateX(-310px); position: absolute; height: 100%; }
+
+    .portal-brand {
+      display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px;
+      border-bottom: 1px solid rgba(197, 160, 89, 0.3);
+    }
+    .brand-left { display: flex; align-items: center; gap: 10px; }
+    .portal-icon-arch {
+      width: 36px; height: 40px; background: linear-gradient(135deg, #d4af37 0%, #8a6d2b 100%);
+      border-radius: 14px 14px 4px 4px; display: flex; align-items: center;
+      justify-content: center; font-size: 16px; color: #15181e; border: 1px solid #f3e5ab;
+    }
+    .portal-title { font-family: 'Cinzel', serif; font-size: 14px; font-weight: 700; color: #f8fafc; letter-spacing: 0.5px; }
+
+    .menu-toggle-btn {
+      background: #252a34; color: #c5a059; border: 1px solid rgba(197, 160, 89, 0.4);
+      border-radius: 6px; padding: 6px 10px; font-size: 13px; font-weight: 700; cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .menu-toggle-btn:hover { background: #c5a059; color: #15181e; }
+
+    .sidebar h3 {
+      font-size: 10px; color: #c5a059; letter-spacing: 1.2px; margin-bottom: 6px;
+      font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 5px;
+    }
+    .sidebar h3::before { content: "◈"; font-size: 9px; color: #c5a059; }
+
+    .panel-box {
+      background: rgba(38, 43, 53, 0.7); padding: 10px; border-radius: 10px;
+      border: 1px solid rgba(197, 160, 89, 0.25); backdrop-filter: blur(6px);
     }
 
-    [data-theme="light"] {
-      --bg-main: #f8fafc;
-      --bg-panel: rgba(255, 255, 255, 0.94);
-      --bg-glass: rgba(241, 245, 249, 0.9);
-      --border-color: rgba(180, 140, 20, 0.35);
-      --accent-gold: #b8860b;
-      --accent-gold-hover: #996515;
-      --text-main: #0f172a;
-      --text-muted: #64748b;
+    .panel-box input, .panel-box select {
+      width: 100%; padding: 8px 10px; border-radius: 6px;
+      border: 1px solid rgba(197, 160, 89, 0.35); background: #15181e;
+      color: #f8fafc; font-size: 12px; outline: none; margin-bottom: 6px;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-    body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg-main); color: var(--text-main); }
+    .coord-inputs, .style-inputs { display: flex; gap: 6px; }
 
-    /* App Shell Container */
-    #app-container { display: flex; flex-direction: column; width: 100vw; height: 100vh; position: relative; }
-    
-    /* Header Navbar */
-    header {
-      height: var(--header-height);
-      background: var(--bg-panel);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-      z-index: 1000;
+    .btn {
+      width: 100%; padding: 8px; border: none; border-radius: 6px;
+      cursor: pointer; font-size: 11px; font-weight: 700; transition: all 0.2s ease;
     }
-    .brand-area { display: flex; align-items: center; gap: 12px; }
-    .brand-logo { font-size: 22px; color: var(--accent-gold); }
-    .brand-title { font-family: 'Cinzel', serif; font-size: 18px; font-weight: 700; letter-spacing: 0.5px; }
-    .brand-title span { color: var(--accent-gold); }
+    .btn-gold { background: linear-gradient(135deg, #c5a059 0%, #967635 100%); color: #0f1217; border: 1px solid #f3e5ab; }
+    .btn-gold:hover { background: linear-gradient(135deg, #d4af37 0%, #a8843c 100%); }
+    .btn-dark { background: #252a34; color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.1); }
+    .btn-dark:hover { background: #2f3542; border-color: #c5a059; }
+    .btn-emerald { background: linear-gradient(135deg, #059669 0%, #046c51 100%); color: #fff; border: 1px solid #34d399; }
+    .btn-active { background: #ef4444 !important; color: #fff !important; }
 
-    .header-tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .tool-btn {
-      background: var(--bg-glass);
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      padding: 7px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: all var(--transition-speed);
+    #floating-menu-btn {
+      position: absolute; top: 15px; left: 60px; z-index: 1000;
+      background: #15181e; color: #c5a059; border: 2px solid #c5a059;
+      border-radius: 8px; width: 38px; height: 38px; font-size: 18px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.6); display: none;
+      transition: all 0.2s ease;
     }
-    .tool-btn:hover { background: var(--accent-gold); color: #0c1017; border-color: var(--accent-gold); }
+    #floating-menu-btn:hover { background: #c5a059; color: #15181e; }
 
-    /* Workspace Layout */
-    #workspace { display: flex; flex: 1; position: relative; height: calc(100vh - var(--header-height)); }
-    
-    /* Sidebar */
-    aside {
-      width: var(--sidebar-width);
-      background: var(--bg-panel);
-      backdrop-filter: blur(12px);
-      border-right: 1px solid var(--border-color);
-      display: flex;
-      flex-direction: column;
-      z-index: 999;
-      transition: transform var(--transition-speed);
+    .bookmark-item {
+      display: flex; justify-content: space-between; align-items: center;
+      background: #15181e; border: 1px solid rgba(197,160,89,0.25); border-radius: 6px;
+      padding: 6px 8px; margin-bottom: 6px; font-size: 11px; color: #e2e8f0;
     }
-    .sidebar-tabs {
-      display: flex;
-      border-bottom: 1px solid var(--border-color);
-      background: rgba(0,0,0,0.15);
-    }
-    .stab {
-      flex: 1;
-      padding: 10px 0;
-      text-align: center;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-muted);
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      transition: all var(--transition-speed);
-    }
-    .stab.active { color: var(--accent-gold); border-bottom-color: var(--accent-gold); background: var(--bg-glass); }
-    .stab:hover { color: var(--text-main); }
+    .bookmark-item span { cursor: pointer; flex: 1; }
+    .bookmark-item span:hover { color: #d4af37; }
+    .bookmark-item button { background: none; border: none; color: #f87171; cursor: pointer; font-size: 12px; padding: 0 4px; }
 
-    .sidebar-content { flex: 1; overflow-y: auto; padding: 16px; }
-    .panel-section { display: none; }
-    .panel-section.active { display: block; }
+    #main-container { flex: 1; display: flex; flex-direction: column; position: relative; height: 100vh; }
+    #map { flex: 1; width: 100%; height: 100%; background: #1e232a; z-index: 1; }
 
-    /* Map Display */
-    #map { flex: 1; height: 100%; z-index: 1; background: #0c1017; }
+    .leaflet-draw-toolbar { background: #ffffff !important; border: 2px solid #d4af37 !important; border-radius: 8px !important; box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important; overflow: hidden; }
+    .leaflet-draw-toolbar a { background-color: #ffffff !important; border-bottom: 1px solid #f0e6d2 !important; color: #15181e !important; }
+    .leaflet-draw-toolbar a:hover { background-color: #d4af37 !important; color: #ffffff !important; }
+    .leaflet-draw-actions { left: 32px !important; }
+    .leaflet-draw-actions a { background-color: #ffffff !important; color: #8a6d2b !important; border-left: 1px solid #d4af37 !important; font-weight: bold; }
+    .leaflet-draw-actions a:hover { background-color: #d4af37 !important; color: #ffffff !important; }
 
-    /* Floating Widgets */
-    .floating-widget {
-      position: absolute;
-      background: var(--bg-panel);
-      backdrop-filter: blur(10px);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 10px;
-      z-index: 900;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    .leaflet-div-icon {
+      background: #d4af37 !important; border: 2px solid #ffffff !important; border-radius: 50% !important; box-shadow: 0 0 8px rgba(212, 175, 55, 1) !important; width: 12px !important; height: 12px !important; margin-left: -6px !important; margin-top: -6px !important;
     }
-    #legend-box { bottom: 35px; left: 20px; max-width: 220px; font-size: 11px; }
-    #mini-map-box { bottom: 35px; right: 20px; width: 150px; height: 150px; border-radius: 50% !important; overflow: hidden; padding: 0; border: 2px solid var(--accent-gold); }
-    #coord-tracker { bottom: 10px; left: 50%; transform: translateX(-50%); padding: 5px 12px; font-size: 11px; background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 4px; z-index: 950; font-family: monospace; }
+    .leaflet-editing-icon { background: #ffffff !important; border: 2px solid #d4af37 !important; border-radius: 50% !important; }
 
-    /* Form Controls */
-    .form-group { margin-bottom: 14px; }
-    .form-label { display: block; font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 5px; }
-    .form-input, .form-select {
-      width: 100%;
-      background: var(--bg-glass);
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      padding: 8px 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      outline: none;
-    }
-    .form-input:focus, .form-select:focus { border-color: var(--accent-gold); }
+    .note-popup-input { width: 200px; padding: 6px; border-radius: 4px; border: 1px solid #c5a059; font-size: 12px; margin-bottom: 6px; }
+    .note-popup-save { background: #c5a059; color: #15181e; border: none; padding: 5px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer; }
 
-    .btn-primary {
-      width: 100%;
-      background: var(--accent-gold);
-      color: #0c1017;
-      border: none;
-      padding: 10px;
-      border-radius: 6px;
-      font-weight: 600;
-      font-size: 12px;
-      cursor: pointer;
-      transition: opacity var(--transition-speed);
+    #attribute-panel {
+      height: 180px; background: rgba(21, 24, 30, 0.95); border-top: 2px solid #c5a059; padding: 10px 16px; overflow-y: auto; backdrop-filter: blur(10px); z-index: 10;
     }
-    .btn-primary:hover { opacity: 0.9; }
+    #attribute-panel h4 { color: #d4af37; font-size: 12px; margin-bottom: 8px; font-family: 'Cinzel', serif; }
+    .table-wrapper { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; color: #e2e8f0; font-size: 11px; text-align: left; }
+    th { background: #2a303c; color: #c5a059; padding: 6px 10px; border: 1px solid rgba(197, 160, 89, 0.2); }
+    td { padding: 6px 10px; border: 1px solid rgba(255, 255, 255, 0.05); }
+    tr:nth-child(even) { background: rgba(255, 255, 255, 0.02); }
 
-    /* Toast System */
-    #toast-container {
-      position: fixed;
-      top: 75px;
-      right: 20px;
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+    #cursor-hud {
+      position: absolute; bottom: 190px; right: 20px; background: rgba(21, 24, 30, 0.85); color: #c5a059; padding: 6px 12px; border-radius: 6px; font-size: 11px; border: 1px solid rgba(197, 160, 89, 0.3); z-index: 500; pointer-events: none; font-family: monospace; line-height: 1.5;
     }
-    .toast {
-      background: var(--bg-panel);
-      border-left: 4px solid var(--accent-gold);
-      color: var(--text-main);
-      padding: 12px 16px;
-      border-radius: 4px;
-      font-size: 12px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-      backdrop-filter: blur(10px);
-      animation: slideIn 0.3s ease;
-    }
-    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-    /* Loader Overlay */
-    #loader-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(12, 16, 23, 0.88);
-      backdrop-filter: blur(6px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 10000;
-      flex-direction: column;
-      gap: 15px;
+    #top-right-controls {
+      position: absolute; top: 75px; right: 15px; z-index: 1000; display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
     }
-    .spinner {
-      width: 45px;
-      height: 45px;
-      border: 3px solid var(--border-color);
-      border-top-color: var(--accent-gold);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+    .note-action-row { display: flex; gap: 6px; }
+    #note-mode-btn {
+      background: linear-gradient(135deg, #c5a059 0%, #967635 100%); color: #0f1217; border: 1px solid #f3e5ab; border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4); transition: all 0.2s ease;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    #note-mode-btn:hover { background: linear-gradient(135deg, #d4af37 0%, #a8843c 100%); }
+    #note-mode-btn.active { background: #ef4444; color: #fff; border-color: #f87171; }
 
-    /* Modal Windows */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.65);
+    #clear-notes-btn {
+      background: #252a34; color: #f87171; border: 1px solid rgba(248, 113, 113, 0.4); border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4); transition: all 0.2s ease;
+    }
+    #clear-notes-btn:hover { background: #ef4444; color: #fff; border-color: #f87171; }
+
+    /* Modal Styles */
+    .custom-modal {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.75); z-index: 2000; justify-content: center; align-items: center;
       backdrop-filter: blur(5px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
     }
-    .modal-box {
-      background: var(--bg-panel);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      width: 90%;
-      max-width: 700px;
-      max-height: 85vh;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+    .modal-content {
+      background: #1a1f29 !important; border: 2px solid #c5a059 !important; border-radius: 12px;
+      width: 90%; max-width: 550px; padding: 26px; color: #ffffff !important; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      position: relative; max-height: 80vh; overflow-y: auto;
     }
-    .modal-header {
-      padding: 15px 20px;
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .modal-title { font-family: 'Cinzel', serif; font-size: 15px; font-weight: 700; color: var(--accent-gold); }
-    .modal-close { background: none; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer; }
-    .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
-
-    /* Advanced Attribute Table Styles */
-    .attr-table { width: 100%; border-collapse: collapse; font-size: 11px; }
-    .attr-table th, .attr-table td { padding: 8px 10px; border-bottom: 1px solid var(--border-color); text-align: left; }
-    .attr-table th { background: var(--bg-glass); color: var(--accent-gold); position: sticky; top: 0; cursor: pointer; }
-    .attr-row:hover { background: rgba(212, 175, 55, 0.05); }
-
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      aside { position: absolute; height: calc(100vh - var(--header-height)); transform: translateX(-100%); }
-      aside.open { transform: translateX(0); }
+    .modal-content h2 { font-family: 'Cinzel', serif; color: #d4af37 !important; margin-bottom: 14px; font-size: 20px; border-bottom: 1px solid rgba(197,160,89,0.3); padding-bottom: 8px; }
+    .modal-content p, .modal-content ul { font-size: 13px; color: #f1f5f9 !important; line-height: 1.6; margin-bottom: 12px; }
+    .modal-content ul { padding-left: 20px; }
+    .modal-content li { margin-bottom: 6px; color: #cbd5e1 !important; }
+    .modal-close {
+      position: absolute; top: 15px; right: 15px; background: none; border: none;
+      color: #f87171; font-size: 20px; font-weight: bold; cursor: pointer;
     }
   </style>
 </head>
 <body>
 
-<div id="app-container">
-  <!-- Header Navbar -->
-  <header>
-    <div class="brand-area">
-      <button class="tool-btn" id="mobile-menu-toggle" style="display:none;" onclick="toggleMobileSidebar()"><i class="fa-solid fa-bars"></i></button>
-      <i class="fa-solid fa-earth-asia brand-logo"></i>
-      <div class="brand-title">Waqar <span>GIS Portal</span></div>
-    </div>
-    <div class="header-tools">
-      <button class="tool-btn" onclick="openDataTableModal()"><i class="fa-solid fa-table"></i> Table</button>
-      <button class="tool-btn" onclick="openPrintModal()"><i class="fa-solid fa-print"></i> Print</button>
-      <button class="tool-btn" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke"></i></button>
-      <button class="tool-btn" onclick="openModal('settingsModal')"><i class="fa-solid fa-gear"></i></button>
-      <button class="tool-btn" onclick="toggleFullScreen()"><i class="fa-solid fa-expand"></i></button>
-    </div>
-  </header>
+  <button id="floating-menu-btn" onclick="toggleSidebar()" title="Open Menu">☰</button>
 
-  <!-- Workspace Container -->
-  <div id="workspace">
-    <!-- Sidebar Navigation Panels -->
-    <aside id="sidebar">
-      <div class="sidebar-tabs">
-        <div class="stab active" onclick="switchTab('layers')"><i class="fa-solid fa-layer-group"></i><br>Layers</div>
-        <div class="stab" onclick="switchTab('search')"><i class="fa-solid fa-magnifying-glass"></i><br>Search</div>
-        <div class="stab" onclick="switchTab('analysis')"><i class="fa-solid fa-chart-line"></i><br>Analysis</div>
-        <div class="stab" onclick="switchTab('edit')"><i class="fa-solid fa-pen-nib"></i><br>Digitize</div>
+  <div class="sidebar" id="app-sidebar">
+    <div class="portal-brand">
+      <div class="brand-left">
+        <div class="portal-icon-arch">🏛️</div>
+        <div class="portal-title">Waqar GIS Portal</div>
       </div>
+      <button class="menu-toggle-btn" onclick="toggleSidebar()" title="Close Menu">✕</button>
+    </div>
 
-      <div class="sidebar-content">
-        <!-- Layers & Basemap Panel -->
-        <div class="panel-section active" id="panel-layers">
-          <div class="form-group">
-            <label class="form-label">Basemap Gallery</label>
-            <select class="form-select" id="basemap-select" onchange="changeBasemap(this.value)">
-              <option value="googleSat">Google Satellite</option>
-              <option value="googleHybrid">Google Hybrid</option>
-              <option value="osm">OpenStreetMap</option>
-              <option value="esriWorld">ESRI World Imagery</option>
-              <option value="esriTopo">ESRI Topographic</option>
-              <option value="cartoDark">Carto Dark</option>
-              <option value="cartoLight">Carto Light</option>
-            </select>
-          </div>
-          <hr style="border:0; border-top:1px solid var(--border-color); margin:15px 0;">
-          <div class="form-group">
-            <label class="form-label">Active Layer Manager & Opacity</label>
-            <div id="layer-manager-list" style="display:flex; flex-direction:column; gap:8px;"></div>
-          </div>
-          <hr style="border:0; border-top:1px solid var(--border-color); margin:15px 0;">
-          <div class="form-group">
-            <label class="form-label">Data Import (Shapefile .zip, GeoJSON, KML, CSV)</label>
-            <input type="file" id="file-uploader" class="form-input" accept=".zip,.json,.geojson,.kml,.gpx,.csv,.tif" onchange="handleFileUpload(event)">
-          </div>
-        </div>
+    <!-- Location Search -->
+    <div class="panel-box">
+      <h3>Search Location</h3>
+      <input type="text" id="sidebar-search" placeholder="District Or Tehsil..." />
+      <button class="btn btn-gold" onclick="searchLocation()">SEARCH</button>
+    </div>
 
-        <!-- Search & Locator Panel -->
-        <div class="panel-section" id="panel-search">
-          <div class="form-group">
-            <label class="form-label">Search Places, Village, Khasra, Coordinates</label>
-            <input type="text" id="spatial-search-input" class="form-input" placeholder="e.g. Mardan, Peshawar, Khasra #...">
-          </div>
-          <button class="btn-primary" onclick="executeSpatialSearch()">Search Spatial Index</button>
-          <div style="margin-top:12px;">
-            <button class="tool-btn" style="width:100%; justify-content:center;" onclick="locateUserGPS()"><i class="fa-solid fa-location-crosshairs"></i> GPS My Location</button>
-          </div>
-        </div>
-
-        <!-- GIS Analysis Panel -->
-        <div class="panel-section" id="panel-analysis">
-          <div class="form-group">
-            <label class="form-label">Professional GIS & Spatial Tools</label>
-            <button class="btn-primary" style="margin-bottom:8px;" onclick="runMultipleBuffer()">Multiple Buffer & Dissolve</button>
-            <button class="btn-primary" style="margin-bottom:8px;" onclick="runSpatialQuery()">Spatial Intersect Query</button>
-            <button class="btn-primary" style="margin-bottom:8px;" onclick="generateElevationProfile()">Elevation Profile Transect</button>
-            <button class="btn-primary" onclick="triggerRouting()">Draw Route / Routing</button>
-          </div>
-          <div id="elevation-chart-wrap" style="margin-top:15px; display:none; background:var(--bg-glass); padding:10px; border-radius:6px; border:1px solid var(--border-color);"></div>
-        </div>
-
-        <!-- Digitize & Editing Panel -->
-        <div class="panel-section" id="panel-edit">
-          <div class="form-group">
-            <label class="form-label">Advanced Editing Toolbar</label>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-              <button class="tool-btn" style="justify-content:center;" onclick="undoEdit()"><i class="fa-solid fa-rotate-left"></i> Undo</button>
-              <button class="tool-btn" style="justify-content:center;" onclick="redoEdit()"><i class="fa-solid fa-rotate-right"></i> Redo</button>
-            </div>
-          </div>
-          <div class="form-group" style="margin-top:12px;">
-            <label class="form-label">Snapping & Topology</label>
-            <select class="form-select" id="snap-mode" onchange="toggleSnapping(this.value)">
-              <option value="disabled">Snap Disabled</option>
-              <option value="vertex">Vertex Snapping Active</option>
-            </select>
-          </div>
-          <div class="form-group" style="margin-top:12px;">
-            <label class="form-label">Heatmap & Clustering</label>
-            <button class="tool-btn" style="width:100%; justify-content:center; margin-bottom:6px;" onclick="toggleHeatmapLayer()"><i class="fa-solid fa-fire"></i> Toggle Heatmap</button>
-            <button class="tool-btn" style="width:100%; justify-content:center;" onclick="toggleClusterLayer()"><i class="fa-solid fa-object-group"></i> Toggle Clustering</button>
-          </div>
-        </div>
+    <!-- Go-To Coordinates -->
+    <div class="panel-box">
+      <h3>Go-To Coordinates</h3>
+      <div class="coord-inputs">
+        <input type="number" id="coord-lat" step="any" placeholder="Lat (34.01)" />
+        <input type="number" id="coord-lng" step="any" placeholder="Lng (71.53)" />
       </div>
-    </aside>
+      <button class="btn btn-gold" onclick="goToCoordinates()">LOCATE</button>
+    </div>
 
-    <!-- Map Display Pane -->
+    <!-- Split-Screen Comparison Slider Tool -->
+    <div class="panel-box" style="border-color: #059669;">
+      <h3 style="color:#34d399;">Split-Screen Compare</h3>
+      <select id="left-layer-select" style="margin-bottom:6px;">
+        <option value="googleSat" selected>Left Side: Google Satellite</option>
+        <option value="sentinel2">Left Side: Sentinel-2</option>
+        <option value="osm">Left Side: OpenStreetMap</option>
+      </select>
+      <select id="right-layer-select" style="margin-bottom:8px;">
+        <option value="esriSat">Right Side: Esri Imagery</option>
+        <option value="dark" selected>Right Side: Dark Canvas</option>
+        <option value="topo">Right Side: Topographic</option>
+      </select>
+      <button id="slider-toggle-btn" class="btn btn-emerald" onclick="toggleSplitScreen()">ENABLE SLIDER COMPARISON</button>
+    </div>
+
+    <!-- Bookmarks / Saved Locations -->
+    <div class="panel-box">
+      <h3>Bookmarks</h3>
+      <input type="text" id="bookmark-name" placeholder="Name this view..." />
+      <button class="btn btn-gold" onclick="saveBookmark()" style="margin-bottom:8px;">SAVE CURRENT VIEW</button>
+      <div id="bookmark-list"></div>
+    </div>
+
+    <!-- Import Spatial File (.geojson / .kml) -->
+    <div class="panel-box">
+      <h3>Import GeoJSON / KML</h3>
+      <input type="file" id="file-input" accept=".geojson, .json, .kml" />
+      <button class="btn btn-gold" onclick="loadSpatialFile()">UPLOAD & VIEW</button>
+    </div>
+
+    <!-- Spatial Buffer Tool -->
+    <div class="panel-box">
+      <h3>Spatial Buffer Tool (M)</h3>
+      <input type="number" id="buffer-radius" placeholder="Buffer Distance (Meters)" value="100" />
+      <button class="btn btn-gold" onclick="createBuffer()">GENERATE BUFFER</button>
+    </div>
+
+    <!-- Custom Symbology Color Picker -->
+    <div class="panel-box">
+      <h3>Feature Styling</h3>
+      <div class="style-inputs">
+        <input type="color" id="fill-color" value="#c5a059" title="Fill Color" style="height:35px; cursor:pointer;" />
+        <input type="color" id="stroke-color" value="#d4af37" title="Stroke Color" style="height:35px; cursor:pointer;" />
+      </div>
+    </div>
+
+    <!-- Basemap Selector & Layer Opacity -->
+    <div class="panel-box">
+      <h3>Basemap Selector</h3>
+      <select id="basemap-select" onchange="switchBasemap(this.value)">
+        <option value="googleSat" selected>Google Satellite Hybrid (Latest)</option>
+        <option value="sentinel2">Sentinel-2 Cloudless (Free, Updated)</option>
+        <option value="esriSat">Esri World Imagery (Standard)</option>
+        <option value="osm">Street Map (OpenStreetMap)</option>
+        <option value="topo">Esri Topographic</option>
+        <option value="dark">Dark Gray Canvas (CartoDB)</option>
+      </select>
+      <label style="font-size: 10px; color: #c5a059; display:block; margin-top:4px;">Layer Opacity / Transparency:</label>
+      <input type="range" id="opacity-slider" min="0.1" max="1" step="0.1" value="1" oninput="changeOpacity(this.value)" style="width:100%; cursor:pointer;" />
+    </div>
+
+    <div class="panel-box">
+      <h3>Topology Check</h3>
+      <button class="btn btn-dark" onclick="checkTopology()">Validate Topology</button>
+    </div>
+
+    <!-- Export Panel -->
+    <div class="panel-box">
+      <h3>Export Options</h3>
+      <button class="btn btn-emerald" onclick="exportGeoJSON()" style="margin-bottom:6px;">Download GeoJSON</button>
+      <button class="btn btn-emerald" onclick="exportCSV()" style="margin-bottom:6px;">Download CSV Attributes</button>
+      <button class="btn btn-dark" onclick="exportMapImage()" style="margin-bottom:6px;">Export PNG Image</button>
+      <button class="btn btn-dark" onclick="exportMapPDF()">Export PDF Report</button>
+    </div>
+
+    <!-- Main Pages & Settings at the very end -->
+    <div class="panel-box">
+      <h3>Main Pages</h3>
+      <button class="btn btn-dark" onclick="openModal('homeModal')" style="margin-bottom:6px;">🏠 Home</button>
+      <button class="btn btn-dark" onclick="openModal('aboutModal')" style="margin-bottom:6px;">ℹ️ About Us</button>
+      <button class="btn btn-dark" onclick="openModal('servicesModal')" style="margin-bottom:6px;">🛠️ Services</button>
+      <button class="btn btn-dark" onclick="openModal('contactModal')" style="margin-bottom:6px;">📞 Contact Us</button>
+    </div>
+
+    <div class="panel-box">
+      <h3>Account & Settings</h3>
+      <button class="btn btn-dark" onclick="openModal('profileModal')" style="margin-bottom:6px;">👤 My Account / Profile</button>
+      <button class="btn btn-dark" onclick="openModal('settingsModal')" style="margin-bottom:6px;">⚙️ Settings</button>
+    </div>
+
+    <div class="panel-box">
+      <h3>Support & Policy</h3>
+      <button class="btn btn-dark" onclick="openModal('faqModal')" style="margin-bottom:6px;">❓ Help / FAQ</button>
+      <button class="btn btn-dark" onclick="openModal('privacyModal')" style="margin-bottom:6px;">🔒 Privacy Policy</button>
+    </div>
+  </div>
+
+  <div id="main-container">
     <div id="map"></div>
 
-    <!-- Floating Map Widgets -->
-    <div class="floating-widget" id="legend-box">
-      <div style="font-weight:600; font-size:10px; margin-bottom:6px; color:var(--accent-gold); text-transform:uppercase;">Map Legend</div>
-      <div id="legend-content" style="display:flex; flex-direction:column; gap:4px;">
-        <div><span style="display:inline-block; width:10px; height:10px; background:#d4af37; margin-right:6px; border-radius:2px;"></span>Digitized Features</div>
-        <div><span style="display:inline-block; width:10px; height:10px; background:#3b82f6; margin-right:6px; border-radius:2px;"></span>Buffer Zones</div>
-        <div><span style="display:inline-block; width:10px; height:10px; background:#ef4444; margin-right:6px; border-radius:2px;"></span>GPS Points</div>
+    <div id="top-right-controls">
+      <div class="note-action-row">
+        <button id="note-mode-btn" onclick="toggleNoteMode()">📍 Add Note</button>
+        <button id="clear-notes-btn" onclick="clearAllNotes()" title="Delete All Notes">🗑️ Clear Notes</button>
       </div>
     </div>
-    <div class="floating-widget" id="mini-map-box"></div>
-    <div id="coord-tracker">Lat: 34.1982, Lng: 72.0406</div>
-  </div>
-</div>
 
-<!-- Loader Overlay -->
-<div id="loader-overlay">
-  <div class="spinner"></div>
-  <div id="loader-text" style="color:var(--accent-gold); font-family:'Cinzel',serif; font-size:13px; font-weight:600;">Processing GIS Operation...</div>
-</div>
+    <div id="cursor-hud">Lat: 0.00000 | Lng: 0.00000<br>UTM: --</div>
 
-<!-- Toast Container -->
-<div id="toast-container"></div>
-
-<!-- Advanced Attribute Table Modal -->
-<div class="modal-overlay" id="dataTableModal">
-  <div class="modal-box" style="max-width:900px;">
-    <div class="modal-header">
-      <div class="modal-title"><i class="fa-solid fa-table"></i> Advanced Attribute Table & GIS Records</div>
-      <button class="modal-close" onclick="closeModal('dataTableModal')">&times;</button>
-    </div>
-    <div class="modal-body">
-      <div style="display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
-        <input type="text" id="attr-search" class="form-input" style="flex:1;" placeholder="Filter attributes..." oninput="updateAttributeTable()">
-        <button class="tool-btn" onclick="exportCSV()"><i class="fa-solid fa-file-csv"></i> CSV</button>
-        <button class="tool-btn" onclick="exportExcel()"><i class="fa-solid fa-file-excel"></i> Excel</button>
-        <button class="tool-btn" onclick="exportGeoJSON()"><i class="fa-solid fa-code"></i> GeoJSON</button>
-      </div>
-      <div style="max-height:400px; overflow-y:auto; border:1px solid var(--border-color); border-radius:6px;">
-        <table class="attr-table" id="attr-table">
+    <div id="attribute-panel">
+      <h4>◈ Attribute Table Viewer</h4>
+      <div class="table-wrapper">
+        <table id="attr-table">
           <thead>
             <tr>
-              <th onclick="sortAttrTable('id')">ID <i class="fa-solid fa-sort"></i></th>
-              <th onclick="sortAttrTable('type')">Type <i class="fa-solid fa-sort"></i></th>
-              <th onclick="sortAttrTable('massaviArea')">Area <i class="fa-solid fa-sort"></i></th>
-              <th onclick="sortAttrTable('length')">Length <i class="fa-solid fa-sort"></i></th>
+              <th>ID</th>
+              <th>Type</th>
+              <th>Area (Kanal-Marla-SqFt)</th>
+              <th>Length / Perimeter</th>
               <th>Coordinates</th>
-              <th>Name / Notes</th>
             </tr>
           </thead>
-          <tbody></tbody>
+          <tbody>
+            <tr><td colspan="5" style="text-align:center; color:#788294;">No digitization features added yet.</td></tr>
+          </tbody>
         </table>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Print PDF Report Modal -->
-<div class="modal-overlay" id="printModal">
-  <div class="modal-box">
-    <div class="modal-header">
-      <div class="modal-title"><i class="fa-solid fa-print"></i> Export Professional Map Report (PDF)</div>
-      <button class="modal-close" onclick="closeModal('printModal')">&times;</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">Report Title</label>
-        <input type="text" id="print-title" class="form-input" value="Waqar GIS Professional Analysis Report">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Page Size & Orientation</label>
-        <div style="display:flex; gap:10px;">
-          <select class="form-select" id="print-pagesize"><option value="a4">A4</option><option value="letter">Letter</option></select>
-          <select class="form-select" id="print-orientation"><option value="landscape">Landscape</option><option value="portrait">Portrait</option></select>
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label"><input type="checkbox" id="print-legend" checked> Include Map Legend & Feature Summary</label>
-      </div>
-      <button class="btn-primary" onclick="exportMapPDF()">Generate Enterprise PDF Report</button>
+  <!-- ENGLISH MODALS -->
+  <div id="homeModal" class="custom-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('homeModal')">×</button>
+      <h2>🏠 Welcome to Waqar GIS Portal</h2>
+      <p>Welcome to the main dashboard of your Executive Spatial Suite. This platform is specifically engineered for advanced Geographic Information System (GIS) analysis and Remote Sensing operations.</p>
+      <p><strong>Quick Features:</strong></p>
+      <ul>
+        <li>District & Tehsil location search engine.</li>
+        <li>Precise spatial area calculations in Kanal, Marla, and SqFt (Massavi format).</li>
+        <li>Split-screen satellite comparison slider.</li>
+        <li>Export datasets directly to GeoJSON, CSV, PNG, and PDF reports.</li>
+      </ul>
     </div>
   </div>
-</div>
 
-<!-- User Settings Modal -->
-<div class="modal-overlay" id="settingsModal">
-  <div class="modal-box">
-    <div class="modal-header">
-      <div class="modal-title"><i class="fa-solid fa-gear"></i> User Preferences & Admin Configuration</div>
-      <button class="modal-close" onclick="closeModal('settingsModal')">&times;</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">Workspace User Profile</label>
-        <input type="text" id="setting-username" class="form-input" value="Waqar Ahmad (Admin)">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Coordinate Display Format</label>
-        <select class="form-select"><option>Decimal Degrees (WGS84)</option><option>MGRS / UTM Grid</option></select>
-      </div>
-      <button class="btn-primary" onclick="saveUserSettings()">Save Preferences</button>
+  <div id="aboutModal" class="custom-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('aboutModal')">×</button>
+      <h2>ℹ️ About Waqar GIS Portal</h2>
+      <p><strong>Waqar GIS Portal</strong> is a high-performance web-based spatial analysis and mapping application engineered in accordance with modern Geomatics and spatial software standards.</p>
+      <p>The system seamlessly integrates multi-source high-resolution satellite imagery (Google, Sentinel-2, Esri) with interactive vector digitization tools, facilitating land area calculations, spatial buffering, and topology validation.</p>
     </div>
   </div>
-</div>
 
-<!-- External JS Libraries -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
-<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://unpkg.com/shpjs@latest/dist/shp.js"></script>
+  <div id="servicesModal" class="custom-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('servicesModal')">×</button>
+      <h2>🛠️ Services & Spatial Solutions</h2>
+      <p>The portal provides the following technical solutions and services:</p>
+      <ul>
+        <li><strong>Spatial Digitization:</strong> Digitizing polygons, lines, and point features with automated perimeter and area measurements.</li>
+        <li><strong>Massavi Conversion:</strong> Automatic calculation of square meters into traditional land units (Kanal, Marla, Square Feet).</li>
+        <li><strong>Buffer Analysis:</strong> Generating custom proximity buffer zones around features.</li>
+        <li><strong>Multi-Source Basemaps:</strong> Seamless basemap switching between Google Satellite, Sentinel-2, OpenStreetMap, and Dark Canvas.</li>
+        <li><strong>Professional Exports:</strong> Downloading vector layers and tables as GeoJSON, CSV, high-resolution PNG images, and PDF reports.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="contactModal" class="custom-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('contactModal')">×</button>
+      <h2>📞 Contact Us & Support</h2>
+      <p>If you have any queries or require technical assistance regarding the portal, please feel free to reach out:</p>
+      <ul>
+        <li><strong>Developer:</strong> Waqar Ahmad (Geomatics Specialist)</li>
+        <li><strong>Phone Number:</strong> 03201975800</li>
+        <li><strong>Email Address:</strong> waqar560ahmad@gmail.com</li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="profileModal" class="custom-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('profileModal')">×</button>
+      <h2>👤 User Profile & Session</h2>
+      <p>Your user account details and active workspace session:</p>
+      <ul>
+        <li><strong>Username:</strong> Waqar Ahmad (Admin)</li>
+        <li><strong>Role:</strong> GIS Analyst / Spatial Developer</li>
+        <li><strong>Phone Number:</strong> 03201975800</li>
+        <li><strong>Email Address:</strong> waqar560ahmad@gmail.com</li>
+        <li><strong>Workspace:</strong> Pakistan</li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="settingsModal" class="custom-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('settingsModal')">×</button>
+      <h2>⚙️ Portal Settings</h2>
+      <p>System configurations and rendering settings:</p>
+      <ul>
+        <li><strong>Map Engine:</strong> Leaflet v1.9.4 Spatial Renderer (Active)</li>
+        <li><strong>Coordinate System:</strong> WGS84 / UTM Zone Mapping (Active)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="faqModal" class="custom-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('faqModal')">×</button>
+      <h2>❓ Help & FAQ</h2>
+      <p><strong>Q1: How do I digitize a new feature?</strong><br>A: Click the polygon or line tool on the top-left Leaflet Draw toolbar and place vertices directly on the map.</p>
+      <p><strong>Q2: Where are the land area conversions displayed?</strong><br>A: Once a feature is drawn, the area automatically calculates in Kanal, Marla, and Square Feet inside the bottom Attribute Table.</p>
+    </div>
+  </div>
+
+  <div id="privacyModal" class="custom-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('privacyModal')">×</button>
+      <h2>🔒 Privacy Policy</h2>
+      <p>Waqar GIS Portal prioritizes data privacy and security.</p>
+      <ul>
+        <li>All digitized geometries, notes, and custom bookmarks are stored locally inside your web browser's LocalStorage.</li>
+        <li>No spatial datasets or personal credentials are sent or sold to external third-party servers.</li>
+      </ul>
+    </div>
+  </div>
 
 <script>
-  /* =====================================================================
-     ENTERPRISE WEB GIS CORE ARCHITECTURE
-  ===================================================================== */
-  let map, miniMap, drawnItems, featureRecords = [], undoStack = [], redoStack = [];
-  let currentBasemap = 'googleSat', activeLayersManager = {};
-  let currentSession = { name: 'Waqar Ahmad (Admin)' };
+  function openModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
+  function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+
+  const map = L.map('map', { crossOrigin: true, maxZoom: 20, zoomControl: true }).setView([34.0, 71.5], 13);
+  L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
 
   const basemaps = {
-    googleSat: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, attribution: '&copy; Esri & Google' }),
-    googleHybrid: L.layerGroup([
+    googleSat: L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: '© Google' }),
+    sentinel2: L.tileLayer('https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2023_3857/default/g/{z}/{y}/{x}.jpg', { maxZoom: 18, attribution: '© EOX' }),
+    esriSat: L.layerGroup([
       L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }),
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', { maxZoom: 19 })
+      L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, opacity: 0.95 })
     ]),
-    osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }),
-    esriWorld: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }),
-    esriTopo: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }),
-    cartoDark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, attribution: '&copy; CARTO' }),
-    cartoLight: L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19, attribution: '&copy; CARTO' })
+    osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }),
+    topo: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }),
+    dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 })
   };
 
-  window.addEventListener('DOMContentLoaded', () => {
-    initMap();
-    initMiniMap();
-    initDrawTools();
-    setupLayerManagerUI();
-    showToast('Waqar GIS Enterprise Portal initialized successfully.');
+  let currentBasemap = basemaps.googleSat;
+  currentBasemap.addTo(map);
+
+  function toggleSidebar() {
+    const sidebar = document.getElementById('app-sidebar');
+    const floatBtn = document.getElementById('floating-menu-btn');
+    sidebar.classList.toggle('closed');
+    floatBtn.style.display = sidebar.classList.contains('closed') ? 'flex' : 'none';
+    setTimeout(() => { map.invalidateSize(); }, 300);
+  }
+
+  let splitControl = null, leftLayerObj = null, rightLayerObj = null, isSplitActive = false;
+  function toggleSplitScreen() {
+    const btn = document.getElementById('slider-toggle-btn');
+    const leftKey = document.getElementById('left-layer-select').value;
+    const rightKey = document.getElementById('right-layer-select').value;
+    if (!isSplitActive) {
+      if (currentBasemap) map.removeLayer(currentBasemap);
+      leftLayerObj = basemaps[leftKey] || basemaps.googleSat;
+      rightLayerObj = basemaps[rightKey] || basemaps.dark;
+      leftLayerObj.addTo(map); rightLayerObj.addTo(map);
+      splitControl = L.control.sideBySide(leftLayerObj, rightLayerObj);
+      splitControl.addTo(map);
+      isSplitActive = true;
+      btn.innerText = "DISABLE SLIDER COMPARISON";
+      btn.classList.add('btn-active');
+    } else {
+      if (splitControl) { map.removeControl(splitControl); splitControl = null; }
+      if (leftLayerObj) map.removeLayer(leftLayerObj);
+      if (rightLayerObj) map.removeLayer(rightLayerObj);
+      isSplitActive = false;
+      switchBasemap(document.getElementById('basemap-select').value);
+      btn.innerText = "ENABLE SLIDER COMPARISON";
+      btn.classList.remove('btn-active');
+    }
+  }
+
+  let coordMarker = null, uploadedLayerGroup = L.layerGroup().addTo(map), bufferLayerGroup = L.layerGroup().addTo(map), notesLayerGroup = L.layerGroup().addTo(map);
+  let featureCounter = 0, featureRecords = [], noteMode = false, noteCounter = 0;
+
+  function toUTM(lat, lng) {
+    const zone = Math.floor((lng + 180) / 6) + 1;
+    const hemisphere = lat >= 0 ? 'north' : 'south';
+    const utmDef = `+proj=utm +zone=${zone} +${hemisphere === 'south' ? 'south ' : ''}+datum=WGS84 +units=m +no_defs`;
+    try {
+      const [easting, northing] = proj4('WGS84', utmDef, [lng, lat]);
+      return `Zone ${zone}${hemisphere === 'north' ? 'N' : 'S'} | E: ${easting.toFixed(1)} N: ${northing.toFixed(1)}`;
+    } catch (e) { return '--'; }
+  }
+
+  map.on('mousemove', function(e) {
+    document.getElementById('cursor-hud').innerHTML = `Lat: ${e.latlng.lat.toFixed(5)} | Lng: ${e.latlng.lng.toFixed(5)}<br>UTM: ${toUTM(e.latlng.lat, e.latlng.lng)}`;
   });
 
-  function initMap() {
-    map = L.map('map', { zoomControl: false }).setView([34.1982, 72.0406], 13); // Mardan Default Location
-    basemaps.googleSat.addTo(map);
-    L.control.zoom({ position: 'topright' }).addTo(map);
-    L.control.scale({ position: 'bottomright', imperial: false }).addTo(map);
-
-    drawnItems = new L.FeatureGroup();
-    map.addLayer(drawnItems);
-
-    map.on('mousemove', (e) => {
-      document.getElementById('coord-tracker').textContent = `Lat: ${e.latlng.lat.toFixed(5)}, Lng: ${e.latlng.lng.toFixed(5)}`;
-    });
+  function switchBasemap(key) {
+    if (isSplitActive) return;
+    if (currentBasemap) map.removeLayer(currentBasemap);
+    if (basemaps[key]) { currentBasemap = basemaps[key]; currentBasemap.addTo(map); changeOpacity(document.getElementById('opacity-slider').value); }
   }
 
-  function initMiniMap() {
-    miniMap = L.map('mini-map-box', { zoomControl: false, attributionControl: false, dragging: false, scrollWheelZoom: false }).setView([34.1982, 72.0406], 8);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(miniMap);
-    map.on('move', () => { miniMap.setView(map.getCenter(), map.getZoom() - 4); });
-  }
-
-  /* =====================================================================
-     UI UTILITIES, NOTIFICATIONS & FEEDBACK
-  ===================================================================== */
-  function showToast(msg, type = 'info') {
-    const container = document.getElementById('toast-container');
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.innerHTML = `<i class="fa-solid fa-circle-info" style="color:var(--accent-gold); margin-right:6px;"></i> ${msg}`;
-    container.appendChild(toast);
-    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3500);
-  }
-
-  function showLoader(text = 'Processing GIS Operation...') {
-    document.getElementById('loader-text').textContent = text;
-    document.getElementById('loader-overlay').style.display = 'flex';
-  }
-
-  function hideLoader() {
-    document.getElementById('loader-overlay').style.display = 'none';
-  }
-
-  function switchTab(tabId) {
-    document.querySelectorAll('.stab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.panel-section').forEach(p => p.classList.remove('active'));
-    event.currentTarget.classList.add('active');
-    document.getElementById('panel-' + tabId).classList.add('active');
-  }
-
-  function toggleTheme() {
-    const html = document.documentElement;
-    const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    html.setAttribute('data-theme', newTheme);
-    showToast('Theme switched to ' + newTheme);
-  }
-
-  function toggleFullScreen() {
-    if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); }
-    else { if (document.exitFullscreen) { document.exitFullscreen(); } }
-  }
-
-  function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-  function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-  function toggleMobileSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
-
-  /* =====================================================================
-     BASEMAP GALLERY & LAYER MANAGER
-  ===================================================================== */
-  function changeBasemap(key) {
-    Object.values(basemaps.googleHybrid === basemaps[currentBasemap] ? basemaps.googleHybrid : { b: basemaps[currentBasemap] }).forEach(l => {
-      if (map.hasLayer(l)) map.removeLayer(l);
-    });
-    // simpler cleanup
-    map.eachLayer(layer => {
-      if (layer instanceof L.TileLayer || layer instanceof L.LayerGroup) {
-        if (!map.hasLayer(drawnItems) || layer !== drawnItems) {
-          // keep basemap cleanup clean
-        }
-      }
-    });
-    
-    // reset basemap strictly
-    for (let k in basemaps) {
-      if (map.hasLayer(basemaps[k])) map.removeLayer(basemaps[k]);
-    }
-
-    if (basemaps[key]) {
-      basemaps[key].addTo(map);
-      currentBasemap = key;
-      showToast('Basemap changed to ' + key);
+  function changeOpacity(val) {
+    if (currentBasemap && !isSplitActive) {
+      if (typeof currentBasemap.setOpacity === 'function') currentBasemap.setOpacity(val);
+      else if (currentBasemap.getLayers) currentBasemap.getLayers().forEach(l => { if (l.setOpacity) l.setOpacity(val); });
     }
   }
 
-  function setupLayerManagerUI() {
-    const list = document.getElementById('layer-manager-list');
-    list.innerHTML = `
-      <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; background:var(--bg-glass); padding:8px; border-radius:6px; border:1px solid var(--border-color);">
-        <span><i class="fa-solid fa-draw-polygon" style="color:var(--accent-gold);"></i> Digitized Vector Layer</span>
-        <div style="display:flex; align-items:center; gap:8px;">
-          <input type="range" min="0" max="1" step="0.1" value="1" style="width:70px;" onchange="setLayerOpacity(this.value)">
-          <input type="checkbox" checked onchange="toggleLayerVisibility(this.checked)">
-        </div>
-      </div>
-    `;
+  function calculateMassaviArea(areaSqMeters) {
+    let totalSqFt = areaSqMeters * 10.7639;
+    let kanals = Math.floor(totalSqFt / 5445.0);
+    let remainingSqFt = totalSqFt % 5445.0;
+    let marlas = Math.floor(remainingSqFt / 272.25);
+    let finalSqFt = Math.round(remainingSqFt % 272.25);
+    if (finalSqFt >= 270) { marlas += 1; finalSqFt = 0; }
+    if (marlas >= 20) { kanals += 1; marlas -= 20; }
+    return { formattedText: `${kanals} Kanal, ${marlas} Marla, ${finalSqFt} SqFt` };
   }
 
-  function toggleLayerVisibility(isVisible) {
-    if (isVisible) map.addLayer(drawnItems);
-    else map.removeLayer(drawnItems);
-    showToast('Vector layer visibility updated.');
-  }
-
-  function setLayerOpacity(val) {
-    drawnItems.eachLayer(l => {
-      if (l.setStyle) l.setStyle({ opacity: val, fillOpacity: val * 0.4 });
-    });
-    showToast('Layer opacity set to ' + Math.round(val * 100) + '%');
-  }
-
-  /* =====================================================================
-     ADVANCED DIGITIZING, DRAWING & TOPOLOGY
-  ===================================================================== */
-  function initDrawTools() {
-    const drawControl = new L.Control.Draw({
-      position: 'topright',
-      draw: {
-        polyline: { shapeOptions: { color: '#d4af37', weight: 3 } },
-        polygon: { shapeOptions: { color: '#d4af37', weight: 2, fillColor: '#d4af37', fillOpacity: 0.3 } },
-        rectangle: { shapeOptions: { color: '#d4af37', weight: 2, fillOpacity: 0.3 } },
-        circle: false,
-        marker: true
-      },
-      edit: { featureGroup: drawnItems, remove: true }
-    });
-    map.addControl(drawControl);
-
-    map.on(L.Draw.Event.CREATED, function (e) {
-      const layer = e.layer;
-      drawnItems.addLayer(layer);
-      recordFeature(layer, e.layerType);
-      saveStateSnapshot();
-      showToast('Feature digitized successfully.');
-    });
-
-    map.on(L.Draw.Event.DELETED, function () {
-      rebuildFeatureRecords();
-      saveStateSnapshot();
-      showToast('Features deleted successfully.');
-    });
-  }
-
-  function recordFeature(layer, type) {
-    const id = featureRecords.length + 1;
-    let area = '-', length = '-', coords = '';
-    
-    if (type === 'polygon' || type === 'rectangle') {
-      const latlngs = layer.getLatLngs()[0];
-      area = (L.GeometryUtil ? L.GeometryUtil.geodesicArea(latlngs) : 0).toFixed(2) + ' m²';
-      coords = latlngs.map(l => `${l.lat.toFixed(4)},${l.lng.toFixed(4)}`).join('; ');
-    } else if (type === 'polyline') {
-      const latlngs = layer.getLatLngs();
-      let dist = 0;
-      for (let i = 0; i < latlngs.length - 1; i++) dist += latlngs[i].distanceTo(latlngs[i+1]);
-      length = dist.toFixed(2) + ' m';
-      coords = latlngs.map(l => `${l.lat.toFixed(4)},${l.lng.toFixed(4)}`).join('; ');
-    } else if (type === 'marker') {
-      const ll = layer.getLatLng();
-      coords = `${ll.lat.toFixed(4)}, ${ll.lng.toFixed(4)}`;
-    }
-
-    featureRecords.push({ id, type, massaviArea: area, length, coords, name: 'Feature #' + id, notes: '' });
-    updateAttributeTable();
-  }
-
-  function rebuildFeatureRecords() {
-    featureRecords = [];
-    drawnItems.eachLayer(layer => {
-      let type = layer instanceof L.Marker ? 'marker' : (layer instanceof L.Polyline ? 'polyline' : 'polygon');
-      recordFeature(layer, type);
-    });
-    updateAttributeTable();
-  }
-
-  function saveStateSnapshot() {
-    undoStack.push(snapshotState());
-    if (undoStack.length > 25) undoStack.shift();
-    redoStack = [];
-  }
-
-  function snapshotState() { return JSON.stringify(drawnItems.toGeoJSON()); }
-
-  function restoreState(geojsonStr) {
-    drawnItems.clearLayers();
-    L.geoJSON(JSON.parse(geojsonStr), {
-      onEachFeature: (feature, layer) => { drawnItems.addLayer(layer); }
-    });
-    rebuildFeatureRecords();
-  }
-
-  function undoEdit() {
-    if (!undoStack.length) { showToast('No undo available.', 'warn'); return; }
-    redoStack.push(snapshotState());
-    restoreState(undoStack.pop());
-    showToast('Action undone.');
-  }
-
-  function redoEdit() {
-    if (!redoStack.length) { showToast('No redo available.', 'warn'); return; }
-    undoStack.push(snapshotState());
-    restoreState(redoStack.pop());
-    showToast('Action redone.');
-  }
-
-  function toggleSnapping(val) { showToast('Snapping mode set to: ' + val); }
-
-  /* =====================================================================
-     DATA IMPORT (SHP ZIP, GEOJSON, KML, CSV) & EXPORT
-  ===================================================================== */
-  function handleFileUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    showLoader('Importing geospatial dataset...');
-
-    const ext = file.name.split('.').pop().toLowerCase();
-    const reader = new FileReader();
-
-    if (ext === 'zip') {
-      reader.onload = function(e) {
-        shp(e.target.result).then(data => {
-          const layer = L.geoJSON(data, {
-            style: { color: '#3b82f6', weight: 2, fillOpacity: 0.4 },
-            onEachFeature: (f, l) => { drawnItems.addLayer(l); }
-          });
-          hideLoader();
-          rebuildFeatureRecords();
-          map.fitBounds(layer.getBounds());
-          showToast('Shapefile (.zip) imported successfully.');
-        }).catch(() => { hideLoader(); showToast('Invalid shapefile structure.', 'error'); });
-      };
-      reader.readAsArrayBuffer(file);
-    } else if (ext === 'geojson' || ext === 'json') {
-      reader.onload = function(e) {
-        try {
-          const data = JSON.parse(e.target.result);
-          const layer = L.geoJSON(data, { onEachFeature: (f, l) => { drawnItems.addLayer(l); } });
-          hideLoader();
-          rebuildFeatureRecords();
-          map.fitBounds(layer.getBounds());
-          showToast('GeoJSON imported successfully.');
-        } catch { hideLoader(); showToast('Parsing error in GeoJSON.', 'error'); }
-      };
-      reader.readAsText(file);
-    } else {
-      hideLoader();
-      showToast('File format successfully parsed.', 'info');
-    }
-  }
-
-  /* =====================================================================
-     SPATIAL SEARCH, GEOLOCATION & ANALYSIS
-  ===================================================================== */
-  function executeSpatialSearch() {
-    const q = document.getElementById('spatial-search-input').value.trim();
-    if (!q) { showToast('Enter place or Khasra to search.', 'warn'); return; }
-    showLoader('Querying spatial index...');
-
-    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}`)
-      .then(res => res.json())
-      .then(data => {
-        hideLoader();
-        if (data && data.length > 0) {
-          const { lat, lon, display_name } = data[0];
-          map.setView([lat, lon], 15);
-          L.marker([lat, lon]).addTo(map).bindPopup(`<b>${display_name}</b>`).openPopup();
-          showToast('Location located: ' + display_name);
-        } else {
-          showToast('Location not found in database.', 'warn');
-        }
-      }).catch(() => { hideLoader(); showToast('Search network error.', 'error'); });
-  }
-
-  function locateUserGPS() {
-    if (!navigator.geolocation) { showToast('Geolocation not supported.', 'error'); return; }
-    showLoader('Acquiring high-precision GPS...');
-    navigator.geolocation.getCurrentPosition(pos => {
-      hideLoader();
-      const { latitude, longitude, accuracy } = pos.coords;
-      map.setView([latitude, longitude], 16);
-      L.circle([latitude, longitude], { radius: accuracy, color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.3 }).addTo(map);
-      L.marker([latitude, longitude]).addTo(map).bindPopup('<b>GPS Location</b><br>Accuracy: ' + accuracy.toFixed(1) + 'm').openPopup();
-      showToast('GPS position successfully acquired.');
-    }, () => { hideLoader(); showToast('Unable to retrieve GPS signal.', 'error'); }, { enableHighAccuracy: true });
-  }
-
-  function runMultipleBuffer() {
-    if (drawnItems.getLayers().length === 0) { showToast('Draw or select features first.', 'warn'); return; }
-    showToast('Executing multiple buffer analysis (50m, 100m)...');
-    drawnItems.eachLayer(layer => {
-      if (layer instanceof L.Marker) {
-        L.circle(layer.getLatLng(), { radius: 50, color: '#3b82f6', weight: 1, fillOpacity: 0.15 }).addTo(map);
-        L.circle(layer.getLatLng(), { radius: 100, color: '#f59e0b', weight: 1, fillOpacity: 0.1 }).addTo(map);
-      }
-    });
-  }
-
-  function runSpatialQuery() { showToast('Spatial intersection query executed successfully.'); }
-  function toggleHeatmapLayer() { showToast('Heatmap layer toggled.'); }
-  function toggleClusterLayer() { showToast('Marker clustering toggled.'); }
-  function triggerRouting() { showToast('Routing tool active. Select start & end points.'); }
-
-  function generateElevationProfile() {
-    showLoader('Computing elevation profile transect...');
-    setTimeout(() => {
-      hideLoader();
-      const wrap = document.getElementById('elevation-chart-wrap');
-      wrap.style.display = 'block';
-      wrap.innerHTML = `<svg viewBox="0 0 400 120" style="width:100%; height:120px;">
-        <text x="10" y="15" fill="#d4af37" font-size="10" font-family="Cinzel">Elevation Profile Transect (Max: 480m, Min: 310m)</text>
-        <polyline fill="none" stroke="#d4af37" stroke-width="2" points="10,85 75,60 140,75 205,35 270,50 380,20" />
-      </svg>`;
-      showToast('Elevation profile generated.');
-    }, 1000);
-  }
-
-  /* =====================================================================
-     ADVANCED ATTRIBUTE TABLE & EXPORTS
-  ===================================================================== */
-  let attrSortField = 'id', attrSortAsc = true;
-
-  function updateAttributeTable() { renderAttrTableBody(); }
-
-  function sortAttrTable(field) {
-    if (attrSortField === field) attrSortAsc = !attrSortAsc;
-    else { attrSortField = field; attrSortAsc = true; }
-    renderAttrTableBody();
-  }
-
-  function renderAttrTableBody() {
-    const term = (document.getElementById('attr-search').value || '').toLowerCase();
-    let filtered = featureRecords.filter(r => Object.values(r).some(v => String(v).toLowerCase().includes(term)));
-
-    filtered.sort((a, b) => {
-      let va = a[attrSortField] || '', vb = b[attrSortField] || '';
-      if (va < vb) return attrSortAsc ? -1 : 1;
-      if (va > vb) return attrSortAsc ? 1 : -1;
-      return 0;
-    });
-
-    const tbody = document.querySelector('#attr-table tbody');
-    let html = '';
-    if (!filtered.length) {
-      html = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">No records found.</td></tr>`;
-    } else {
-      filtered.forEach(r => {
-        html += `<tr class="attr-row"><td>${r.id}</td><td>${r.type}</td><td>${r.massaviArea}</td><td>${r.length}</td><td>${r.coords}</td><td>${r.name}</td></tr>`;
+  function searchLocation() {
+    const query = document.getElementById('sidebar-search').value;
+    if (!query) return alert('Please enter location!');
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=pk`)
+      .then(r => r.json())
+      .then(d => {
+        if (!d.length) return alert('Not found!');
+        map.setView([parseFloat(d[0].lat), parseFloat(d[0].lon)], 16);
+        L.marker([parseFloat(d[0].lat), parseFloat(d[0].lon)]).addTo(map).bindPopup(d[0].display_name).openPopup();
       });
-    }
-    tbody.innerHTML = html;
   }
 
-  function openDataTableModal() { openModal('dataTableModal'); renderAttrTableBody(); }
+  function goToCoordinates() {
+    const lat = parseFloat(document.getElementById('coord-lat').value);
+    const lng = parseFloat(document.getElementById('coord-lng').value);
+    if (isNaN(lat) || isNaN(lng)) return alert('Valid coordinates required!');
+    if (coordMarker) map.removeLayer(coordMarker);
+    map.setView([lat, lng], 17);
+    coordMarker = L.marker([lat, lng]).addTo(map).bindPopup(`Lat: ${lat}<br>Lng: ${lng}`).openPopup();
+  }
+
+  function loadBookmarks() {
+    const saved = JSON.parse(localStorage.getItem('waqar_gis_bookmarks') || '[]');
+    const list = document.getElementById('bookmark-list');
+    list.innerHTML = '';
+    saved.forEach((b, idx) => {
+      const row = document.createElement('div');
+      row.className = 'bookmark-item';
+      row.innerHTML = `<span onclick="goToBookmark(${idx})">📌 ${b.name}</span><button onclick="deleteBookmark(${idx})">✕</button>`;
+      list.appendChild(row);
+    });
+  }
+
+  function saveBookmark() {
+    const nameInput = document.getElementById('bookmark-name');
+    const name = nameInput.value.trim() || `View ${new Date().toLocaleTimeString()}`;
+    const center = map.getCenter();
+    const saved = JSON.parse(localStorage.getItem('waqar_gis_bookmarks') || '[]');
+    saved.push({ name: name, lat: center.lat, lng: center.lng, zoom: map.getZoom() });
+    localStorage.setItem('waqar_gis_bookmarks', JSON.stringify(saved));
+    nameInput.value = '';
+    loadBookmarks();
+  }
+
+  function goToBookmark(idx) {
+    const saved = JSON.parse(localStorage.getItem('waqar_gis_bookmarks') || '[]');
+    if (saved[idx]) map.setView([saved[idx].lat, saved[idx].lng], saved[idx].zoom);
+  }
+
+  function deleteBookmark(idx) {
+    const saved = JSON.parse(localStorage.getItem('waqar_gis_bookmarks') || '[]');
+    saved.splice(idx, 1);
+    localStorage.setItem('waqar_gis_bookmarks', JSON.stringify(saved));
+    loadBookmarks();
+  }
+  loadBookmarks();
+
+  function toggleNoteMode() {
+    noteMode = !noteMode;
+    document.getElementById('note-mode-btn').classList.toggle('active', noteMode);
+    map.getContainer().style.cursor = noteMode ? 'crosshair' : '';
+  }
+
+  function clearAllNotes() {
+    if (confirm('Delete all notes?')) notesLayerGroup.clearLayers();
+  }
+
+  map.on('click', function(e) {
+    if (!noteMode) return;
+    noteCounter++;
+    const marker = L.marker(e.latlng, {
+      icon: L.divIcon({ className: '', html: '<div style="background:#c5a059;border:2px solid #fff;border-radius:50% 50% 50% 0;width:16px;height:16px;transform:rotate(-45deg);box-shadow:0 0 6px rgba(0,0,0,0.6);"></div>', iconSize: [16, 16] })
+    }).addTo(notesLayerGroup);
+
+    marker.on('dblclick', (ev) => { L.DomEvent.stopPropagation(ev); notesLayerGroup.removeLayer(marker); });
+    const pc = document.createElement('div');
+    pc.innerHTML = `<textarea class="note-popup-input" rows="3">Note #${noteCounter}</textarea><br><button class="note-popup-save">Save</button>`;
+    pc.querySelector('button').onclick = () => marker.bindPopup(`<strong>Note #${noteCounter}</strong><br>${pc.querySelector('textarea').value}`).openPopup();
+    marker.bindPopup(pc).openPopup();
+    toggleNoteMode();
+  });
+
+  function loadSpatialFile() {
+    const file = document.getElementById('file-input').files[0];
+    if (!file) return alert('Select a file!');
+    const reader = new FileReader();
+    uploadedLayerGroup.clearLayers();
+    reader.onload = function(e) {
+      try {
+        const fc = document.getElementById('fill-color').value;
+        const sc = document.getElementById('stroke-color').value;
+        const layer = L.geoJSON(JSON.parse(e.target.result), { style: { color: sc, fillColor: fc, fillOpacity: 0.5 } });
+        uploadedLayerGroup.addLayer(layer);
+        map.fitBounds(layer.getBounds());
+      } catch(err) { alert('Invalid file!'); }
+    };
+    reader.readAsText(file);
+  }
+
+  const drawnItems = new L.FeatureGroup();
+  map.addLayer(drawnItems);
+  const drawControl = new L.Control.Draw({
+    draw: { polygon: { allowIntersection: false, showArea: true, shapeOptions: { color: '#d4af37', fillColor: '#c5a059', fillOpacity: 0.45, weight: 2 } }, polyline: { shapeOptions: { color: '#d4af37', weight: 3 } }, rectangle: false, circle: false, circlemarker: false },
+    edit: { featureGroup: drawnItems, remove: true }
+  });
+  map.addControl(drawControl);
+
+  function removeFeature(layer) {
+    drawnItems.removeLayer(layer);
+    featureRecords = featureRecords.filter(f => f.id !== layer._custom_id);
+    updateAttributeTable();
+  }
+
+  map.on(L.Draw.Event.DELETED, (e) => e.layers.eachLayer(layer => removeFeature(layer)));
+
+  map.on(L.Draw.Event.CREATED, function(e) {
+    const layer = e.layer;
+    if (layer.setStyle) layer.setStyle({ color: document.getElementById('stroke-color').value, fillColor: document.getElementById('fill-color').value, fillOpacity: 0.5, weight: 2.5 });
+    featureCounter++;
+    layer._custom_id = featureCounter;
+    drawnItems.addLayer(layer);
+    layer.on('dblclick', (ev) => { L.DomEvent.stopPropagation(ev); removeFeature(layer); });
+
+    const geojson = layer.toGeoJSON();
+    const type = e.layerType;
+    let areaText = 'N/A', lenText = 'N/A', coordsText = '';
+
+    if (type === 'polygon') {
+      areaText = calculateMassaviArea(turf.area(geojson)).formattedText;
+      lenText = `${(turf.length(geojson, {units: 'kilometers'}) * 1000).toFixed(2)} m`;
+      coordsText = 'Polygon';
+    } else if (type === 'polyline') {
+      let l = turf.length(geojson, {units: 'kilometers'});
+      lenText = l >= 1 ? `${l.toFixed(2)} km` : `${(l * 1000).toFixed(2)} m`;
+      coordsText = 'Line';
+    } else if (type === 'marker') {
+      coordsText = `${geojson.geometry.coordinates[1].toFixed(5)}, ${geojson.geometry.coordinates[0].toFixed(5)}`;
+    }
+
+    featureRecords.push({ id: featureCounter, type: type.toUpperCase(), massaviArea: areaText, length: lenText, coords: coordsText });
+    updateAttributeTable();
+  });
+
+  function createBuffer() {
+    const data = drawnItems.toGeoJSON();
+    const radius = parseFloat(document.getElementById('buffer-radius').value);
+    if (!data.features.length) return alert('Draw a feature first!');
+    bufferLayerGroup.clearLayers();
+    bufferLayerGroup.addLayer(L.geoJSON(turf.buffer(data, radius / 1000, { units: 'kilometers' }), { style: { color: '#ef4444', fillColor: '#f87171', fillOpacity: 0.35, dashArray: '5, 5' } }));
+  }
+
+  function updateAttributeTable() {
+    const tbody = document.querySelector('#attr-table tbody');
+    if (!featureRecords.length) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#788294;">No digitization features added yet.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = featureRecords.map(f => `<tr><td>#${f.id}</td><td><strong>${f.type}</strong></td><td style="color:#d4af37; font-weight:bold;">${f.massaviArea}</td><td>${f.length}</td><td>${f.coords}</td></tr>`).join('');
+  }
+
+  function checkTopology() {
+    const data = drawnItems.toGeoJSON();
+    if (!data.features.length) return alert('Draw a feature first!');
+    let errs = 0;
+    data.features.forEach(f => { if (f.geometry.type === 'Polygon') errs += turf.kinks(f).features.length; });
+    alert(errs > 0 ? `Topology Error: ${errs} intersections found!` : 'Topology Valid! No errors.');
+  }
 
   function exportGeoJSON() {
     const data = drawnItems.toGeoJSON();
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'waqar_gis_export.geojson'; a.click();
-    showToast('GeoJSON exported.');
+    if (!data.features.length) return alert('No features!');
+    const a = document.createElement('a');
+    a.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));
+    a.download = 'waqar_gis_data.geojson';
+    a.click();
   }
 
   function exportCSV() {
-    if (!featureRecords.length) { showToast('No records to export.', 'warn'); return; }
-    let csv = 'ID,Type,Area,Length,Coordinates,Name\n';
-    featureRecords.forEach(r => { csv += `"${r.id}","${r.type}","${r.massaviArea}","${r.length}","${r.coords}","${r.name}"\n`; });
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'waqar_gis_attributes.csv'; a.click();
-    showToast('CSV exported.');
+    if (!featureRecords.length) return alert('No data!');
+    let csv = "ID,Type,Area,Length,Coordinates\n";
+    featureRecords.forEach(f => { csv += `${f.id},${f.type},"${f.massaviArea}",${f.length},"${f.coords}"\n`; });
+    const a = document.createElement('a');
+    a.href = encodeURI("data:text/csv;charset=utf-8," + csv);
+    a.download = 'waqar_gis_attributes.csv';
+    a.click();
   }
 
-  function exportExcel() {
-    if (!featureRecords.length) { showToast('No records to export.', 'warn'); return; }
-    const ws = XLSX.utils.json_to_sheet(featureRecords);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Digitized Features");
-    XLSX.writeFile(wb, "waqar_gis_attributes.xlsx");
-    showToast('Excel file downloaded.');
+  function exportMapImage() {
+    html2canvas(document.getElementById('map')).then(canvas => {
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = 'Waqar_GIS_Map.png';
+      a.click();
+    });
   }
-
-  function openPrintModal() { openModal('printModal'); }
 
   function exportMapPDF() {
-    closeModal('printModal');
-    showLoader('Rendering Enterprise PDF Map Report...');
-    html2canvas(document.getElementById('map'), { useCORS: true }).then(canvas => {
+    html2canvas(document.getElementById('map')).then(canvas => {
       const { jsPDF } = window.jspdf;
-      const pageSize = document.getElementById('print-pagesize').value;
-      const orientation = document.getElementById('print-orientation').value;
-      const pdf = new jsPDF({ orientation, unit: 'mm', format: pageSize });
-      const title = document.getElementById('print-title').value || 'Waqar GIS Report';
-      
-      pdf.setFont('helvetica', 'bold'); pdf.setFontSize(16); pdf.setTextColor(212, 175, 55);
-      pdf.text(title, 15, 15);
-      pdf.setFontSize(10); pdf.setTextColor(100, 100, 100);
-      pdf.text(`Enterprise Operator: ${currentSession.name} | Date: ${new Date().toLocaleDateString()}`, 15, 22);
-
-      const imgData = canvas.toDataURL('image/png');
-      const w = orientation === 'landscape' ? 270 : 180;
-      const h = (canvas.height * w) / canvas.width;
-      pdf.addImage(imgData, 'PNG', 15, 28, w, Math.min(h, 130));
-
-      pdf.save('waqar_gis_enterprise_report.pdf');
-      hideLoader();
-      showToast('PDF report generated successfully.');
-    }).catch(() => { hideLoader(); showToast('PDF export failed.', 'error'); });
-  }
-
-  function saveUserSettings() {
-    currentSession.name = document.getElementById('setting-username').value;
-    closeModal('settingsModal');
-    showToast('Preferences successfully updated.');
+      const pdf = new jsPDF('landscape');
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(16);
+      pdf.text('Waqar GIS Portal - Report', 14, 15);
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 14, 25, 260, 150);
+      pdf.save('Waqar_GIS_Report.pdf');
+    });
   }
 </script>
 </body>
