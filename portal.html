@@ -30,11 +30,11 @@
     .app-header {
       height: 60px; min-height: 60px; background: #1a1f29; border-bottom: 2px solid #c5a059;
       display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
-      z-index: 1002; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      z-index: 1002; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); position: relative;
     }
     .header-left { display: flex; align-items: center; gap: 12px; }
-    .header-center { display: flex; align-items: center; gap: 8px; }
-    .header-right { display: flex; align-items: center; gap: 12px; }
+    .header-center { display: flex; align-items: center; gap: 8px; position: relative; z-index: 10; }
+    .header-right { display: flex; align-items: center; gap: 12px; position: relative; z-index: 10; }
     
     .header-btn {
       background: #252a34; color: #c5a059; border: 1px solid rgba(197, 160, 89, 0.4);
@@ -50,7 +50,6 @@
       border: 1px solid rgba(197, 160, 89, 0.3); padding: 5px 10px; border-radius: 6px;
       color: #f8fafc; font-size: 11px; font-weight: 600;
     }
-
     .app-body { display: flex; flex: 1; height: calc(100vh - 60px); width: 100%; position: relative; }
     
     .sidebar {
@@ -200,7 +199,6 @@
       <button class="header-btn logout-btn" onclick="handleLogout()" title="Logout Session">Logout</button>
     </div>
   </header>
-
   <button id="floating-menu-btn" onclick="toggleSidebar()" title="Open Menu">☰</button>
   
   <div class="app-body">
@@ -345,7 +343,6 @@
       </div>
     </div>
   </div>
-
   <!-- ENGLISH MODALS -->
   <div id="homeModal" class="custom-modal">
     <div class="modal-content">
@@ -439,7 +436,6 @@
       </ul>
     </div>
   </div>
-
 <script>
   function openModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
   function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
@@ -459,7 +455,6 @@
   function redoLastAction() {
     alert('Redo buffer is currently empty.');
   }
-
   const map = L.map('map', { crossOrigin: true, maxZoom: 20, zoomControl: true }).setView([34.0, 71.5], 13);
   L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
   const basemaps = {
