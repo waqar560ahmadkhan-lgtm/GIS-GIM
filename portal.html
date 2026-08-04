@@ -26,20 +26,21 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
     html, body { height: 100%; width: 100%; overflow: hidden; background: #15181e; display: flex; flex-direction: column; }
     
-    /* App Header Styles Optimized for Mobile & Desktop */
+    /* App Header Styles Fully Optimized for Mobile & Desktop */
     .app-header {
-      height: auto; min-height: 56px; background: #1a1f29; border-bottom: 2px solid #c5a059;
-      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: 8px 12px;
-      z-index: 1002; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); gap: 6px;
+      height: auto; min-height: 52px; background: #1a1f29; border-bottom: 2px solid #c5a059;
+      display: flex; align-items: center; justify-content: space-between; padding: 6px 10px;
+      z-index: 1002; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); gap: 8px; flex-wrap: nowrap;
+      overflow-x: auto;
     }
-    .header-left { display: flex; align-items: center; gap: 8px; }
-    .header-center { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-    .header-right { display: flex; align-items: center; gap: 8px; }
+    .header-left { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .header-center { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .header-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
     
     .header-btn {
       background: #252a34; color: #c5a059; border: 1px solid rgba(197, 160, 89, 0.4);
-      border-radius: 6px; padding: 5px 10px; font-size: 10px; font-weight: 700; cursor: pointer;
-      display: flex; align-items: center; gap: 4px; transition: all 0.2s ease; white-space: nowrap;
+      border-radius: 6px; padding: 4px 8px; font-size: 10px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; gap: 3px; transition: all 0.2s ease; white-space: nowrap;
     }
     .header-btn:hover { background: #c5a059; color: #15181e; }
     .header-btn.logout-btn { background: #7f1d1d; color: #fca5a5; border-color: #ef4444; }
@@ -50,7 +51,15 @@
       border: 1px solid rgba(197, 160, 89, 0.3); padding: 4px 8px; border-radius: 6px;
       color: #f8fafc; font-size: 10px; font-weight: 600; white-space: nowrap;
     }
-    .app-body { display: flex; flex: 1; height: calc(100vh - 56px); width: 100%; position: relative; }
+    
+    @media (max-width: 768px) {
+      .app-header { overflow-x: auto; justify-content: flex-start; padding: 6px 8px; }
+      .app-header::-webkit-scrollbar { height: 3px; }
+      .app-header::-webkit-scrollbar-thumb { background: #c5a059; border-radius: 3px; }
+      .header-center { margin-left: auto; margin-right: auto; }
+    }
+
+    .app-body { display: flex; flex: 1; height: calc(100vh - 52px); width: 100%; position: relative; }
     
     .sidebar {
       width: 310px; min-width: 310px;
@@ -185,7 +194,7 @@
   <header class="app-header">
     <div class="header-left">
       <button class="header-btn" onclick="toggleSidebar()" title="Toggle Menu">☰ Menu</button>
-      <div style="font-family: 'Cinzel', serif; font-weight: 700; color: #d4af37; font-size: 13px; letter-spacing: 0.5px;">Waqar GIS</div>
+      <div style="font-family: 'Cinzel', serif; font-weight: 700; color: #d4af37; font-size: 13px; letter-spacing: 0.5px; white-space: nowrap;">Waqar GIS</div>
     </div>
     <div class="header-center">
       <button class="header-btn" onclick="undoLastAction()" title="Undo">↩️ Undo</button>
