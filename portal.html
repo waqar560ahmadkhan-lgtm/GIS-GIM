@@ -249,6 +249,7 @@
       <div id="map"></div>
       <div id="top-right-controls">
         <button class="action-ctrl-btn" onclick="undoLastAction()">↩️ Undo</button>
+        <button class="action-ctrl-btn" onclick="redoLastAction()">🔁 Redo</button>
         <button class="action-ctrl-btn" onclick="exportMapImage()">🖨️ Print Map</button>
         <button id="note-mode-btn" onclick="toggleNoteMode()">📍 Note</button>
         <button id="clear-notes-btn" onclick="clearAllNotes()">🗑️ Clear</button>
@@ -301,10 +302,34 @@
 <script>
   function openModal(id) { document.getElementById(id).style.display = 'flex'; }
   function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+  
+  let undoStack = [];
+  let redoStack = [];
+
   function undoLastAction() {
     const layers = drawnItems.getLayers();
-    if (layers.length > 0) removeFeature(layers[layers.length - 1]);
+    if (layers.length > 0) {
+      const lastLayer = layers[layers.length - 1];
+      drawnItems.removeLayer(lastLayer);
+      redoStack.push(lastLayer);
+      const removedRecord = featureRecords.pop();
+      updateAttributeTable();
+    }
   }
+
+  function redoLastAction() {
+    if (redoStack.length > 0) {
+      const layerToRestore = redoStack.pop();
+      drawnItems.addLayer(layerToRestore);
+      const geojson = layerToRestore.toGeoJSON();
+      const type = layerToRestore instanceof L.Polygon ? 'POLYGON' : 'POLYLINE';
+      let areaText = type === 'POLYGON' ? calculateMassaviArea(turf.area(geojson)) : 'N/A';
+      let lenText = `${(turf.length(geojson, {units: 'meters'})).toFixed(1)} m`;
+      featureRecords.push({ id: layerToRestore._custom_id, type: type, area: areaText, length: lenText, coords: type });
+      updateAttributeTable();
+    }
+  }
+
   const map = L.map('map', { crossOrigin: true, maxZoom: 20, zoomControl: true }).setView([34.0, 71.5], 13);
   L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
   const basemaps = {
@@ -448,16 +473,12 @@
     edit: { featureGroup: drawnItems, remove: true }
   });
   map.addControl(drawControl);
-  function removeFeature(layer) {
-    drawnItems.removeLayer(layer);
-    featureRecords = featureRecords.filter(f => f.id !== layer._custom_id);
-    updateAttributeTable();
-  }
   map.on(L.Draw.Event.CREATED, function(e) {
     const layer = e.layer;
     featureCounter++;
     layer._custom_id = featureCounter;
     drawnItems.addLayer(layer);
+    redoStack = []; // Clear redo stack on new action
     const geojson = layer.toGeoJSON();
     const type = e.layerType;
     let areaText = type === 'polygon' ? calculateMassaviArea(turf.area(geojson)) : 'N/A';
