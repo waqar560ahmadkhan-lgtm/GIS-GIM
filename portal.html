@@ -35,10 +35,6 @@
     .header-left { display: flex; align-items: center; gap: 12px; }
     .header-center { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
     .header-right { display: flex; align-items: center; gap: 12px; }
-    /* FIX: auth-guard.js injects a duplicate Waqar(Admin)/Admin/Logout badge into
-       header-right at runtime. Hiding this container permanently so the duplicate
-       never shows, since the real badge already lives in header-center. */
-    .header-right { display: none !important; }
     
     .header-btn {
       background: #252a34; color: #c5a059; border: 1px solid rgba(197, 160, 89, 0.4);
@@ -726,24 +722,6 @@
       pdf.save('Waqar_GIS_Report.pdf');
     });
   }
-</script>
-
-<script>
-  // Auto-remove duplicate user-badge / logout buttons injected anywhere on the page
-  // (e.g. by auth-guard.js), keeping only the first occurrence.
-  window.addEventListener('load', function() {
-    setTimeout(function() {
-      const badges = document.querySelectorAll('.user-badge');
-      badges.forEach((el, i) => { if (i > 0) el.remove(); });
-
-      const logoutBtns = document.querySelectorAll('.logout-btn, [onclick*="handleLogout"]');
-      logoutBtns.forEach((el, i) => { if (i > 0) el.remove(); });
-
-      document.querySelectorAll('.header-right').forEach(el => {
-        el.style.display = 'none';
-      });
-    }, 300);
-  });
 </script>
 </body>
 </html>
