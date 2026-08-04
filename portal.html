@@ -727,18 +727,6 @@
     });
   }
 </script>
-  function exportMapPDF() {
-    html2canvas(document.getElementById('map')).then(canvas => {
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF('landscape');
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(16);
-      pdf.text('Waqar GIS Portal - Report', 14, 15);
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 14, 25, 260, 150);
-      pdf.save('Waqar_GIS_Report.pdf');
-    });
-  }
-</script>
 
 <script>
   // Auto-remove duplicate user-badge / logout buttons injected anywhere on the page
@@ -757,8 +745,5 @@
     }, 300);
   });
 </script>
-
-</body>
-</html>
 </body>
 </html>
