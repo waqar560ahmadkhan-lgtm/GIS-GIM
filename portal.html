@@ -35,6 +35,10 @@
     .header-left { display: flex; align-items: center; gap: 12px; }
     .header-center { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
     .header-right { display: flex; align-items: center; gap: 12px; }
+    /* FIX: auth-guard.js injects a duplicate Waqar(Admin)/Admin/Logout badge into
+       header-right at runtime. Hiding this container permanently so the duplicate
+       never shows, since the real badge already lives in header-center. */
+    .header-right { display: none !important; }
     
     .header-btn {
       background: #252a34; color: #c5a059; border: 1px solid rgba(197, 160, 89, 0.4);
