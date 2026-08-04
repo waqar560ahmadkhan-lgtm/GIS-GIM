@@ -124,8 +124,14 @@
       position: absolute; bottom: 170px; right: 15px; background: rgba(21, 24, 30, 0.85); color: #c5a059; padding: 5px 10px; border-radius: 6px; font-size: 10px; border: 1px solid rgba(197, 160, 89, 0.3); z-index: 500; pointer-events: none; font-family: monospace;
     }
     #top-right-controls {
-      position: absolute; top: 12px; right: 12px; z-index: 1000; display: flex; gap: 6px;
+      position: absolute; top: 12px; right: 12px; z-index: 1000; display: flex; gap: 6px; align-items: center;
     }
+    .action-ctrl-btn {
+      background: #252a34; color: #c5a059; border: 1px solid rgba(197, 160, 89, 0.4);
+      border-radius: 6px; padding: 5px 9px; font-size: 10px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; gap: 3px; white-space: nowrap;
+    }
+    .action-ctrl-btn:hover { background: #c5a059; color: #15181e; }
     #note-mode-btn { background: #c5a059; color: #0f1217; border: 1px solid #f3e5ab; border-radius: 6px; padding: 5px 8px; font-size: 10px; font-weight: 700; cursor: pointer; }
     #note-mode-btn.active { background: #ef4444; color: #fff; }
     #clear-notes-btn { background: #252a34; color: #f87171; border: 1px solid rgba(248, 113, 113, 0.4); border-radius: 6px; padding: 5px 8px; font-size: 10px; font-weight: 700; cursor: pointer; }
@@ -148,11 +154,6 @@
     <div class="header-left">
       <button class="header-btn" onclick="toggleSidebar()">☰ Menu</button>
       <div style="font-family: 'Cinzel', serif; font-weight: 700; color: #d4af37; font-size: 12px;">Waqar GIS</div>
-    </div>
-    <div class="header-right">
-      <button class="header-btn" onclick="undoLastAction()">↩️ Undo</button>
-      <button class="header-btn" onclick="exportMapImage()">🖨️ Print</button>
-      <button class="header-btn logout-btn" onclick="handleLogout()">Logout</button>
     </div>
   </header>
   <button id="floating-menu-btn" onclick="toggleSidebar()">☰</button>
@@ -247,6 +248,8 @@
     <div id="main-container">
       <div id="map"></div>
       <div id="top-right-controls">
+        <button class="action-ctrl-btn" onclick="undoLastAction()">↩️ Undo</button>
+        <button class="action-ctrl-btn" onclick="exportMapImage()">🖨️ Print Map</button>
         <button id="note-mode-btn" onclick="toggleNoteMode()">📍 Note</button>
         <button id="clear-notes-btn" onclick="clearAllNotes()">🗑️ Clear</button>
       </div>
@@ -298,12 +301,6 @@
 <script>
   function openModal(id) { document.getElementById(id).style.display = 'flex'; }
   function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-  function handleLogout() {
-    if (confirm('Logout?')) {
-      localStorage.removeItem('waqar_gis_logged_in');
-      window.location.href = 'index.html';
-    }
-  }
   function undoLastAction() {
     const layers = drawnItems.getLayers();
     if (layers.length > 0) removeFeature(layers[layers.length - 1]);
