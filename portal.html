@@ -31,7 +31,6 @@
     .header-btn:hover { background: #c5a059; color: #15181e; }
     .header-btn.logout-btn { background: #7f1d1d; color: #fca5a5; border-color: #ef4444; }
     .header-btn.logout-btn:hover { background: #ef4444; color: #fff; }
-    .user-badge { display: flex; align-items: center; gap: 6px; background: rgba(197, 160, 89, 0.1); border: 1px solid rgba(197, 160, 89, 0.3); padding: 5px 10px; border-radius: 6px; color: #f8fafc; font-size: 11px; font-weight: 600; }
     .app-body { display: flex; flex: 1; height: calc(100vh - 60px); width: 100%; position: relative; }
     .sidebar { width: 310px; min-width: 310px; background: linear-gradient(180deg, #20242c 0%, #15181e 100%); color: #f1f5f9; padding: 20px 16px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; border-right: 2px solid #c5a059; box-shadow: 6px 0 25px rgba(0, 0, 0, 0.6); z-index: 1001; position: relative; transition: transform 0.3s ease; }
     .sidebar.closed { transform: translateX(-310px); position: absolute; height: 100%; }
@@ -119,6 +118,14 @@
         </div>
         <button class="menu-toggle-btn" onclick="toggleSidebar()" title="Close Menu">✕</button>
       </div>
+
+      <!-- NEW MOUZA LIST & SEARCH PANEL -->
+      <div class="panel-box">
+        <h3>Mouza List</h3>
+        <input type="text" id="mouza-search-input" placeholder="Type Mouza or Khasra name..." />
+        <button class="btn btn-gold" onclick="searchMouzaByName()">SEARCH MOUZA</button>
+      </div>
+
       <div class="panel-box">
         <h3>Search Location</h3>
         <input type="text" id="sidebar-search" placeholder="District Or Tehsil..." />
@@ -248,13 +255,6 @@
       <button class="modal-close" onclick="closeModal('homeModal')">×</button>
       <h2>🏠 Welcome to Waqar GIS Portal</h2>
       <p>Welcome to the main dashboard of your Executive Spatial Suite. This platform is specifically engineered for advanced Geographic Information System (GIS) analysis and Remote Sensing operations.</p>
-      <p><strong>Quick Features:</strong></p>
-      <ul>
-        <li>District & Tehsil location search engine.</li>
-        <li>Precise spatial area calculations in Kanal, Marla, and SqFt (Massavi format).</li>
-        <li>Split-screen satellite comparison slider.</li>
-        <li>Export datasets directly to GeoJSON, CSV, PNG, and PDF reports.</li>
-      </ul>
     </div>
   </div>
   <div id="aboutModal" class="custom-modal">
@@ -262,106 +262,69 @@
       <button class="modal-close" onclick="closeModal('aboutModal')">×</button>
       <h2>ℹ️ About Waqar GIS Portal</h2>
       <p><strong>Waqar GIS Portal</strong> is a high-performance web-based spatial analysis and mapping application engineered in accordance with modern Geomatics and spatial software standards.</p>
-      <p>The system seamlessly integrates multi-source high-resolution satellite imagery (Google, Sentinel-2, Esri) with interactive vector digitization tools, facilitating land area calculations, spatial buffering, and topology validation.</p>
     </div>
   </div>
   <div id="servicesModal" class="custom-modal">
     <div class="modal-content">
       <button class="modal-close" onclick="closeModal('servicesModal')">×</button>
       <h2>🛠️ Services & Spatial Solutions</h2>
-      <p>The portal provides the following technical solutions and services:</p>
-      <ul>
-        <li><strong>Spatial Digitization:</strong> Digitizing polygons, lines, and point features with automated perimeter and area measurements.</li>
-        <li><strong>Massavi Conversion:</strong> Automatic calculation of square meters into traditional land units (Kanal, Marla, Square Feet).</li>
-        <li><strong>Buffer Analysis:</strong> Generating custom proximity buffer zones around features.</li>
-        <li><strong>Multi-Source Basemaps:</strong> Seamless basemap switching between Google Satellite, Sentinel-2, OpenStreetMap, and Dark Canvas.</li>
-        <li><strong>Professional Exports:</strong> Downloading vector layers and tables as GeoJSON, CSV, high-resolution PNG images, and PDF reports.</li>
-      </ul>
+      <p>The portal provides advanced spatial digitization, Massavi land area conversion, buffer analysis, and multi-source basemap capabilities.</p>
     </div>
   </div>
   <div id="contactModal" class="custom-modal">
     <div class="modal-content">
       <button class="modal-close" onclick="closeModal('contactModal')">×</button>
       <h2>📞 Contact Us & Support</h2>
-      <p>If you have any queries or require technical assistance regarding the portal, please feel free to reach out:</p>
-      <ul>
-        <li><strong>Developer:</strong> Waqar Ahmad (Geomatics Specialist)</li>
-        <li><strong>Phone Number:</strong> 03201975800</li>
-        <li><strong>Email Address:</strong> waqar560ahmad@gmail.com</li>
-      </ul>
+      <p><strong>Developer:</strong> Waqar Ahmad (Geomatics Specialist)</p>
+      <p><strong>Phone Number:</strong> 03201975800</p>
+      <p><strong>Email Address:</strong> waqar560ahmad@gmail.com</p>
     </div>
   </div>
   <div id="profileModal" class="custom-modal">
     <div class="modal-content">
       <button class="modal-close" onclick="closeModal('profileModal')">×</button>
       <h2>👤 User Profile & Session</h2>
-      <p>Your user account details and active workspace session:</p>
-      <ul>
-        <li><strong>Username:</strong> Waqar Ahmad (Admin)</li>
-        <li><strong>Role:</strong> GIS Analyst / Spatial Developer</li>
-        <li><strong>Phone Number:</strong> 03201975800</li>
-        <li><strong>Email Address:</strong> waqar560ahmad@gmail.com</li>
-        <li><strong>Workspace:</strong> Pakistan</li>
-      </ul>
+      <p><strong>Username:</strong> Waqar Ahmad (Admin)</p>
+      <p><strong>Role:</strong> GIS Analyst / Spatial Developer</p>
+      <p><strong>Phone Number:</strong> 03201975800</p>
+      <p><strong>Workspace:</strong> Pakistan</p>
     </div>
   </div>
   <div id="settingsModal" class="custom-modal">
     <div class="modal-content">
       <button class="modal-close" onclick="closeModal('settingsModal')">×</button>
       <h2>⚙️ Portal Settings</h2>
-      <p>System configurations and rendering settings:</p>
-      <ul>
-        <li><strong>Map Engine:</strong> Leaflet v1.9.4 Spatial Renderer (Active)</li>
-        <li><strong>Coordinate System:</strong> WGS84 / UTM Zone Mapping (Active)</li>
-      </ul>
+      <p>Leaflet v1.9.4 Spatial Renderer & UTM Coordinate Mapping active.</p>
     </div>
   </div>
   <div id="faqModal" class="custom-modal">
     <div class="modal-content">
       <button class="modal-close" onclick="closeModal('faqModal')">×</button>
       <h2>❓ Help & FAQ</h2>
-      <p><strong>Q1: How do I digitize a new feature?</strong><br>A: Click the polygon or line tool on the top-left Leaflet Draw toolbar and place vertices directly on the map.</p>
-      <p><strong>Q2: Where are the land area conversions displayed?</strong><br>A: Once a feature is drawn, the area automatically calculates in Kanal, Marla, and Square Feet inside the bottom Attribute Table.</p>
+      <p>Use the new Mouza List search bar to look up specific features or Khasra IDs instantly.</p>
     </div>
   </div>
   <div id="privacyModal" class="custom-modal">
     <div class="modal-content">
       <button class="modal-close" onclick="closeModal('privacyModal')">×</button>
       <h2>🔒 Privacy Policy</h2>
-      <p>Waqar GIS Portal prioritizes data privacy and security.</p>
-      <ul>
-        <li>All digitized geometries, notes, and custom bookmarks are stored locally inside your web browser's LocalStorage.</li>
-        <li>No spatial datasets or personal credentials are sent or sold to external third-party servers.</li>
-      </ul>
+      <p>All geometries and user settings remain local to your session.</p>
     </div>
   </div>
+
 <script>
   function openModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
   function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
-  function handleLogout() {
-    if (confirm('Are you sure you want to log out?')) {
-      localStorage.removeItem('waqar_gis_logged_in');
-      window.location.href = 'index.html';
-    }
-  }
-  function undoLastAction() {
-    const layers = drawnItems.getLayers();
-    if (layers.length > 0) {
-      const lastLayer = layers[layers.length - 1];
-      removeFeature(lastLayer);
-    }
-  }
-  function redoLastAction() {
-    alert('Redo buffer is currently empty.');
-  }
+  
   const map = L.map('map', { crossOrigin: true, maxZoom: 20, zoomControl: true }).setView([34.0, 71.5], 13);
   L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
+  
   const basemaps = {
     googleSat: L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: '© Google' }),
     sentinel2: L.tileLayer('https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2023_3857/default/g/{z}/{y}/{x}.jpg', { maxZoom: 18, attribution: '© EOX' }),
     esriSat: L.layerGroup([
       L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }),
-      L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, opacity: 0.95 })
+      L.services = L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, opacity: 0.95 })
     ]),
     osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }),
     topo: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }),
@@ -369,6 +332,7 @@
   };
   let currentBasemap = basemaps.googleSat;
   currentBasemap.addTo(map);
+
   function toggleSidebar() {
     const sidebar = document.getElementById('app-sidebar');
     const floatBtn = document.getElementById('floating-menu-btn');
@@ -376,6 +340,7 @@
     floatBtn.style.display = sidebar.classList.contains('closed') ? 'flex' : 'none';
     setTimeout(() => { map.invalidateSize(); }, 300);
   }
+
   let splitControl = null, leftLayerObj = null, rightLayerObj = null, isSplitActive = false;
   function toggleSplitScreen() {
     const btn = document.getElementById('slider-toggle-btn');
@@ -401,8 +366,11 @@
       btn.classList.remove('btn-active');
     }
   }
+
   let coordMarker = null, uploadedLayerGroup = L.layerGroup().addTo(map), bufferLayerGroup = L.layerGroup().addTo(map), notesLayerGroup = L.layerGroup().addTo(map);
   let featureCounter = 0, featureRecords = [], noteMode = false, noteCounter = 0;
+  let loadedMouzaLayer = null; // Global reference for Mouza search
+
   function toUTM(lat, lng) {
     const zone = Math.floor((lng + 180) / 6) + 1;
     const hemisphere = lat >= 0 ? 'north' : 'south';
@@ -412,20 +380,24 @@
       return `Zone ${zone}${hemisphere === 'north' ? 'N' : 'S'} | E: ${easting.toFixed(1)} N: ${northing.toFixed(1)}`;
     } catch (e) { return '--'; }
   }
+
   map.on('mousemove', function(e) {
     document.getElementById('cursor-hud').innerHTML = `Lat: ${e.latlng.lat.toFixed(5)} | Lng: ${e.latlng.lng.toFixed(5)}<br>UTM: ${toUTM(e.latlng.lat, e.latlng.lng)}`;
   });
+
   function switchBasemap(key) {
     if (isSplitActive) return;
     if (currentBasemap) map.removeLayer(currentBasemap);
     if (basemaps[key]) { currentBasemap = basemaps[key]; currentBasemap.addTo(map); changeOpacity(document.getElementById('opacity-slider').value); }
   }
+
   function changeOpacity(val) {
     if (currentBasemap && !isSplitActive) {
       if (typeof currentBasemap.setOpacity === 'function') currentBasemap.setOpacity(val);
       else if (currentBasemap.getLayers) currentBasemap.getLayers().forEach(l => { if (l.setOpacity) l.setOpacity(val); });
     }
   }
+
   function calculateMassaviArea(areaSqMeters) {
     let totalSqFt = areaSqMeters * 10.7639;
     let kanals = Math.floor(totalSqFt / 5445.0);
@@ -436,6 +408,7 @@
     if (marlas >= 20) { kanals += 1; marlas -= 20; }
     return { formattedText: `${kanals} Kanal, ${marlas} Marla, ${finalSqFt} SqFt` };
   }
+
   function searchLocation() {
     const query = document.getElementById('sidebar-search').value;
     if (!query) return alert('Please enter location!');
@@ -447,6 +420,32 @@
         L.marker([parseFloat(d[0].lat), parseFloat(d[0].lon)]).addTo(map).bindPopup(d[0].display_name).openPopup();
       });
   }
+
+  // ==== MOUZA SEARCH FUNCTIONALITY ====
+  function searchMouzaByName() {
+    const query = document.getElementById('mouza-search-input').value.toLowerCase().trim();
+    if (!query) return alert('Please enter a Mouza or Khasra name to search!');
+    if (!loadedMouzaLayer) return alert('Mouza dataset is still loading or unavailable.');
+
+    let found = false;
+    loadedMouzaLayer.eachLayer(layer => {
+      const propString = JSON.stringify(layer.feature.properties).toLowerCase();
+      if (propString.includes(query)) {
+        if (layer.getBounds && layer.getBounds().isValid()) {
+          map.fitBounds(layer.getBounds());
+        } else if (layer.getLatLng) {
+          map.setView(layer.getLatLng(), 18);
+        }
+        if (layer.openPopup) layer.openPopup();
+        found = true;
+      }
+    });
+
+    if (!found) {
+      alert('No matching Mouza or Khasra found!');
+    }
+  }
+
   function goToCoordinates() {
     const lat = parseFloat(document.getElementById('coord-lat').value);
     const lng = parseFloat(document.getElementById('coord-lng').value);
@@ -455,6 +454,7 @@
     map.setView([lat, lng], 17);
     coordMarker = L.marker([lat, lng]).addTo(map).bindPopup(`Lat: ${lat}<br>Lng: ${lng}`).openPopup();
   }
+
   function loadBookmarks() {
     const saved = JSON.parse(localStorage.getItem('waqar_gis_bookmarks') || '[]');
     const list = document.getElementById('bookmark-list');
@@ -487,6 +487,7 @@
     loadBookmarks();
   }
   loadBookmarks();
+
   function toggleNoteMode() {
     noteMode = !noteMode;
     document.getElementById('note-mode-btn').classList.toggle('active', noteMode);
@@ -508,6 +509,7 @@
     marker.bindPopup(pc).openPopup();
     toggleNoteMode();
   });
+
   function loadSpatialFile() {
     const file = document.getElementById('file-input').files[0];
     if (!file) return alert('Select a file!');
@@ -524,6 +526,7 @@
     };
     reader.readAsText(file);
   }
+
   const drawnItems = new L.FeatureGroup();
   map.addLayer(drawnItems);
   const drawControl = new L.Control.Draw({
@@ -531,6 +534,7 @@
     edit: { featureGroup: drawnItems, remove: true }
   });
   map.addControl(drawControl);
+
   function removeFeature(layer) {
     drawnItems.removeLayer(layer);
     featureRecords = featureRecords.filter(f => f.id !== layer._custom_id);
@@ -561,6 +565,7 @@
     featureRecords.push({ id: featureCounter, type: type.toUpperCase(), massaviArea: areaText, length: lenText, coords: coordsText });
     updateAttributeTable();
   });
+
   function createBuffer() {
     const data = drawnItems.toGeoJSON();
     const radius = parseFloat(document.getElementById('buffer-radius').value);
@@ -568,6 +573,7 @@
     bufferLayerGroup.clearLayers();
     bufferLayerGroup.addLayer(L.geoJSON(turf.buffer(data, radius / 1000, { units: 'kilometers' }), { style: { color: '#ef4444', fillColor: '#f87171', fillOpacity: 0.35, dashArray: '5, 5' } }));
   }
+
   function updateAttributeTable() {
     const tbody = document.querySelector('#attr-table tbody');
     if (!featureRecords.length) {
@@ -576,6 +582,7 @@
     }
     tbody.innerHTML = featureRecords.map(f => `<tr><td>#${f.id}</td><td><strong>${f.type}</strong></td><td style="color:#d4af37; font-weight:bold;">${f.massaviArea}</td><td>${f.length}</td><td>${f.coords}</td></tr>`).join('');
   }
+
   function checkTopology() {
     const data = drawnItems.toGeoJSON();
     if (!data.features.length) return alert('Draw a feature first!');
@@ -583,6 +590,7 @@
     data.features.forEach(f => { if (f.geometry.type === 'Polygon') errs += turf.kinks(f).features.length; });
     alert(errs > 0 ? `Topology Error: ${errs} intersections found!` : 'Topology Valid! No errors.');
   }
+
   function exportGeoJSON() {
     const data = drawnItems.toGeoJSON();
     if (!data.features.length) return alert('No features!');
@@ -620,11 +628,11 @@
     });
   }
 
-  // ==== VECTOR FILES AUTO-ZOOM & LOAD CODE ====
+  // ==== DATA.json & Line_Data.json LOADING WITH SEARCH SUPPORT ====
   fetch('DATA.json')
     .then(response => response.json())
     .then(data => {
-        const polyLayer = L.geoJSON(data, {
+        loadedMouzaLayer = L.geoJSON(data, {
             style: {
                 color: "#ffcc00",
                 weight: 2,
@@ -633,15 +641,17 @@
             },
             onEachFeature: function (feature, layer) {
                 if (feature.properties) {
-                    let popupText = "<b>Khasar No:</b> " + (feature.properties.Khasar_NO || 'N/A');
+                    let popupText = "<b>Khasra / Mouza Info:</b><br>";
+                    for (let key in feature.properties) {
+                        popupText += `<b>${key}:</b> ${feature.properties[key]}<br>`;
+                    }
                     layer.bindPopup(popupText);
                 }
             }
         }).addTo(map);
         
-        // Map khud-ba-khud vector data par zoom ho jaye ga
-        if (polyLayer.getBounds().isValid()) {
-            map.fitBounds(polyLayer.getBounds());
+        if (loadedMouzaLayer.getBounds().isValid()) {
+            map.fitBounds(loadedMouzaLayer.getBounds());
         }
     })
     .catch(error => console.error('Error loading DATA.json:', error));
