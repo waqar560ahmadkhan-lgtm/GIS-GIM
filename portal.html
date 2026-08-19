@@ -211,19 +211,18 @@
         <button class="btn btn-dark" onclick="openModal('privacyModal')" style="margin-bottom:6px;">🔒 Privacy Policy</button>
       </div>
 
-    <!-- MOUZA LIST WITH VECTOR DATA LIST AND SAVE OPTION -->
-<div class="panel-box" style="border-color: #d4af37;">
-    <h3>Mouza List</h3>
-    <input type="text" id="mouza-search-input" placeholder="🔍 Mouza Name" />
-    <button class="btn btn-gold" onclick="searchMouzaByName()">SEARCH MOUZA</button>
+      <!-- MOUZA LIST WITH VECTOR DATA LIST AND SAVE OPTION -->
+      <div class="panel-box" style="border-color: #d4af37;">
+        <h3>Mouza List</h3>
+        <input type="text" id="mouza-search-input" placeholder="🔍 Mouza Name" />
+        <button class="btn btn-gold" onclick="searchMouzaByName()" style="margin-bottom:6px;">SEARCH MOUZA</button>
+        
+        <!-- Scrollable list where Jammat_Polygon.json items appear and support double-click zoom -->
+        <div id="mouza-container-list" style="max-height: 120px; overflow-y: auto; margin-bottom: 6px; border: 1px solid rgba(197,160,89,0.3); border-radius: 6px; padding: 4px; background: #15181e;">
+          <div style="font-size:10px; color:#788294; text-align:center; padding:4px;">Loading Jammat_Polygon.json...</div>
+        </div>
 
-    <!-- Scrollable list where Jammat_Polygon.json items appear and support double-click zoom -->
-    <div id="mouza-container-list" style="max-height: 120px; overflow-y: auto; margin-bottom: 6px; border: 1px solid rgba(197,160,89,0.3); border-radius: 6px; padding: 4px; background: rgba(197,160,89,0.05);">
-        <div style="font-size:10px; color:#788294; text-align:center; padding:4px;">Loading Jammat_Polygon.json...</div>
-    </div>
-
-    <button class="btn btn-emerald" onclick="saveMouzaVectorData()">💾 Save Vector Data</button>
-</div>
+        <button class="btn btn-emerald" onclick="saveMouzaVectorData()">💾 Save Vector Data</button>
       </div>
     </div>
 
@@ -735,4 +734,16 @@
     });
 
   fetch('Jammat_Line.json')
-  </script>
+    .then(response => response.json())
+    .then(data => {
+        L.geoJSON(data, {
+            style: {
+                color: "#ff0000",
+                weight: 3
+            }
+        }).addTo(map);
+    })
+    .catch(error => console.error('Error loading Jammat_Line.json:', error));
+</script>
+</body>
+</html>
