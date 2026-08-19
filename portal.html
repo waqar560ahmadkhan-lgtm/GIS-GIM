@@ -211,11 +211,12 @@
         <button class="btn btn-dark" onclick="openModal('privacyModal')" style="margin-bottom:6px;">🔒 Privacy Policy</button>
       </div>
 
-      <!-- MOUZA LIST MOVED TO THE VERY BOTTOM -->
+      <!-- MOUZA LIST WITH VECTOR DATA SAVE OPTION AT THE VERY BOTTOM -->
       <div class="panel-box" style="border-color: #d4af37;">
         <h3>Mouza List</h3>
         <input type="text" id="mouza-search-input" placeholder="🔍 Mouza Name" />
-        <button class="btn btn-gold" onclick="searchMouzaByName()">SEARCH MOUZA</button>
+        <button class="btn btn-gold" onclick="searchMouzaByName()" style="margin-bottom:6px;">SEARCH MOUZA</button>
+        <button class="btn btn-emerald" onclick="saveMouzaVectorData()">💾 Save Vector Data</button>
       </div>
     </div>
 
@@ -443,6 +444,22 @@
     if (!found) {
       alert('No matching Mouza found!');
     }
+  }
+
+  // NEW FUNCTION: Save Mouza / Vector design data directly from the list section
+  function saveMouzaVectorData() {
+    const data = drawnItems.toGeoJSON();
+    if (!data.features.length) {
+      alert('No designed vector features found on map to save!');
+      return;
+    }
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", "mouza_vector_design.geojson");
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
   }
 
   function goToCoordinates() {
