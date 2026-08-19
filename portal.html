@@ -619,24 +619,12 @@
       pdf.save('Waqar_GIS_Report.pdf');
     });
   }
-  function exportMapPDF() {
-    html2canvas(document.getElementById('map')).then(canvas => {
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF('landscape');
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(16);
-      pdf.text('Waqar GIS Portal - Report', 14, 15);
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 14, 25, 260, 150);
-      pdf.save('Waqar_GIS_Report.pdf');
-    });
-  }
 
-  // ==== YAHAN NEECHE APNI VECTOR FILES LOAD KARNE KA CODE PASTE KAREIN ====
-
+  // ==== VECTOR FILES AUTO-ZOOM & LOAD CODE ====
   fetch('DATA.json')
     .then(response => response.json())
     .then(data => {
-        L.geoJSON(data, {
+        const polyLayer = L.geoJSON(data, {
             style: {
                 color: "#ffcc00",
                 weight: 2,
@@ -650,6 +638,11 @@
                 }
             }
         }).addTo(map);
+        
+        // Map khud-ba-khud vector data par zoom ho jaye ga
+        if (polyLayer.getBounds().isValid()) {
+            map.fitBounds(polyLayer.getBounds());
+        }
     })
     .catch(error => console.error('Error loading DATA.json:', error));
 
@@ -664,8 +657,6 @@
         }).addTo(map);
     })
     .catch(error => console.error('Error loading Line_Data.json:', error));
-
-</script> <!-- Is closing script tag se upar paste karna hai -->
 </script>
 </body>
 </html>
