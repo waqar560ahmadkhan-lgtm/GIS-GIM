@@ -217,9 +217,9 @@
         <input type="text" id="mouza-search-input" placeholder="🔍 Mouza Name" />
         <button class="btn btn-gold" onclick="searchMouzaByName()" style="margin-bottom:6px;">SEARCH MOUZA</button>
         
-        <!-- Scrollable list where DATA.json items appear and support double-click zoom -->
+        <!-- Scrollable list where Jammat_Polygon.json items appear and support double-click zoom -->
         <div id="mouza-container-list" style="max-height: 120px; overflow-y: auto; margin-bottom: 6px; border: 1px solid rgba(197,160,89,0.3); border-radius: 6px; padding: 4px; background: #15181e;">
-          <div style="font-size:10px; color:#788294; text-align:center; padding:4px;">Loading DATA.json...</div>
+          <div style="font-size:10px; color:#788294; text-align:center; padding:4px;">Loading Jammat_Polygon.json...</div>
         </div>
 
         <button class="btn btn-emerald" onclick="saveMouzaVectorData()">💾 Save Vector Data</button>
@@ -460,7 +460,7 @@
     if (!container) return;
     container.innerHTML = '';
     if (!mouzaItemsData.length) {
-      container.innerHTML = '<div style="font-size:10px; color:#788294; text-align:center; padding:4px;">No mouzas found in DATA.json</div>';
+      container.innerHTML = '<div style="font-size:10px; color:#788294; text-align:center; padding:4px;">No mouzas found in Jammat_Polygon.json</div>';
       return;
     }
     mouzaItemsData.forEach((item) => {
@@ -686,8 +686,8 @@
     });
   }
 
-  // Load DATA.json and populate Mouza List with Double-Click zoom feature
-  fetch('DATA.json')
+  // Load Jammat_Polygon.json and populate Mouza List with Double-Click zoom feature
+  fetch('Jammat_Polygon.json')
     .then(response => response.json())
     .then(data => {
         loadedMouzaLayer = L.geoJSON(data, {
@@ -729,11 +729,11 @@
         }
     })
     .catch(error => {
-      console.error('Error loading DATA.json:', error);
-      document.getElementById('mouza-container-list').innerHTML = '<div style="font-size:10px; color:#ef4444; text-align:center; padding:4px;">Error loading DATA.json</div>';
+      console.error('Error loading Jammat_Polygon.json:', error);
+      document.getElementById('mouza-container-list').innerHTML = '<div style="font-size:10px; color:#ef4444; text-align:center; padding:4px;">Error loading Jammat_Polygon.json</div>';
     });
 
-  fetch('Line_Data.json')
+  fetch('Jammat_Line.json')
     .then(response => response.json())
     .then(data => {
         L.geoJSON(data, {
@@ -743,7 +743,7 @@
             }
         }).addTo(map);
     })
-    .catch(error => console.error('Error loading Line_Data.json:', error));
+    .catch(error => console.error('Error loading Jammat_Line.json:', error));
 </script>
 </body>
 </html>
