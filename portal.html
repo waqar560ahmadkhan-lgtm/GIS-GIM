@@ -119,13 +119,6 @@
         <button class="menu-toggle-btn" onclick="toggleSidebar()" title="Close Menu">✕</button>
       </div>
 
-      <!-- NEW MOUZA LIST & SEARCH PANEL -->
-      <div class="panel-box">
-        <h3>Mouza List</h3>
-        <input type="text" id="mouza-search-input" placeholder="Type Mouza or Khasra name..." />
-        <button class="btn btn-gold" onclick="searchMouzaByName()">SEARCH MOUZA</button>
-      </div>
-
       <div class="panel-box">
         <h3>Search Location</h3>
         <input type="text" id="sidebar-search" placeholder="District Or Tehsil..." />
@@ -217,6 +210,13 @@
         <button class="btn btn-dark" onclick="openModal('faqModal')" style="margin-bottom:6px;">❓ Help / FAQ</button>
         <button class="btn btn-dark" onclick="openModal('privacyModal')" style="margin-bottom:6px;">🔒 Privacy Policy</button>
       </div>
+
+      <!-- MOUZA LIST MOVED TO THE VERY BOTTOM -->
+      <div class="panel-box" style="border-color: #d4af37;">
+        <h3>Mouza List</h3>
+        <input type="text" id="mouza-search-input" placeholder="🔍 Mouza Name" />
+        <button class="btn btn-gold" onclick="searchMouzaByName()">SEARCH MOUZA</button>
+      </div>
     </div>
 
     <div id="main-container">
@@ -301,7 +301,7 @@
     <div class="modal-content">
       <button class="modal-close" onclick="closeModal('faqModal')">×</button>
       <h2>❓ Help & FAQ</h2>
-      <p>Use the new Mouza List search bar to look up specific features or Khasra IDs instantly.</p>
+      <p>Use the new Mouza List search bar at the bottom to look up specific features instantly.</p>
     </div>
   </div>
   <div id="privacyModal" class="custom-modal">
@@ -324,7 +324,7 @@
     sentinel2: L.tileLayer('https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2023_3857/default/g/{z}/{y}/{x}.jpg', { maxZoom: 18, attribution: '© EOX' }),
     esriSat: L.layerGroup([
       L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }),
-      L.services = L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, opacity: 0.95 })
+      L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, opacity: 0.95 })
     ]),
     osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }),
     topo: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }),
@@ -369,7 +369,7 @@
 
   let coordMarker = null, uploadedLayerGroup = L.layerGroup().addTo(map), bufferLayerGroup = L.layerGroup().addTo(map), notesLayerGroup = L.layerGroup().addTo(map);
   let featureCounter = 0, featureRecords = [], noteMode = false, noteCounter = 0;
-  let loadedMouzaLayer = null; // Global reference for Mouza search
+  let loadedMouzaLayer = null;
 
   function toUTM(lat, lng) {
     const zone = Math.floor((lng + 180) / 6) + 1;
@@ -421,10 +421,9 @@
       });
   }
 
-  // ==== MOUZA SEARCH FUNCTIONALITY ====
   function searchMouzaByName() {
     const query = document.getElementById('mouza-search-input').value.toLowerCase().trim();
-    if (!query) return alert('Please enter a Mouza or Khasra name to search!');
+    if (!query) return alert('Please enter a Mouza name to search!');
     if (!loadedMouzaLayer) return alert('Mouza dataset is still loading or unavailable.');
 
     let found = false;
@@ -442,7 +441,7 @@
     });
 
     if (!found) {
-      alert('No matching Mouza or Khasra found!');
+      alert('No matching Mouza found!');
     }
   }
 
@@ -628,7 +627,6 @@
     });
   }
 
-  // ==== DATA.json & Line_Data.json LOADING WITH SEARCH SUPPORT ====
   fetch('DATA.json')
     .then(response => response.json())
     .then(data => {
