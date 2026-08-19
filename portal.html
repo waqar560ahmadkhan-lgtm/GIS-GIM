@@ -211,11 +211,17 @@
         <button class="btn btn-dark" onclick="openModal('privacyModal')" style="margin-bottom:6px;">🔒 Privacy Policy</button>
       </div>
 
-      <!-- MOUZA LIST WITH VECTOR DATA SAVE OPTION AT THE VERY BOTTOM -->
+      <!-- MOUZA LIST WITH VECTOR DATA LIST AND SAVE OPTION -->
       <div class="panel-box" style="border-color: #d4af37;">
         <h3>Mouza List</h3>
         <input type="text" id="mouza-search-input" placeholder="🔍 Mouza Name" />
         <button class="btn btn-gold" onclick="searchMouzaByName()" style="margin-bottom:6px;">SEARCH MOUZA</button>
+        
+        <!-- Scrollable list where DATA.json items appear and support double-click zoom -->
+        <div id="mouza-container-list" style="max-height: 120px; overflow-y: auto; margin-bottom: 6px; border: 1px solid rgba(197,160,89,0.3); border-radius: 6px; padding: 4px; background: #15181e;">
+          <div style="font-size:10px; color:#788294; text-align:center; padding:4px;">Loading DATA.json...</div>
+        </div>
+
         <button class="btn btn-emerald" onclick="saveMouzaVectorData()">💾 Save Vector Data</button>
       </div>
     </div>
@@ -302,7 +308,7 @@
     <div class="modal-content">
       <button class="modal-close" onclick="closeModal('faqModal')">×</button>
       <h2>❓ Help & FAQ</h2>
-      <p>Use the new Mouza List search bar at the bottom to look up specific features instantly.</p>
+      <p>Double-click any item in the Mouza List or on the map to automatically zoom into the vector data.</p>
     </div>
   </div>
   <div id="privacyModal" class="custom-modal">
@@ -371,6 +377,8 @@
   let coordMarker = null, uploadedLayerGroup = L.layerGroup().addTo(map), bufferLayerGroup = L.layerGroup().addTo(map), notesLayerGroup = L.layerGroup().addTo(map);
   let featureCounter = 0, featureRecords = [], noteMode = false, noteCounter = 0;
   let loadedMouzaLayer = null;
+  let mouzaItemsData = [];
+  let mouzaCount = 0;
 
   function toUTM(lat, lng) {
     const zone = Math.floor((lng + 180) / 6) + 1;
@@ -446,7 +454,41 @@
     }
   }
 
-  // NEW FUNCTION: Save Mouza / Vector design data directly from the list section
+  // Populate Mouza Sidebar list dynamically
+  function populateMouzaSidebarList() {
+    const container = document.getElementById('mouza-container-list');
+    if (!container) return;
+    container.innerHTML = '';
+    if (!mouzaItemsData.length) {
+      container.innerHTML = '<div style="font-size:10px; color:#788294; text-align:center; padding:4px;">No mouzas found in DATA.json</div>';
+      return;
+    }
+    mouzaItemsData.forEach((item) => {
+      const div = document.createElement('div');
+      div.style.padding = '5px 8px';
+      div.style.fontSize = '11px';
+      div.style.cursor = 'pointer';
+      div.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+      div.style.color = '#e2e8f0';
+      div.innerText = `📂 ${item.name}`;
+      
+      div.onmouseover = () => { div.style.background = 'rgba(197,160,89,0.25)'; div.style.color = '#d4af37'; };
+      div.onmouseout = () => { div.style.background = 'transparent'; div.style.color = '#e2e8f0'; };
+
+      // Double click to zoom automatically to vector data
+      div.ondblclick = () => {
+        if (item.layer.getBounds && item.layer.getBounds().isValid()) {
+          map.fitBounds(item.layer.getBounds());
+        } else if (item.layer.getLatLng) {
+          map.setView(item.layer.getLatLng(), 18);
+        }
+        if (item.layer.openPopup) item.layer.openPopup();
+      };
+      
+      container.appendChild(div);
+    });
+  }
+
   function saveMouzaVectorData() {
     const data = drawnItems.toGeoJSON();
     if (!data.features.length) {
@@ -644,6 +686,7 @@
     });
   }
 
+  // Load DATA.json and populate Mouza List with Double-Click zoom feature
   fetch('DATA.json')
     .then(response => response.json())
     .then(data => {
@@ -656,20 +699,39 @@
             },
             onEachFeature: function (feature, layer) {
                 if (feature.properties) {
+                    let pName = feature.properties.name || feature.properties.NAME || feature.properties.Mouza || feature.properties.mouza || `Mouza Item #${++mouzaCount}`;
+                    mouzaItemsData.push({ name: pName, layer: layer });
+
                     let popupText = "<b>Khasra / Mouza Info:</b><br>";
                     for (let key in feature.properties) {
                         popupText += `<b>${key}:</b> ${feature.properties[key]}<br>`;
                     }
                     layer.bindPopup(popupText);
+
+                    // Double click on map vector feature to zoom
+                    layer.on('dblclick', function(e) {
+                        L.DomEvent.stopPropagation(e);
+                        if (layer.getBounds && layer.getBounds().isValid()) {
+                            map.fitBounds(layer.getBounds());
+                        } else if (layer.getLatLng) {
+                            map.setView(layer.getLatLng(), 18);
+                        }
+                        if (layer.openPopup) layer.openPopup();
+                    });
                 }
             }
         }).addTo(map);
         
+        populateMouzaSidebarList();
+
         if (loadedMouzaLayer.getBounds().isValid()) {
             map.fitBounds(loadedMouzaLayer.getBounds());
         }
     })
-    .catch(error => console.error('Error loading DATA.json:', error));
+    .catch(error => {
+      console.error('Error loading DATA.json:', error);
+      document.getElementById('mouza-container-list').innerHTML = '<div style="font-size:10px; color:#ef4444; text-align:center; padding:4px;">Error loading DATA.json</div>';
+    });
 
   fetch('Line_Data.json')
     .then(response => response.json())
