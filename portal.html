@@ -619,6 +619,53 @@
       pdf.save('Waqar_GIS_Report.pdf');
     });
   }
+  function exportMapPDF() {
+    html2canvas(document.getElementById('map')).then(canvas => {
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('landscape');
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(16);
+      pdf.text('Waqar GIS Portal - Report', 14, 15);
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 14, 25, 260, 150);
+      pdf.save('Waqar_GIS_Report.pdf');
+    });
+  }
+
+  // ==== YAHAN NEECHE APNI VECTOR FILES LOAD KARNE KA CODE PASTE KAREIN ====
+
+  fetch('DATA.json')
+    .then(response => response.json())
+    .then(data => {
+        L.geoJSON(data, {
+            style: {
+                color: "#ffcc00",
+                weight: 2,
+                fillColor: "#ffcc00",
+                fillOpacity: 0.3
+            },
+            onEachFeature: function (feature, layer) {
+                if (feature.properties) {
+                    let popupText = "<b>Khasar No:</b> " + (feature.properties.Khasar_NO || 'N/A');
+                    layer.bindPopup(popupText);
+                }
+            }
+        }).addTo(map);
+    })
+    .catch(error => console.error('Error loading DATA.json:', error));
+
+  fetch('Line_Data.json')
+    .then(response => response.json())
+    .then(data => {
+        L.geoJSON(data, {
+            style: {
+                color: "#ff0000",
+                weight: 3
+            }
+        }).addTo(map);
+    })
+    .catch(error => console.error('Error loading Line_Data.json:', error));
+
+</script> <!-- Is closing script tag se upar paste karna hai -->
 </script>
 </body>
 </html>
