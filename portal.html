@@ -211,18 +211,19 @@
         <button class="btn btn-dark" onclick="openModal('privacyModal')" style="margin-bottom:6px;">🔒 Privacy Policy</button>
       </div>
 
-      <!-- MOUZA LIST WITH VECTOR DATA LIST AND SAVE OPTION -->
-      <div class="panel-box" style="border-color: #d4af37;">
-        <h3>Mouza List</h3>
-        <input type="text" id="mouza-search-input" placeholder="🔍 Mouza Name" />
-        <button class="btn btn-gold" onclick="searchMouzaByName()" style="margin-bottom:6px;">SEARCH MOUZA</button>
-        
-        <!-- Scrollable list where Jammat_Polygon.json items appear and support double-click zoom -->
-        <div id="mouza-container-list" style="max-height: 120px; overflow-y: auto; margin-bottom: 6px; border: 1px solid rgba(197,160,89,0.3); border-radius: 6px; padding: 4px; background: #15181e;">
-          <div style="font-size:10px; color:#788294; text-align:center; padding:4px;">Loading Jammat_Polygon.json...</div>
-        </div>
+    <!-- MOUZA LIST WITH VECTOR DATA LIST AND SAVE OPTION -->
+<div class="panel-box" style="border-color: #d4af37;">
+    <h3>Mouza List</h3>
+    <input type="text" id="mouza-search-input" placeholder="🔍 Mouza Name" />
+    <button class="btn btn-gold" onclick="searchMouzaByName()">SEARCH MOUZA</button>
 
-        <button class="btn btn-emerald" onclick="saveMouzaVectorData()">💾 Save Vector Data</button>
+    <!-- Scrollable list where Jammat_Polygon.json items appear and support double-click zoom -->
+    <div id="mouza-container-list" style="max-height: 120px; overflow-y: auto; margin-bottom: 6px; border: 1px solid rgba(197,160,89,0.3); border-radius: 6px; padding: 4px; background: rgba(197,160,89,0.05);">
+        <div style="font-size:10px; color:#788294; text-align:center; padding:4px;">Loading Jammat_Polygon.json...</div>
+    </div>
+
+    <button class="btn btn-emerald" onclick="saveMouzaVectorData()">💾 Save Vector Data</button>
+</div>
       </div>
     </div>
 
@@ -747,3 +748,57 @@
 </script>
 </body>
 </html>
+// Load Jammat_Polygon.json using GitHub Raw URL
+  fetch('https://raw.githubusercontent.com/waqar560ahmadkhan-lgtm/GIS-GIM/main/Jammat_Polygon.json')
+    .then(response => response.json())
+    .then(data => {
+        loadedMouzaLayer = L.geoJSON(data, {
+            style: {
+                color: "#ffcc00",
+                weight: 2,
+                fillColor: "#ffcc00",
+                fillOpacity: 0.3
+            },
+            onEachFeature: function (feature, layer) {
+                if (feature.properties) {
+                    let pName = feature.properties.Khasar_NO || feature.properties.name || feature.properties.NAME || `Khasra #${++mouzaCount}`;
+                    mouzaItemsData.push({ name: pName, layer: layer });
+
+                    let popupText = "<b>Khasra / Mouza Info:</b><br>";
+                    for (let key in feature.properties) {
+                        popupText += `<b>${key}:</b> ${feature.properties[key]}<br>`;
+                    }
+                    layer.bindPopup(popupText);
+
+                    layer.on('dblclick', function(e) {
+                        L.DomEvent.stopPropagation(e);
+                        if (layer.getBounds && layer.getBounds().isValid()) {
+                            map.fitBounds(layer.getBounds());
+                        } else if (layer.getLatLng) {
+                            map.setView(layer.getLatLng(), 18);
+                        }
+                        if (layer.openPopup) layer.openPopup();
+                    });
+                }
+            }
+        }).addTo(map);
+        
+        populateMouzaSidebarList();
+
+        if (loadedMouzaLayer.getBounds().isValid()) {
+            map.fitBounds(loadedMouzaLayer.getBounds());
+        }
+    })
+    .catch(error => {
+      console.error('Error loading Jammat_Polygon.json:', error);
+      document.getElementById('mouza-container-list').innerHTML = '<div style="font-size:10px; color:#ef4444; text-align:center; padding:4px;">Error loading Jammat_Polygon.json</div>';
+    });
+
+  fetch('https://raw.githubusercontent.com/waqar560ahmadkhan-lgtm/GIS-GIM/main/Jammat_Line.json')
+    .then(response => response.json())
+    .then(data => {
+        L.geoJSON(data, {
+            style: { color: "#ff0000", weight: 3 }
+        }).addTo(map);
+    })
+    .catch(error => console.error('Error loading Jammat_Line.json:', error));
