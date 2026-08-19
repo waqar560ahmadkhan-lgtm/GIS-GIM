@@ -105,10 +105,6 @@
       <button class="header-btn" onclick="undoLastAction()" title="Undo Last Feature">↩️ Undo</button>
       <button class="header-btn" onclick="redoLastAction()" title="Redo Feature">🔁 Redo</button>
       <button class="header-btn" onclick="exportMapImage()" title="Print/Export Map">🖨️ Print Map</button>
-      <div class="user-badge" id="primary-user-badge" style="margin-left: 8px;">
-        <span>👤</span> Waqar (Admin)
-      </div>
-      <button class="header-btn logout-btn" id="primary-logout-btn" onclick="handleLogout()" title="Logout Session">Logout</button>
     </div>
     <div class="header-right" id="header-right-slot"></div>
   </header>
@@ -623,15 +619,6 @@
       pdf.save('Waqar_GIS_Report.pdf');
     });
   }
-
-  function removeDuplicateHeaderControls() {
-    document.querySelectorAll('.user-badge').forEach((el, i) => { if (i > 0) el.remove(); });
-    document.querySelectorAll('.logout-btn').forEach((el, i) => { if (i > 0) el.remove(); });
-  }
-  window.addEventListener('DOMContentLoaded', removeDuplicateHeaderControls);
-  window.addEventListener('load', removeDuplicateHeaderControls);
-  const headerObserver = new MutationObserver(removeDuplicateHeaderControls);
-  headerObserver.observe(document.body, { childList: true, subtree: true });
 </script>
 </body>
 </html>
