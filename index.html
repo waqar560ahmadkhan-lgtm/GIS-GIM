@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,6 +15,42 @@
     body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
     body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(46,204,143,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(46,204,143,0.04) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; }
     body::after { content: ''; position: fixed; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, rgba(46,204,143,0.08) 0%, transparent 70%); top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; }
+
+    /* =========================================
+       LUXURY INTRO DOORS OVERLAY
+       ========================================= */
+    #intro-overlay {
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background-color: #0b0b0b; z-index: 99999;
+        display: flex; justify-content: center; align-items: center;
+        transition: opacity 0.8s ease-in-out, visibility 0.8s ease-in-out;
+    }
+    #intro-overlay.fade-out { opacity: 0; visibility: hidden; pointer-events: none; }
+
+    .portal-doors { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; z-index: 3; }
+    .door {
+        width: 50%; height: 100%;
+        background: linear-gradient(135deg, #111111 0%, #050505 100%);
+        border-top: 4px solid #d4af37; border-bottom: 4px solid #d4af37;
+        position: relative; transition: transform 1.5s cubic-bezier(0.77, 0, 0.175, 1);
+        box-shadow: inset 0 0 50px rgba(0,0,0,0.9);
+    }
+    .door.left-door { border-right: 2px solid #d4af37; transform-origin: left; }
+    .door.right-door { border-left: 2px solid #d4af37; transform-origin: right; }
+
+    #intro-overlay.open-doors .left-door { transform: translateX(-100%); }
+    #intro-overlay.open-doors .right-door { transform: translateX(100%); }
+
+    /* Gold Door Handles */
+    .door::after {
+        content: ''; position: absolute; top: 50%; width: 12px; height: 120px;
+        background: linear-gradient(to bottom, #bf953f, #fbf5b7, #b38728, #fbf5b7, #aa771c);
+        transform: translateY(-50%); box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+    }
+    .left-door::after { right: 30px; }
+    .right-door::after { left: 30px; }
+
+    /* Container inside overlay */
     .container { position: relative; z-index: 1; width: 100%; max-width: 440px; padding: 20px; }
     .logo-area { text-align: center; margin-bottom: 32px; }
     .logo-icon { width: 56px; height: 56px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px; box-shadow: 0 0 30px rgba(46,204,143,0.3); }
@@ -45,110 +80,128 @@
     .footer-note span { color: var(--accent); }
     .status-dot { display: inline-block; width: 7px; height: 7px; background: var(--accent); border-radius: 50%; margin-right: 6px; box-shadow: 0 0 8px var(--accent); animation: pulse 2s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-    .coords { position: fixed; bottom: 16px; right: 20px; font-size: 0.7rem; color: #1f2d45; font-family: monospace; letter-spacing: 0.5px; }
+    .coords { position: fixed; bottom: 16px; right: 20px; font-size: 0.7rem; color: #1f2d45; font-family: monospace; letter-spacing: 0.5px; z-index: 10; }
   </style>
 </head>
 <body>
-<div class="container">
-  <div class="logo-area">
-    <div class="logo-icon">
-      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-      </svg>
-    </div>
-    <h1>Waqar <span>GIS</span> Portal</h1>
-    <p><span class="status-dot"></span>Spatial Intelligence Platform — Peshawar</p>
+
+  <!-- LUXURY DOORS OVERLAY -->
+  <div id="intro-overlay">
+      <div class="portal-doors">
+          <div class="door left-door"></div>
+          <div class="door right-door"></div>
+      </div>
   </div>
-  <div class="card">
-    <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('login')">Login</button>
-      <button class="tab-btn" onclick="switchTab('register')">Register</button>
+
+  <div class="container">
+    <div class="logo-area">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+        </svg>
+      </div>
+      <h1>Waqar <span>GIS</span> Portal</h1>
+      <p><span class="status-dot"></span>Spatial Intelligence Platform — Peshawar</p>
     </div>
-    <div id="loginForm">
-      <div id="loginMsg" class="msg"></div>
-      <div class="form-group">
-        <label>Email Address</label>
-        <input type="email" id="loginEmail" placeholder="you@example.com" />
+    <div class="card">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('login')">Login</button>
+        <button class="tab-btn" onclick="switchTab('register')">Register</button>
       </div>
-      <div class="form-group">
-        <label>Password</label>
-        <input type="password" id="loginPass" placeholder="••••••••" />
+      <div id="loginForm">
+        <div id="loginMsg" class="msg"></div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="loginEmail" placeholder="you@example.com" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="loginPass" placeholder="••••••••" />
+        </div>
+        <button class="btn" onclick="doLogin()">Open Portal →</button>
       </div>
-      <button class="btn" onclick="doLogin()">Open Portal →</button>
-    </div>
-    <div id="registerForm" style="display:none;">
-      <div id="regMsg" class="msg"></div>
-      <div class="form-group">
-        <label>Full Name</label>
-        <input type="text" id="regName" placeholder="Your name" />
+      <div id="registerForm" style="display:none;">
+        <div id="regMsg" class="msg"></div>
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="regName" placeholder="Your name" />
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="regEmail" placeholder="you@example.com" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="regPass" placeholder="Min 6 characters" />
+        </div>
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <input type="password" id="regPass2" placeholder="Repeat password" />
+        </div>
+        <button class="btn" onclick="doRegister()">Create Account</button>
       </div>
-      <div class="form-group">
-        <label>Email Address</label>
-        <input type="email" id="regEmail" placeholder="you@example.com" />
+      <div class="divider">secured access</div>
+      <div class="footer-note">
+        <span>Admin</span> access is pre-configured &nbsp;·&nbsp; Data stays local
       </div>
-      <div class="form-group">
-        <label>Password</label>
-        <input type="password" id="regPass" placeholder="Min 6 characters" />
-      </div>
-      <div class="form-group">
-        <label>Confirm Password</label>
-        <input type="password" id="regPass2" placeholder="Repeat password" />
-      </div>
-      <button class="btn" onclick="doRegister()">Create Account</button>
-    </div>
-    <div class="divider">secured access</div>
-    <div class="footer-note">
-      <span>Admin</span> access is pre-configured &nbsp;·&nbsp; Data stays local
     </div>
   </div>
-</div>
-<div class="coords">34.0151° N, 71.5249° E · KP, Pakistan</div>
-<script>
-  function getUsers() { return JSON.parse(localStorage.getItem('waqar_gis_users') || '[]'); }
-  function saveUsers(u) { localStorage.setItem('waqar_gis_users', JSON.stringify(u)); }
-  (function initAdmin() {
-    const users = getUsers();
-    if (!users.find(u => u.email === 'admin@waqargis.com')) {
-      users.push({ name: 'Waqar (Admin)', email: 'admin@waqargis.com', password: 'waqar!!admin125714TaKhT@BhAi', role: 'admin' });
+  <div class="coords">34.0151° N, 71.5249° E · KP, Pakistan</div>
+
+  <script>
+    // Luxury Door Opening Script on Page Load
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            const overlay = document.getElementById('intro-overlay');
+            overlay.classList.add('open-doors', 'fade-out');
+        }, 600); // 0.6 seconds delay before doors start opening automatically
+    });
+
+    function getUsers() { return JSON.parse(localStorage.getItem('waqar_gis_users') || '[]'); }
+    function saveUsers(u) { localStorage.setItem('waqar_gis_users', JSON.stringify(u)); }
+    (function initAdmin() {
+      const users = getUsers();
+      if (!users.find(u => u.email === 'admin@waqargis.com')) {
+        users.push({ name: 'Waqar (Admin)', email: 'admin@waqargis.com', password: 'waqar!!admin125714TaKhT@BhAi', role: 'admin' });
+        saveUsers(users);
+      }
+    })();
+    function switchTab(tab) {
+      document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+      document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+      document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
+    }
+    function showMsg(id, text, type) { const el = document.getElementById(id); el.textContent = text; el.className = 'msg ' + type; }
+    function doLogin() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const pass = document.getElementById('loginPass').value;
+      if (!email || !pass) { showMsg('loginMsg', 'Please fill all fields.', 'error'); return; }
+      const user = getUsers().find(u => u.email === email && u.password === pass);
+      if (!user) { showMsg('loginMsg', 'Invalid email or password.', 'error'); return; }
+      showMsg('loginMsg', '✓ Login successful! Opening portal...', 'success');
+      sessionStorage.setItem('waqar_gis_session', JSON.stringify({ name: user.name, email: user.email, role: user.role || 'user' }));
+      setTimeout(() => { window.location.href = 'portal.html'; }, 900);
+    }
+    function doRegister() {
+      const name = document.getElementById('regName').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const pass = document.getElementById('regPass').value;
+      const pass2 = document.getElementById('regPass2').value;
+      if (!name||!email||!pass||!pass2) { showMsg('regMsg','Please fill all fields.','error'); return; }
+      if (pass.length < 6) { showMsg('regMsg','Password must be at least 6 characters.','error'); return; }
+      if (pass !== pass2) { showMsg('regMsg','Passwords do not match.','error'); return; }
+      const users = getUsers();
+      if (users.find(u => u.email === email)) { showMsg('regMsg','This email is already registered.','error'); return; }
+      users.push({ name, email, password: pass, role: 'user' });
       saveUsers(users);
+      showMsg('regMsg','✓ Account created! You can now login.','success');
+      setTimeout(() => switchTab('login'), 1200);
     }
-  })();
-  function switchTab(tab) {
-    document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
-    document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
-    document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
-  }
-  function showMsg(id, text, type) { const el = document.getElementById(id); el.textContent = text; el.className = 'msg ' + type; }
-  function doLogin() {
-    const email = document.getElementById('loginEmail').value.trim();
-    const pass = document.getElementById('loginPass').value;
-    if (!email || !pass) { showMsg('loginMsg', 'Please fill all fields.', 'error'); return; }
-    const user = getUsers().find(u => u.email === email && u.password === pass);
-    if (!user) { showMsg('loginMsg', 'Invalid email or password.', 'error'); return; }
-    showMsg('loginMsg', '✓ Login successful! Opening portal...', 'success');
-    sessionStorage.setItem('waqar_gis_session', JSON.stringify({ name: user.name, email: user.email, role: user.role || 'user' }));
-    setTimeout(() => { window.location.href = 'portal.html'; }, 900);
-  }
-  function doRegister() {
-    const name = document.getElementById('regName').value.trim();
-    const email = document.getElementById('regEmail').value.trim();
-    const pass = document.getElementById('regPass').value;
-    const pass2 = document.getElementById('regPass2').value;
-    if (!name||!email||!pass||!pass2) { showMsg('regMsg','Please fill all fields.','error'); return; }
-    if (pass.length < 6) { showMsg('regMsg','Password must be at least 6 characters.','error'); return; }
-    if (pass !== pass2) { showMsg('regMsg','Passwords do not match.','error'); return; }
-    const users = getUsers();
-    if (users.find(u => u.email === email)) { showMsg('regMsg','This email is already registered.','error'); return; }
-    users.push({ name, email, password: pass, role: 'user' });
-    saveUsers(users);
-    showMsg('regMsg','✓ Account created! You can now login.','success');
-    setTimeout(() => switchTab('login'), 1200);
-  }
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-      document.getElementById('loginForm').style.display !== 'none' ? doLogin() : doRegister();
-    }
-  });
-</script>
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        document.getElementById('loginForm').style.display !== 'none' ? doLogin() : doRegister();
+      }
+    });
+  </script>
 </body>
 </html>
