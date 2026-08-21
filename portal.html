@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Waqar GIS Portal - Executive Spatial Suite</title>
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -92,6 +91,31 @@
     .modal-content ul { padding-left: 20px; }
     .modal-content li { margin-bottom: 6px; color: #cbd5e1 !important; }
     .modal-close { position: absolute; top: 15px; right: 15px; background: none; border: none; color: #f87171; font-size: 20px; font-weight: bold; cursor: pointer; }
+
+    /* ============ LOCATION BUTTON ============ */
+    #locate-control { position: absolute; bottom: 30px; right: 15px; z-index: 900; display: flex; align-items: center; gap: 8px; flex-direction: row-reverse; }
+    #locate-btn { position: relative; width: 46px; height: 46px; border-radius: 50%; border: 1px solid rgba(197, 160, 89, 0.5); background: linear-gradient(155deg, #20242c 0%, #15181e 100%); color: #c5a059; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.02) inset; transition: transform 0.18s ease, box-shadow 0.25s ease, border-color 0.25s ease, color 0.25s ease; }
+    #locate-btn:hover { border-color: #d4af37; color: #f3e5ab; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6), 0 0 14px rgba(212, 175, 55, 0.35); }
+    #locate-btn:active { transform: scale(0.92); }
+    #locate-btn:focus-visible { outline: 2px solid #d4af37; outline-offset: 2px; }
+    #locate-spinner { display: none; }
+    #locate-btn.locating #locate-icon { opacity: 0.25; }
+    #locate-btn.locating #locate-spinner { display: block; position: absolute; animation: locate-spin 0.9s linear infinite; }
+    @keyframes locate-spin { to { transform: rotate(360deg); } }
+    #locate-btn.active { color: #15181e; background: linear-gradient(135deg, #d4af37 0%, #a8843c 100%); border-color: #f3e5ab; }
+    #locate-btn.locate-error { color: #fca5a5; border-color: #ef4444; animation: locate-shake 0.4s ease; }
+    @keyframes locate-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
+    #locate-tooltip { background: #1a1f29; color: #e2e8f0; border: 1px solid rgba(197, 160, 89, 0.35); font-size: 11px; font-weight: 600; padding: 6px 10px; border-radius: 6px; white-space: nowrap; opacity: 0; transform: translateX(6px); pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+    #locate-control:hover #locate-tooltip { opacity: 1; transform: translateX(0); }
+    .user-location-marker { width: 18px; height: 18px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f3e5ab, #d4af37 55%, #967635 100%); border: 2.5px solid #ffffff; box-shadow: 0 0 8px rgba(212, 175, 55, 0.9); }
+    .user-location-pulse-wrap { width: 18px; height: 18px; position: relative; }
+    .user-location-pulse-wrap::before { content: ''; position: absolute; top: 50%; left: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: rgba(212, 175, 55, 0.55); animation: user-dot-pulse 2s ease-out infinite; }
+    @keyframes user-dot-pulse { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(3.2); opacity: 0; } }
+    @media (max-width: 600px) {
+      #locate-control { bottom: 200px; right: 12px; }
+      #locate-btn { width: 48px; height: 48px; }
+      #locate-tooltip { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -211,23 +235,36 @@
         <button class="btn btn-dark" onclick="openModal('privacyModal')" style="margin-bottom:6px;">🔒 Privacy Policy</button>
       </div>
 
-      <!-- MOUZA LIST WITH VECTOR DATA LIST AND SAVE OPTION -->
       <div class="panel-box" style="border-color: #d4af37;">
         <h3>Mouza List</h3>
         <input type="text" id="mouza-search-input" placeholder="🔍 Mouza Name" />
         <button class="btn btn-gold" onclick="searchMouzaByName()" style="margin-bottom:6px;">SEARCH MOUZA</button>
-        
-        <!-- Scrollable list where Jammat_Polygon.json items appear and support double-click zoom -->
         <div id="mouza-container-list" style="max-height: 120px; overflow-y: auto; margin-bottom: 6px; border: 1px solid rgba(197,160,89,0.3); border-radius: 6px; padding: 4px; background: #15181e;">
           <div style="font-size:10px; color:#788294; text-align:center; padding:4px;">Loading Jammat_Polygon.json...</div>
         </div>
-
         <button class="btn btn-emerald" onclick="saveMouzaVectorData()">💾 Save Vector Data</button>
       </div>
     </div>
 
     <div id="main-container">
       <div id="map"></div>
+
+      <!-- LOCATION BUTTON -->
+      <div id="locate-control">
+        <button id="locate-btn" title="Find My Location" aria-label="Find my location">
+          <svg id="locate-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="7"></circle>
+            <circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none"></circle>
+            <path d="M12 2v3.2M12 18.8V22M2 12h3.2M18.8 12H22"></path>
+          </svg>
+          <svg id="locate-spinner" viewBox="0 0 24 24" width="20" height="20">
+            <circle cx="12" cy="12" r="9" fill="none" stroke="rgba(197,160,89,0.25)" stroke-width="2.5"></circle>
+            <circle cx="12" cy="12" r="9" fill="none" stroke="#d4af37" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="14 42"></circle>
+          </svg>
+        </button>
+        <div id="locate-tooltip">My Location</div>
+      </div>
+
       <div id="top-right-controls">
         <div class="note-action-row">
           <button id="note-mode-btn" onclick="toggleNoteMode()">📍 Add Note</button>
@@ -322,10 +359,10 @@
 <script>
   function openModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
   function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
-  
+
   const map = L.map('map', { crossOrigin: true, maxZoom: 20, zoomControl: true }).setView([34.0, 71.5], 13);
   L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
-  
+
   const basemaps = {
     googleSat: L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: '© Google' }),
     sentinel2: L.tileLayer('https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2023_3857/default/g/{z}/{y}/{x}.jpg', { maxZoom: 18, attribution: '© EOX' }),
@@ -385,7 +422,7 @@
   let redoStack = [];
   function pushHistory(action) {
     actionHistory.push(action);
-    redoStack = []; // naya action hone par redo stack clear ho jata hai
+    redoStack = [];
   }
 
   function toUTM(lat, lng) {
@@ -462,7 +499,6 @@
     }
   }
 
-  // Populate Mouza Sidebar list dynamically
   function populateMouzaSidebarList() {
     const container = document.getElementById('mouza-container-list');
     if (!container) return;
@@ -479,11 +515,10 @@
       div.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
       div.style.color = '#e2e8f0';
       div.innerText = `📂 ${item.name}`;
-      
+
       div.onmouseover = () => { div.style.background = 'rgba(197,160,89,0.25)'; div.style.color = '#d4af37'; };
       div.onmouseout = () => { div.style.background = 'transparent'; div.style.color = '#e2e8f0'; };
 
-      // Double click to zoom automatically to vector data
       div.ondblclick = () => {
         if (item.layer.getBounds && item.layer.getBounds().isValid()) {
           map.fitBounds(item.layer.getBounds());
@@ -492,7 +527,7 @@
         }
         if (item.layer.openPopup) item.layer.openPopup();
       };
-      
+
       container.appendChild(div);
     });
   }
@@ -738,17 +773,11 @@
     });
   }
 
-  // Load Jammat_Polygon.json and populate Mouza List with Double-Click zoom feature
   fetch('Jammat_Polygon.json')
     .then(response => response.json())
     .then(data => {
         loadedMouzaLayer = L.geoJSON(data, {
-            style: {
-                color: "#ffcc00",
-                weight: 2,
-                fillColor: "#ffcc00",
-                fillOpacity: 0.3
-            },
+            style: { color: "#ffcc00", weight: 2, fillColor: "#ffcc00", fillOpacity: 0.3 },
             onEachFeature: function (feature, layer) {
                 if (feature.properties) {
                     let pName = feature.properties.name || feature.properties.NAME || feature.properties.Mouza || feature.properties.mouza || `Mouza Item #${++mouzaCount}`;
@@ -760,7 +789,6 @@
                     }
                     layer.bindPopup(popupText);
 
-                    // Double click on map vector feature to zoom
                     layer.on('dblclick', function(e) {
                         L.DomEvent.stopPropagation(e);
                         if (layer.getBounds && layer.getBounds().isValid()) {
@@ -773,7 +801,7 @@
                 }
             }
         }).addTo(map);
-        
+
         populateMouzaSidebarList();
 
         if (loadedMouzaLayer.getBounds().isValid()) {
@@ -788,14 +816,87 @@
   fetch('Jammat_Line.json')
     .then(response => response.json())
     .then(data => {
-        L.geoJSON(data, {
-            style: {
-                color: "#ff0000",
-                weight: 3
-            }
-        }).addTo(map);
+        L.geoJSON(data, { style: { color: "#ff0000", weight: 3 } }).addTo(map);
     })
     .catch(error => console.error('Error loading Jammat_Line.json:', error));
+
+  // ============ LOCATION BUTTON — JS ============
+  (function () {
+    const btn = document.getElementById('locate-btn');
+    let userMarker = null;
+    let accuracyCircle = null;
+    let watchId = null;
+
+    function clearLocationLayers() {
+      if (userMarker) { map.removeLayer(userMarker); userMarker = null; }
+      if (accuracyCircle) { map.removeLayer(accuracyCircle); accuracyCircle = null; }
+    }
+
+    function showUserLocation(lat, lng, accuracy, shouldFly) {
+      clearLocationLayers();
+
+      accuracyCircle = L.circle([lat, lng], {
+        radius: accuracy, color: '#d4af37', weight: 1, fillColor: '#c5a059', fillOpacity: 0.12
+      }).addTo(map);
+
+      userMarker = L.marker([lat, lng], {
+        icon: L.divIcon({
+          className: '',
+          html: '<div class="user-location-pulse-wrap"><div class="user-location-marker"></div></div>',
+          iconSize: [18, 18],
+          iconAnchor: [9, 9]
+        }),
+        zIndexOffset: 1000
+      }).addTo(map);
+
+      userMarker.bindPopup(`<strong style="color:#8a6d2b;">📍 You are here</strong><br>Accuracy: ±${Math.round(accuracy)} m`);
+
+      if (shouldFly) {
+        map.flyTo([lat, lng], 16, { animate: true, duration: 1.2 });
+      }
+    }
+
+    function setState(state) {
+      btn.classList.remove('locating', 'active', 'locate-error');
+      if (state) btn.classList.add(state);
+    }
+
+    function handleError(err) {
+      setState('locate-error');
+      setTimeout(() => setState(null), 1800);
+
+      let msg = 'Unable to retrieve your location.';
+      if (err.code === 1) msg = 'Location access denied. Browser settings mein is site ke liye location permission enable karein.';
+      else if (err.code === 2) msg = 'Location unavailable. Apna GPS / network connection check karein.';
+      else if (err.code === 3) msg = 'Location request timed out. Dobara try karein.';
+      alert(msg);
+    }
+
+    btn.addEventListener('click', function () {
+      if (!navigator.geolocation) {
+        alert('Aapka browser Geolocation support nahi karta.');
+        return;
+      }
+      setState('locating');
+      navigator.geolocation.getCurrentPosition(
+        function (pos) {
+          setState('active');
+          const { latitude, longitude, accuracy } = pos.coords;
+          showUserLocation(latitude, longitude, accuracy, true);
+
+          if (watchId === null) {
+            watchId = navigator.geolocation.watchPosition(
+              (p) => showUserLocation(p.coords.latitude, p.coords.longitude, p.coords.accuracy, false),
+              (e) => console.warn('watchPosition error:', e),
+              { enableHighAccuracy: true, maximumAge: 5000 }
+            );
+          }
+        },
+        handleError,
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    });
+  })();
 </script>
 </body>
 </html>
