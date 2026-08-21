@@ -1,210 +1,154 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Waqar GIS Portal – Map Dashboard</title>
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Waqar GIS Portal – Login</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@300;400;500;600&display=swap');
-    
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body, html { width: 100%; height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; background: #050505; color: #fff; }
-
-    /* =========================================
-       LUXURY INTRO OVERLAY & DOORS (MATCHING IMAGE)
-       ========================================= */
-    #intro-overlay {
-        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-        background-color: #030303; z-index: 99999;
-        display: flex; justify-content: center; align-items: center;
-        overflow: hidden;
-        transition: opacity 1s ease-in-out, visibility 1s ease-in-out;
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;600;700&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0b1120; --panel: #111827; --border: #1f2d45;
+      --accent: #2ecc8f; --accent2: #1a9e6b; --text: #e8f0fe;
+      --muted: #8899b0; --input-bg: #0d1929; --error: #ff6b6b; --radius: 12px;
     }
-    #intro-overlay.fade-out { opacity: 0; visibility: hidden; pointer-events: none; }
-
-    /* Double Doors */
-    .portal-doors { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; z-index: 5; pointer-events: none; }
-    .door {
-        width: 50%; height: 100%;
-        background: linear-gradient(135deg, #121212 0%, #080808 100%);
-        border-top: 6px solid #d4af37; border-bottom: 6px solid #d4af37;
-        position: relative; transition: transform 2s cubic-bezier(0.77, 0, 0.175, 1);
-        box-shadow: inset 0 0 80px rgba(0,0,0,0.9);
-    }
-    .door.left-door { border-right: 3px solid #d4af37; transform-origin: left; }
-    .door.right-door { border-left: 3px solid #d4af37; transform-origin: right; }
-
-    #intro-overlay.open-doors .left-door { transform: translateX(-100%); }
-    #intro-overlay.open-doors .right-door { transform: translateX(100%); }
-
-    /* Ornate Gold Door Panels & Handles */
-    .door::before {
-        content: ''; position: absolute; top: 50px; bottom: 50px; left: 40px; right: 40px;
-        border: 2px solid rgba(212, 175, 55, 0.35); box-shadow: inset 0 0 20px rgba(212,175,55,0.1);
-    }
-    .door::after {
-        content: ''; position: absolute; top: 50%; width: 16px; height: 160px;
-        background: linear-gradient(to bottom, #bf953f, #fbf5b7, #b38728, #fbf5b7, #aa771c);
-        transform: translateY(-50%); box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
-        border-radius: 4px;
-    }
-    .left-door::after { right: 40px; }
-    .right-door::after { left: 40px; }
-
-    /* Decorative Gold Center Crest on Doors */
-    .door-crest {
-        position: absolute; top: 40%; width: 80px; height: 80px;
-        border: 2px solid #d4af37; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-        box-shadow: 0 0 20px rgba(212,175,55,0.3); background: rgba(0,0,0,0.6);
-    }
-    .left-door .door-crest { right: 60px; transform: translateY(-50%); }
-    .right-door .door-crest { left: 60px; transform: translateY(-50%); }
-    .door-crest span { color: #d4af37; font-size: 24px; }
-
-    /* Splash Screen Center Content */
-    .splash-content {
-        position: relative; z-index: 4; text-align: center; color: #fff; padding: 20px; max-width: 800px;
-        opacity: 0; transform: scale(0.92);
-        transition: opacity 1.2s ease 0.4s, transform 1.2s ease 0.4s;
-    }
-    #intro-overlay.show-splash .splash-content { opacity: 1; transform: scale(1); }
-
-    /* Golden Globe & Mountain Graphics */
-    .globe-glow {
-        width: 90px; height: 90px; margin: 0 auto 15px auto;
-        background: radial-gradient(circle, rgba(212,175,55,0.4) 0%, transparent 70%);
-        display: flex; align-items: center; justify-content: center;
-        animation: pulseGlow 3s infinite ease-in-out;
-    }
-    .globe-glow svg { width: 70px; height: 70px; fill: url(#goldGradient); filter: drop-shadow(0 0 10px #d4af37); }
-    
-    .mountain-art {
-        font-size: 2rem; color: #d4af37; opacity: 0.85; margin-bottom: 5px; letter-spacing: 2px;
-    }
-    
-    .splash-title {
-        font-family: 'Cinzel', serif; font-size: 3.2rem; font-weight: 800; letter-spacing: 6px;
-        background: linear-gradient(180deg, #ffffff 20%, #fbf5b7 50%, #d4af37 100%);
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        text-transform: uppercase; margin-bottom: 8px; filter: drop-shadow(0 4px 15px rgba(0,0,0,0.8));
-    }
-    
-    .splash-subtitle {
-        font-family: 'Cinzel', serif; font-size: 0.95rem; letter-spacing: 7px; color: #d4af37;
-        margin-bottom: 30px; text-transform: uppercase; font-weight: 600;
-    }
-
-    .enter-btn {
-        background: linear-gradient(135deg, #bf953f 0%, #aa771c 100%); color: #050505;
-        border: 1px solid #fbf5b7; padding: 15px 45px; font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 700;
-        letter-spacing: 4px; text-transform: uppercase; cursor: pointer; transition: all 0.3s ease;
-        box-shadow: 0 6px 25px rgba(212, 175, 55, 0.4); border-radius: 3px;
-    }
-    .enter-btn:hover {
-        background: linear-gradient(135deg, #fbf5b7 0%, #bf953f 100%);
-        box-shadow: 0 8px 30px rgba(212, 175, 55, 0.8); transform: translateY(-2px);
-    }
-    
-    .splash-footer { font-size: 0.75rem; color: #888; letter-spacing: 2px; margin-top: 15px; text-transform: uppercase; }
-
-    @keyframes pulseGlow {
-        0%, 100% { transform: scale(1); opacity: 0.8; }
-        50% { transform: scale(1.08); opacity: 1; }
-    }
-
-    /* =========================================
-       MAIN GIS MAP CONTAINER
-       ========================================= */
-    #map { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(46,204,143,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(46,204,143,0.04) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; }
+    body::after { content: ''; position: fixed; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, rgba(46,204,143,0.08) 0%, transparent 70%); top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; }
+    .container { position: relative; z-index: 1; width: 100%; max-width: 440px; padding: 20px; }
+    .logo-area { text-align: center; margin-bottom: 32px; }
+    .logo-icon { width: 56px; height: 56px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px; box-shadow: 0 0 30px rgba(46,204,143,0.3); }
+    .logo-icon svg { width: 30px; height: 30px; fill: #fff; }
+    .logo-area h1 { font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem; font-weight: 700; letter-spacing: -0.5px; color: var(--text); }
+    .logo-area h1 span { color: var(--accent); }
+    .logo-area p { font-size: 0.82rem; color: var(--muted); margin-top: 6px; }
+    .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px 28px; box-shadow: 0 24px 60px rgba(0,0,0,0.5); }
+    .tabs { display: flex; background: var(--input-bg); border-radius: 8px; padding: 4px; margin-bottom: 28px; border: 1px solid var(--border); }
+    .tab-btn { flex: 1; padding: 9px; border: none; border-radius: 6px; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all 0.2s; background: transparent; color: var(--muted); }
+    .tab-btn.active { background: var(--accent); color: #0b1120; font-weight: 600; }
+    .form-group { margin-bottom: 18px; }
+    label { display: block; font-size: 0.78rem; font-weight: 500; color: var(--muted); margin-bottom: 7px; text-transform: uppercase; letter-spacing: 0.5px; }
+    input { width: 100%; padding: 11px 14px; background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 0.9rem; transition: border-color 0.2s, box-shadow 0.2s; outline: none; }
+    input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(46,204,143,0.12); }
+    input::placeholder { color: #3a4a60; }
+    .btn { width: 100%; padding: 13px; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #0b1120; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.92rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s, transform 0.15s; margin-top: 8px; letter-spacing: 0.3px; }
+    .btn:hover { opacity: 0.92; transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .msg { font-size: 0.82rem; padding: 10px 14px; border-radius: 7px; margin-bottom: 16px; display: none; }
+    .msg.error { background: rgba(255,107,107,0.12); color: var(--error); border: 1px solid rgba(255,107,107,0.25); display: block; }
+    .msg.success { background: rgba(46,204,143,0.1); color: var(--accent); border: 1px solid rgba(46,204,143,0.25); display: block; }
+    .divider { text-align: center; color: var(--muted); font-size: 0.75rem; margin: 20px 0; position: relative; }
+    .divider::before, .divider::after { content: ''; position: absolute; top: 50%; width: 38%; height: 1px; background: var(--border); }
+    .divider::before { left: 0; } .divider::after { right: 0; }
+    .footer-note { text-align: center; margin-top: 24px; font-size: 0.78rem; color: var(--muted); }
+    .footer-note span { color: var(--accent); }
+    .status-dot { display: inline-block; width: 7px; height: 7px; background: var(--accent); border-radius: 50%; margin-right: 6px; box-shadow: 0 0 8px var(--accent); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .coords { position: fixed; bottom: 16px; right: 20px; font-size: 0.7rem; color: #1f2d45; font-family: monospace; letter-spacing: 0.5px; }
   </style>
 </head>
 <body>
-
-  <!-- SVG Gradients Definitions -->
-  <svg width="0" height="0">
-    <defs>
-      <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#bf953f" />
-        <stop offset="50%" stop-color="#fbf5b7" />
-        <stop offset="100%" stop-color="#aa771c" />
-      </linearGradient>
-    </defs>
-  </svg>
-
-  <!-- LUXURY INTRO OVERLAY (10 SECONds / MANUAL ENTRY) -->
-  <div id="intro-overlay">
-      <div class="portal-doors">
-          <div class="door left-door"><div class="door-crest"><span>✦</span></div></div>
-          <div class="door right-door"><div class="door-crest"><span>✦</span></div></div>
-      </div>
-      
-      <div class="splash-content">
-          <div class="globe-glow">
-              <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 m-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2 v1.93 M17.9 17.39c-.26-.81-1-1.39-1.9-1.39h-1v-2c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-          </div>
-          <div class="mountain-art">▲ ▲ ▲ ▲ ▲</div>
-          <h1 class="splash-title">Waqar GIS Portal</h1>
-          <p class="splash-subtitle">Explore &nbsp;•&nbsp; Analyze &nbsp;•&nbsp; Decide</p>
-          <button class="enter-btn" id="enterPortalBtn">Enter Portal</button>
-          <div class="splash-footer">Discover. Visualize. Empower.</div>
-      </div>
+<div class="container">
+  <div class="logo-area">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+      </svg>
+    </div>
+    <h1>Waqar <span>GIS</span> Portal</h1>
+    <p><span class="status-dot"></span>Spatial Intelligence Platform — Peshawar</p>
   </div>
-
-  <!-- MAIN MAP -->
-  <div id="map"></div>
-
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
-    // 1. Initialize Leaflet Map (Dark Basemap)
-    const map = L.map('map', { zoomControl: false }).setView([34.0151, 71.5249], 11);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '© OpenStreetMap contributors © CARTO',
-        maxZoom: 20
-    }).addTo(map);
-
-    // Add Zoom control to bottom right
-    L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-    // 2. Animation & Timer Logic
-    const introOverlay = document.getElementById('intro-overlay');
-    const enterBtn = document.getElementById('enterPortalBtn');
-
-    function triggerIntro() {
-        setTimeout(() => {
-            introOverlay.classList.add('open-doors');
-        }, 400);
-        setTimeout(() => {
-            introOverlay.classList.add('show-splash');
-        }, 600);
+  <div class="card">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('login')">Login</button>
+      <button class="tab-btn" onclick="switchTab('register')">Register</button>
+    </div>
+    <div id="loginForm">
+      <div id="loginMsg" class="msg"></div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="loginEmail" placeholder="you@example.com" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="loginPass" placeholder="••••••••" />
+      </div>
+      <button class="btn" onclick="doLogin()">Open Portal →</button>
+    </div>
+    <div id="registerForm" style="display:none;">
+      <div id="regMsg" class="msg"></div>
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="regName" placeholder="Your name" />
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="regEmail" placeholder="you@example.com" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="regPass" placeholder="Min 6 characters" />
+      </div>
+      <div class="form-group">
+        <label>Confirm Password</label>
+        <input type="password" id="regPass2" placeholder="Repeat password" />
+      </div>
+      <button class="btn" onclick="doRegister()">Create Account</button>
+    </div>
+    <div class="divider">secured access</div>
+    <div class="footer-note">
+      <span>Admin</span> access is pre-configured &nbsp;·&nbsp; Data stays local
+    </div>
+  </div>
+</div>
+<div class="coords">34.0151° N, 71.5249° E · KP, Pakistan</div>
+<script>
+  function getUsers() { return JSON.parse(localStorage.getItem('waqar_gis_users') || '[]'); }
+  function saveUsers(u) { localStorage.setItem('waqar_gis_users', JSON.stringify(u)); }
+  (function initAdmin() {
+    const users = getUsers();
+    if (!users.find(u => u.email === 'admin@waqargis.com')) {
+      users.push({ name: 'Waqar (Admin)', email: 'admin@waqargis.com', password: 'waqar!!admin125714TaKhT@BhAi', role: 'admin' });
+      saveUsers(users);
     }
-
-    function closeIntro() {
-        introOverlay.classList.add('fade-out');
-        setTimeout(() => {
-            introOverlay.remove();
-            map.invalidateSize(); // Refresh map tiles correctly
-        }, 1000);
+  })();
+  function switchTab(tab) {
+    document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+    document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
+  }
+  function showMsg(id, text, type) { const el = document.getElementById(id); el.textContent = text; el.className = 'msg ' + type; }
+  function doLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    if (!email || !pass) { showMsg('loginMsg', 'Please fill all fields.', 'error'); return; }
+    const user = getUsers().find(u => u.email === email && u.password === pass);
+    if (!user) { showMsg('loginMsg', 'Invalid email or password.', 'error'); return; }
+    showMsg('loginMsg', '✓ Login successful! Opening portal...', 'success');
+    sessionStorage.setItem('waqar_gis_session', JSON.stringify({ name: user.name, email: user.email, role: user.role || 'user' }));
+    setTimeout(() => { window.location.href = 'portal.html'; }, 900);
+  }
+  function doRegister() {
+    const name = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const pass = document.getElementById('regPass').value;
+    const pass2 = document.getElementById('regPass2').value;
+    if (!name||!email||!pass||!pass2) { showMsg('regMsg','Please fill all fields.','error'); return; }
+    if (pass.length < 6) { showMsg('regMsg','Password must be at least 6 characters.','error'); return; }
+    if (pass !== pass2) { showMsg('regMsg','Passwords do not match.','error'); return; }
+    const users = getUsers();
+    if (users.find(u => u.email === email)) { showMsg('regMsg','This email is already registered.','error'); return; }
+    users.push({ name, email, password: pass, role: 'user' });
+    saveUsers(users);
+    showMsg('regMsg','✓ Account created! You can now login.','success');
+    setTimeout(() => switchTab('login'), 1200);
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      document.getElementById('loginForm').style.display !== 'none' ? doLogin() : doRegister();
     }
-
-    // Run animation on page load
-    window.addEventListener('load', () => {
-        triggerIntro();
-    });
-
-    // Manual click on "Enter Portal"
-    enterBtn.addEventListener('click', () => {
-        closeIntro();
-    });
-
-    // Exactly 10 seconds auto-dismiss safety timer
-    setTimeout(() => {
-        if(document.body.contains(introOverlay)) {
-            closeIntro();
-        }
-    }, 10000);
-  </script>
+  });
+</script>
 </body>
 </html>
