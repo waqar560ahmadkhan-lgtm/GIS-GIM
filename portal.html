@@ -30,6 +30,8 @@
     .header-btn:hover { background: #c5a059; color: #15181e; }
     .header-btn.logout-btn { background: #7f1d1d; color: #fca5a5; border-color: #ef4444; }
     .header-btn.logout-btn:hover { background: #ef4444; color: #fff; }
+    .header-btn.remove-point-btn { background: #3a2530; color: #f3a8a8; border-color: rgba(239,68,68,0.4); }
+    .header-btn.remove-point-btn:hover { background: #ef4444; color: #fff; }
     .app-body { display: flex; flex: 1; height: calc(100vh - 60px); width: 100%; position: relative; }
     .sidebar { width: 310px; min-width: 310px; background: linear-gradient(180deg, #20242c 0%, #15181e 100%); color: #f1f5f9; padding: 20px 16px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; border-right: 2px solid #c5a059; box-shadow: 6px 0 25px rgba(0, 0, 0, 0.6); z-index: 1001; position: relative; transition: transform 0.3s ease; }
     .sidebar.closed { transform: translateX(-310px); position: absolute; height: 100%; }
@@ -107,10 +109,10 @@
     @keyframes locate-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
     #locate-tooltip { background: #1a1f29; color: #e2e8f0; border: 1px solid rgba(197, 160, 89, 0.35); font-size: 11px; font-weight: 600; padding: 6px 10px; border-radius: 6px; white-space: nowrap; opacity: 0; transform: translateX(6px); pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
     #locate-control:hover #locate-tooltip { opacity: 1; transform: translateX(0); }
-    .user-location-marker { width: 18px; height: 18px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f3e5ab, #d4af37 55%, #967635 100%); border: 2.5px solid #ffffff; box-shadow: 0 0 8px rgba(212, 175, 55, 0.9); }
-    .user-location-pulse-wrap { width: 18px; height: 18px; position: relative; }
-    .user-location-pulse-wrap::before { content: ''; position: absolute; top: 50%; left: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: rgba(212, 175, 55, 0.55); animation: user-dot-pulse 2s ease-out infinite; }
-    @keyframes user-dot-pulse { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(3.2); opacity: 0; } }
+    .user-location-marker { width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f3e5ab, #d4af37 55%, #967635 100%); border: 2.5px solid #ffffff; box-shadow: 0 0 8px rgba(212, 175, 55, 0.9); }
+    .user-location-pulse-wrap { width: 16px; height: 16px; position: relative; }
+    .user-location-pulse-wrap::before { content: ''; position: absolute; top: 50%; left: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; background: rgba(212, 175, 55, 0.5); animation: user-dot-pulse 1.8s ease-out infinite; }
+    @keyframes user-dot-pulse { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(2.6); opacity: 0; } }
     @media (max-width: 600px) {
       #locate-control { bottom: 200px; right: 12px; }
       #locate-btn { width: 48px; height: 48px; }
@@ -127,6 +129,7 @@
     <div class="header-center">
       <button class="header-btn" onclick="undoLastAction()" title="Undo Last Feature">↩️ Undo</button>
       <button class="header-btn" onclick="redoLastAction()" title="Redo Feature">🔁 Redo</button>
+      <button class="header-btn remove-point-btn" onclick="removeLastPoint()" title="Remove Last Point (or press Backspace while drawing)">⌫ Remove Point</button>
       <button class="header-btn" onclick="exportMapImage()" title="Print/Export Map">🖨️ Print Map</button>
     </div>
     <div class="header-right" id="header-right-slot"></div>
@@ -346,6 +349,7 @@
       <button class="modal-close" onclick="closeModal('faqModal')">×</button>
       <h2>❓ Help & FAQ</h2>
       <p>Double-click any item in the Mouza List or on the map to automatically zoom into the vector data.</p>
+      <p>While drawing a polygon/line, use <strong>⌫ Remove Point</strong> button or press <strong>Backspace</strong> to delete the last placed point.</p>
     </div>
   </div>
   <div id="privacyModal" class="custom-modal">
@@ -642,6 +646,29 @@
     updateAttributeTable();
   }
 
+  // ---- REMOVE LAST POINT (during active drawing) ----
+  let activeDrawHandler = null;
+  map.on('draw:drawstart', function () {
+    const activeMode = drawControl._toolbars.draw._activeMode;
+    activeDrawHandler = activeMode ? activeMode.handler : null;
+  });
+  map.on('draw:drawstop', function () {
+    activeDrawHandler = null;
+  });
+  function removeLastPoint() {
+    if (activeDrawHandler && typeof activeDrawHandler.deleteLastVertex === 'function') {
+      activeDrawHandler.deleteLastVertex();
+    } else {
+      alert('Pehle Polygon ya Line draw karna shuru karein, phir galat point ko remove kar sakte hain.');
+    }
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Backspace' && activeDrawHandler && typeof activeDrawHandler.deleteLastVertex === 'function') {
+      e.preventDefault();
+      activeDrawHandler.deleteLastVertex();
+    }
+  });
+
   // ---- UNDO / REDO FUNCTIONS ----
   function undoLastAction() {
     if (!actionHistory.length) { alert('Undo ke liye koi action available nahi hai!'); return; }
@@ -820,40 +847,30 @@
     })
     .catch(error => console.error('Error loading Jammat_Line.json:', error));
 
-  // ============ LOCATION BUTTON — JS ============
+  // ============ LOCATION BUTTON — JS (simplified, no leftover circle) ============
   (function () {
     const btn = document.getElementById('locate-btn');
     let userMarker = null;
-    let accuracyCircle = null;
-    let watchId = null;
 
-    function clearLocationLayers() {
+    function clearLocationLayer() {
       if (userMarker) { map.removeLayer(userMarker); userMarker = null; }
-      if (accuracyCircle) { map.removeLayer(accuracyCircle); accuracyCircle = null; }
     }
 
-    function showUserLocation(lat, lng, accuracy, shouldFly) {
-      clearLocationLayers();
-
-      accuracyCircle = L.circle([lat, lng], {
-        radius: accuracy, color: '#d4af37', weight: 1, fillColor: '#c5a059', fillOpacity: 0.12
-      }).addTo(map);
+    function showUserLocation(lat, lng) {
+      clearLocationLayer(); // hamesha purana marker pehle hata dein
 
       userMarker = L.marker([lat, lng], {
         icon: L.divIcon({
           className: '',
           html: '<div class="user-location-pulse-wrap"><div class="user-location-marker"></div></div>',
-          iconSize: [18, 18],
-          iconAnchor: [9, 9]
+          iconSize: [16, 16],
+          iconAnchor: [8, 8]
         }),
         zIndexOffset: 1000
       }).addTo(map);
 
-      userMarker.bindPopup(`<strong style="color:#8a6d2b;">📍 You are here</strong><br>Accuracy: ±${Math.round(accuracy)} m`);
-
-      if (shouldFly) {
-        map.flyTo([lat, lng], 16, { animate: true, duration: 1.2 });
-      }
+      userMarker.bindPopup(`<strong style="color:#8a6d2b;">📍 You are here</strong>`);
+      map.flyTo([lat, lng], 16, { animate: true, duration: 1.2 });
     }
 
     function setState(state) {
@@ -881,16 +898,7 @@
       navigator.geolocation.getCurrentPosition(
         function (pos) {
           setState('active');
-          const { latitude, longitude, accuracy } = pos.coords;
-          showUserLocation(latitude, longitude, accuracy, true);
-
-          if (watchId === null) {
-            watchId = navigator.geolocation.watchPosition(
-              (p) => showUserLocation(p.coords.latitude, p.coords.longitude, p.coords.accuracy, false),
-              (e) => console.warn('watchPosition error:', e),
-              { enableHighAccuracy: true, maximumAge: 5000 }
-            );
-          }
+          showUserLocation(pos.coords.latitude, pos.coords.longitude);
         },
         handleError,
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
