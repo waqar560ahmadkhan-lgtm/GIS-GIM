@@ -380,6 +380,14 @@
   let mouzaItemsData = [];
   let mouzaCount = 0;
 
+  // ---- UNDO / REDO STATE ----
+  let actionHistory = [];
+  let redoStack = [];
+  function pushHistory(action) {
+    actionHistory.push(action);
+    redoStack = []; // naya action hone par redo stack clear ho jata hai
+  }
+
   function toUTM(lat, lng) {
     const zone = Math.floor((lng + 180) / 6) + 1;
     const hemisphere = lat >= 0 ? 'north' : 'south';
@@ -598,7 +606,49 @@
     featureRecords = featureRecords.filter(f => f.id !== layer._custom_id);
     updateAttributeTable();
   }
-  map.on(L.Draw.Event.DELETED, (e) => e.layers.eachLayer(layer => removeFeature(layer)));
+
+  // ---- UNDO / REDO FUNCTIONS ----
+  function undoLastAction() {
+    if (!actionHistory.length) { alert('Undo ke liye koi action available nahi hai!'); return; }
+    const action = actionHistory.pop();
+    if (action.type === 'create') {
+      drawnItems.removeLayer(action.layer);
+      featureRecords = featureRecords.filter(f => f.id !== action.layer._custom_id);
+    } else if (action.type === 'delete') {
+      action.layers.forEach((layer) => { drawnItems.addLayer(layer); });
+      action.records.forEach((rec) => { featureRecords.push(rec); });
+    }
+    updateAttributeTable();
+    redoStack.push(action);
+  }
+
+  function redoLastAction() {
+    if (!redoStack.length) { alert('Redo ke liye koi action available nahi hai!'); return; }
+    const action = redoStack.pop();
+    if (action.type === 'create') {
+      drawnItems.addLayer(action.layer);
+      featureRecords.push(action.record);
+    } else if (action.type === 'delete') {
+      action.layers.forEach((layer) => { drawnItems.removeLayer(layer); });
+      const deletedIds = action.layers.map(l => l._custom_id);
+      featureRecords = featureRecords.filter(f => !deletedIds.includes(f.id));
+    }
+    updateAttributeTable();
+    actionHistory.push(action);
+  }
+
+  map.on(L.Draw.Event.DELETED, function(e) {
+    const deletedLayers = [];
+    const deletedRecords = [];
+    e.layers.eachLayer(layer => {
+      const rec = featureRecords.find(f => f.id === layer._custom_id);
+      if (rec) deletedRecords.push(rec);
+      deletedLayers.push(layer);
+      removeFeature(layer);
+    });
+    pushHistory({ type: 'delete', layers: deletedLayers, records: deletedRecords });
+  });
+
   map.on(L.Draw.Event.CREATED, function(e) {
     const layer = e.layer;
     if (layer.setStyle) layer.setStyle({ color: document.getElementById('stroke-color').value, fillColor: document.getElementById('fill-color').value, fillOpacity: 0.5, weight: 2.5 });
@@ -620,8 +670,10 @@
     } else if (type === 'marker') {
       coordsText = `${geojson.geometry.coordinates[1].toFixed(5)}, ${geojson.geometry.coordinates[0].toFixed(5)}`;
     }
-    featureRecords.push({ id: featureCounter, type: type.toUpperCase(), massaviArea: areaText, length: lenText, coords: coordsText });
+    const record = { id: featureCounter, type: type.toUpperCase(), massaviArea: areaText, length: lenText, coords: coordsText };
+    featureRecords.push(record);
     updateAttributeTable();
+    pushHistory({ type: 'create', layer: layer, record: record });
   });
 
   function createBuffer() {
