@@ -34,23 +34,17 @@
     .btn { width: 100%; padding: 13px; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #0b1120; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.92rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s, transform 0.15s; margin-top: 8px; letter-spacing: 0.3px; }
     .btn:hover { opacity: 0.92; transform: translateY(-1px); }
     .btn:active { transform: translateY(0); }
-    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
     .msg { font-size: 0.82rem; padding: 10px 14px; border-radius: 7px; margin-bottom: 16px; display: none; }
     .msg.error { background: rgba(255,107,107,0.12); color: var(--error); border: 1px solid rgba(255,107,107,0.25); display: block; }
     .msg.success { background: rgba(46,204,143,0.1); color: var(--accent); border: 1px solid rgba(46,204,143,0.25); display: block; }
     .divider { text-align: center; color: var(--muted); font-size: 0.75rem; margin: 20px 0; position: relative; }
     .divider::before, .divider::after { content: ''; position: absolute; top: 50%; width: 38%; height: 1px; background: var(--border); }
     .divider::before { left: 0; } .divider::after { right: 0; }
-    .forgot-link { text-align: right; margin-top: -10px; margin-bottom: 14px; }
-    .forgot-link a { font-size: 0.78rem; color: var(--accent); text-decoration: none; cursor: pointer; }
-    .forgot-link a:hover { text-decoration: underline; }
     .footer-note { text-align: center; margin-top: 24px; font-size: 0.78rem; color: var(--muted); }
     .footer-note span { color: var(--accent); }
     .status-dot { display: inline-block; width: 7px; height: 7px; background: var(--accent); border-radius: 50%; margin-right: 6px; box-shadow: 0 0 8px var(--accent); animation: pulse 2s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     .coords { position: fixed; bottom: 16px; right: 20px; font-size: 0.7rem; color: #1f2d45; font-family: monospace; letter-spacing: 0.5px; }
-    .loading { display: inline-block; width: 14px; height: 14px; border: 2px solid #0b1120; border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
-    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -69,8 +63,6 @@
       <button class="tab-btn active" onclick="switchTab('login')">Login</button>
       <button class="tab-btn" onclick="switchTab('register')">Register</button>
     </div>
-
-    <!-- LOGIN FORM -->
     <div id="loginForm">
       <div id="loginMsg" class="msg"></div>
       <div class="form-group">
@@ -81,13 +73,8 @@
         <label>Password</label>
         <input type="password" id="loginPass" placeholder="••••••••" />
       </div>
-      <div class="forgot-link">
-        <a onclick="doForgotPassword()">Forgot password?</a>
-      </div>
-      <button class="btn" id="loginBtn" onclick="doLogin()">Open Portal →</button>
+      <button class="btn" onclick="doLogin()">Open Portal →</button>
     </div>
-
-    <!-- REGISTER FORM -->
     <div id="registerForm" style="display:none;">
       <div id="regMsg" class="msg"></div>
       <div class="form-group">
@@ -106,156 +93,56 @@
         <label>Confirm Password</label>
         <input type="password" id="regPass2" placeholder="Repeat password" />
       </div>
-      <button class="btn" id="registerBtn" onclick="doRegister()">Create Account</button>
+      <button class="btn" onclick="doRegister()">Create Account</button>
     </div>
-
-    <div class="divider">secured by Firebase</div>
+    <div class="divider">secured access</div>
     <div class="footer-note">
-      <span>🔐 Real authentication</span> &nbsp;·&nbsp; No local storage
+      <span>Admin</span> access is pre-configured &nbsp;·&nbsp; Data stays local
     </div>
   </div>
 </div>
 <div class="coords">34.0151° N, 71.5249° E · KP, Pakistan</div>
-
-<!-- FIREBASE SDK -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-  // ✅ AAPKA FIREBASE CONFIG
-  const firebaseConfig = {
-    apiKey: "AIzaSy8ImmDJIRGPGtDaJBVMlULskyXOY-UciU",
-    authDomain: "waqargisportal.firebaseapp.com",
-    projectId: "waqargisportal",
-    storageBucket: "waqargisportal.firebasestorage.app",
-    messagingSenderId: "466401397793",
-    appId: "1:466401397793:web:f0369ae9452cf36995ebb0",
-    measurementId: "G-ZCJGX7NM4B"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-
-  // ========== HELPER FUNCTIONS ==========
-  function showMsg(id, text, type) {
-    const el = document.getElementById(id);
-    el.textContent = text;
-    el.className = 'msg ' + type;
-  }
-
-  function setLoading(btnId, loading) {
-    const btn = document.getElementById(btnId);
-    if (loading) {
-      btn.disabled = true;
-      btn.innerHTML = '<span class="loading"></span>Please wait...';
-    } else {
-      btn.disabled = false;
-      btn.innerHTML = btnId === 'loginBtn' ? 'Open Portal →' : 'Create Account';
+<script>
+  function getUsers() { return JSON.parse(localStorage.getItem('waqar_gis_users') || '[]'); }
+  function saveUsers(u) { localStorage.setItem('waqar_gis_users', JSON.stringify(u)); }
+  (function initAdmin() {
+    const users = getUsers();
+    if (!users.find(u => u.email === 'admin@waqargis.com')) {
+      users.push({ name: 'Waqar (Admin)', email: 'admin@waqargis.com', password: 'waqar!!admin125714TaKhT@BhAi', role: 'admin' });
+      saveUsers(users);
     }
+  })();
+  function switchTab(tab) {
+    document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+    document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
   }
-
-  // ========== LOGIN ==========
-  window.doLogin = async function() {
+  function showMsg(id, text, type) { const el = document.getElementById(id); el.textContent = text; el.className = 'msg ' + type; }
+  function doLogin() {
     const email = document.getElementById('loginEmail').value.trim();
     const pass = document.getElementById('loginPass').value;
     if (!email || !pass) { showMsg('loginMsg', 'Please fill all fields.', 'error'); return; }
-
-    setLoading('loginBtn', true);
-    try {
-      const userCred = await signInWithEmailAndPassword(auth, email, pass);
-      const user = userCred.user;
-
-      // Firestore se role check karo
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      const role = userDoc.exists() ? userDoc.data().role : 'user';
-
-      showMsg('loginMsg', '✓ Login successful! Opening portal...', 'success');
-
-      // Session mein role save karo
-      sessionStorage.setItem('waqar_gis_session', JSON.stringify({
-        name: user.displayName || email,
-        email: user.email,
-        uid: user.uid,
-        role: role
-      }));
-
-      setTimeout(() => { window.location.href = 'portal.html'; }, 900);
-    } catch (err) {
-      let msg = 'Login failed. Please try again.';
-      if (err.code === 'auth/user-not-found') msg = 'No account found with this email.';
-      if (err.code === 'auth/wrong-password') msg = 'Incorrect password.';
-      if (err.code === 'auth/invalid-email') msg = 'Invalid email address.';
-      if (err.code === 'auth/too-many-requests') msg = 'Too many attempts. Try again later.';
-      if (err.code === 'auth/invalid-credential') msg = 'Invalid email or password.';
-      showMsg('loginMsg', msg, 'error');
-      setLoading('loginBtn', false);
-    }
-  };
-
-  // ========== REGISTER ==========
-  window.doRegister = async function() {
+    const user = getUsers().find(u => u.email === email && u.password === pass);
+    if (!user) { showMsg('loginMsg', 'Invalid email or password.', 'error'); return; }
+    showMsg('loginMsg', '✓ Login successful! Opening portal...', 'success');
+    sessionStorage.setItem('waqar_gis_session', JSON.stringify({ name: user.name, email: user.email, role: user.role || 'user' }));
+    setTimeout(() => { window.location.href = 'portal.html'; }, 900);
+  }
+  function doRegister() {
     const name = document.getElementById('regName').value.trim();
     const email = document.getElementById('regEmail').value.trim();
     const pass = document.getElementById('regPass').value;
     const pass2 = document.getElementById('regPass2').value;
-
-    if (!name || !email || !pass || !pass2) { showMsg('regMsg', 'Please fill all fields.', 'error'); return; }
-    if (pass.length < 6) { showMsg('regMsg', 'Password must be at least 6 characters.', 'error'); return; }
-    if (pass !== pass2) { showMsg('regMsg', 'Passwords do not match.', 'error'); return; }
-
-    setLoading('registerBtn', true);
-    try {
-      const userCred = await createUserWithEmailAndPassword(auth, email, pass);
-      const user = userCred.user;
-
-      // Display name set karo
-      await updateProfile(user, { displayName: name });
-
-      // Firestore mein user save karo
-      await setDoc(doc(db, 'users', user.uid), {
-        name: name,
-        email: email,
-        role: 'user',
-        createdAt: new Date().toISOString()
-      });
-
-      showMsg('regMsg', '✓ Account created! You can now login.', 'success');
-      setLoading('registerBtn', false);
-      setTimeout(() => switchTab('login'), 1200);
-    } catch (err) {
-      let msg = 'Registration failed.';
-      if (err.code === 'auth/email-already-in-use') msg = 'This email is already registered.';
-      if (err.code === 'auth/invalid-email') msg = 'Invalid email address.';
-      if (err.code === 'auth/weak-password') msg = 'Password is too weak.';
-      showMsg('regMsg', msg, 'error');
-      setLoading('registerBtn', false);
-    }
-  };
-
-  // ========== FORGOT PASSWORD ==========
-  window.doForgotPassword = async function() {
-    const email = document.getElementById('loginEmail').value.trim();
-    if (!email) { showMsg('loginMsg', 'Enter your email above first.', 'error'); return; }
-    try {
-      await sendPasswordResetEmail(auth, email);
-      showMsg('loginMsg', '✓ Password reset email sent! Check your inbox.', 'success');
-    } catch (err) {
-      showMsg('loginMsg', 'Could not send reset email. Check the address.', 'error');
-    }
-  };
-
-  // ========== TAB SWITCH ==========
-  window.switchTab = function(tab) {
-    document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
-    document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
-    document.querySelectorAll('.tab-btn').forEach((b, i) =>
-      b.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'))
-    );
-  };
-
-  // ========== ENTER KEY ==========
+    if (!name||!email||!pass||!pass2) { showMsg('regMsg','Please fill all fields.','error'); return; }
+    if (pass.length < 6) { showMsg('regMsg','Password must be at least 6 characters.','error'); return; }
+    if (pass !== pass2) { showMsg('regMsg','Passwords do not match.','error'); return; }
+    const users = getUsers();
+    if (users.find(u => u.email === email)) { showMsg('regMsg','This email is already registered.','error'); return; }
+    users.push({ name, email, password: pass, role: 'user' });
+    saveUsers(users);
+    showMsg('regMsg','✓ Account created! You can now login.','success');
+    setTimeout(() => switchTab('login'), 1200);
+  }
   document.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       document.getElementById('loginForm').style.display !== 'none' ? doLogin() : doRegister();
