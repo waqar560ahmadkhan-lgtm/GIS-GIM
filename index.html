@@ -95,57 +95,85 @@
       </div>
       <button class="btn" onclick="doRegister()">Create Account</button>
     </div>
-    <div class="divider">secured access</div>
+    <div class="divider">secured firebase access</div>
     <div class="footer-note">
-      <span>Admin</span> access is pre-configured &nbsp;·&nbsp; Data stays local
+      <span>Cloud Authentication</span> Enabled &nbsp;·&nbsp; Secure & Scalable
     </div>
   </div>
 </div>
 <div class="coords">34.0151° N, 71.5249° E · KP, Pakistan</div>
-<script>
-  function getUsers() { return JSON.parse(localStorage.getItem('waqar_gis_users') || '[]'); }
-  function saveUsers(u) { localStorage.setItem('waqar_gis_users', JSON.stringify(u)); }
-  (function initAdmin() {
-    const users = getUsers();
-    if (!users.find(u => u.email === 'admin@waqargis.com')) {
-      users.push({ name: 'Waqar (Admin)', email: 'admin@waqargis.com', password: 'waqar!!admin125714TaKhT@BhAi', role: 'admin' });
-      saveUsers(users);
-    }
-  })();
-  function switchTab(tab) {
+
+<!-- Firebase App SDK & Auth SDK (Modular v10) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+  // TODO: Apne Firebase Project ki config yahan paste karein (Jo Firebase Console se mili hai)
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  // Expose functions globally for HTML buttons
+  window.switchTab = function(tab) {
     document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
     document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
     document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
-  }
-  function showMsg(id, text, type) { const el = document.getElementById(id); el.textContent = text; el.className = 'msg ' + type; }
-  function doLogin() {
+  };
+
+  window.showMsg = function(id, text, type) { 
+    const el = document.getElementById(id); 
+    el.textContent = text; 
+    el.className = 'msg ' + type; 
+  };
+
+  window.doLogin = async function() {
     const email = document.getElementById('loginEmail').value.trim();
     const pass = document.getElementById('loginPass').value;
     if (!email || !pass) { showMsg('loginMsg', 'Please fill all fields.', 'error'); return; }
-    const user = getUsers().find(u => u.email === email && u.password === pass);
-    if (!user) { showMsg('loginMsg', 'Invalid email or password.', 'error'); return; }
-    showMsg('loginMsg', '✓ Login successful! Opening portal...', 'success');
-    sessionStorage.setItem('waqar_gis_session', JSON.stringify({ name: user.name, email: user.email, role: user.role || 'user' }));
-    setTimeout(() => { window.location.href = 'portal.html'; }, 900);
-  }
-  function doRegister() {
+    
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+      showMsg('loginMsg', '✓ Login successful! Opening portal...', 'success');
+      setTimeout(() => { window.location.href = 'portal.html'; }, 900);
+    } catch (error) {
+      showMsg('loginMsg', 'Error: ' + error.message, 'error');
+    }
+  };
+
+  window.doRegister = async function() {
     const name = document.getElementById('regName').value.trim();
     const email = document.getElementById('regEmail').value.trim();
     const pass = document.getElementById('regPass').value;
     const pass2 = document.getElementById('regPass2').value;
-    if (!name||!email||!pass||!pass2) { showMsg('regMsg','Please fill all fields.','error'); return; }
+
+    if (!name || !email || !pass || !pass2) { showMsg('regMsg','Please fill all fields.','error'); return; }
     if (pass.length < 6) { showMsg('regMsg','Password must be at least 6 characters.','error'); return; }
     if (pass !== pass2) { showMsg('regMsg','Passwords do not match.','error'); return; }
-    const users = getUsers();
-    if (users.find(u => u.email === email)) { showMsg('regMsg','This email is already registered.','error'); return; }
-    users.push({ name, email, password: pass, role: 'user' });
-    saveUsers(users);
-    showMsg('regMsg','✓ Account created! You can now login.','success');
-    setTimeout(() => switchTab('login'), 1200);
-  }
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+      // Update user profile name
+      await updateProfile(userCredential.user, { displayName: name });
+      
+      showMsg('regMsg','✓ Account created! You can now login.','success');
+      setTimeout(() => window.switchTab('login'), 1200);
+    } catch (error) {
+      showMsg('regMsg', 'Error: ' + error.message, 'error');
+    }
+  };
+
   document.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
-      document.getElementById('loginForm').style.display !== 'none' ? doLogin() : doRegister();
+      document.getElementById('loginForm').style.display !== 'none' ? window.doLogin() : window.doRegister();
     }
   });
 </script>
