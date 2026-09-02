@@ -710,13 +710,27 @@
         const geojson = layer.toGeoJSON();
         const type = e.layerType;
         let areaText = 'N/A', lenText = 'N/A', coordsText = 'Geometry';
+        
         if (type === 'polygon') {
             areaText = calculateMassaviArea(turf.area(geojson)).formattedText;
-            lenText = `${(turf.length(geojson, {units:'kilometers'}) * 1000).toFixed(2)} m`;
+            let latlngs = layer.getLatLngs();
+            let flatLatLngs = Array.isArray(latlngs[0]) && Array.isArray(latlngs[0][0]) ? latlngs[0] : (Array.isArray(latlngs[0]) ? latlngs[0] : latlngs);
+            let perimeterMeters = 0;
+            for (let i = 0; i < flatLatLngs.length; i++) {
+                let p1 = flatLatLngs[i];
+                let p2 = flatLatLngs[(i + 1) % flatLatLngs.length];
+                perimeterMeters += p1.distanceTo(p2);
+            }
+            lenText = perimeterMeters >= 1000 ? `${(perimeterMeters / 1000).toFixed(2)} km` : `${perimeterMeters.toFixed(2)} m`;
         } else if (type === 'polyline') {
-            let l = turf.length(geojson, {units:'kilometers'});
-            lenText = l >= 1 ? `${l.toFixed(2)} km` : `${(l * 1000).toFixed(2)} m`;
+            let lineLatLngs = layer.getLatLngs();
+            let lineMeters = 0;
+            for (let i = 0; i < lineLatLngs.length - 1; i++) {
+                lineMeters += lineLatLngs[i].distanceTo(lineLatLngs[i+1]);
+            }
+            lenText = lineMeters >= 1000 ? `${(lineMeters / 1000).toFixed(2)} km` : `${lineMeters.toFixed(2)} m`;
         }
+
         const record = { id: featureCounter, type: type.toUpperCase(), massaviArea: areaText, length: lenText, coords: coordsText };
         featureRecords.push(record);
         updateAttributeTable();
