@@ -676,7 +676,7 @@
         if (activeDrawHandler && typeof activeDrawHandler.deleteLastVertex === 'function') {
             activeDrawHandler.deleteLastVertex();
         } else {
-            alert('Start drawing a Polygon or Line first.');
+            showToast('⚠️ Click the Polygon or Line icon on the map tools first.');
         }
     }
 
@@ -757,7 +757,7 @@
         let csv = 'ID,Type,Area,Length,Coordinates\n';
         featureRecords.forEach(f => csv += `${f.id},${f.type},"${f.massaviArea}",${f.length},"${f.coords}"\n`);
         const a = document.createElement('a');
-        a.href = encodeURI('data:text/csv;charset=utf-8,' + csv);
+        a.href = encodeURI('data:text/csv;charset=utf-8,+ ' + csv);
         a.download = 'waqar_gis_attributes.csv';
         a.click();
     }
