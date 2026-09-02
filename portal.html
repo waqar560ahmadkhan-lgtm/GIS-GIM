@@ -923,9 +923,8 @@
     }
 
     let activeDrawHandler = null;
-    map.on('draw:drawstart', function() {
-        const activeMode = drawControl._toolbars.draw._activeMode;
-        activeDrawHandler = activeMode ? activeMode.handler : null;
+    map.on('draw:drawstart', function(e) {
+        activeDrawHandler = e.layerType ? drawControl._toolbars.draw._modes[e.layerType].handler : null;
     });
     map.on('draw:drawstop', function() { activeDrawHandler = null; });
 
@@ -1067,12 +1066,16 @@
 
     function exportMapImage() {
         closePrintLayout();
-        html2canvas(document.getElementById('map'), { useCORS: true, allowTaint: true }).then(canvas => {
-            const a = document.createElement('a');
-            a.href = canvas.toDataURL('image/png');
-            a.download = 'Waqar_GIS_Map.png';
-            a.click();
-        });
+        setTimeout(() => {
+            html2canvas(document.getElementById('map'), { useCORS: true, allowTaint: true, logging: false }).then(canvas => {
+                const a = document.createElement('a');
+                a.href = canvas.toDataURL('image/png');
+                a.download = 'Waqar_GIS_Map.png';
+                a.click();
+            }).catch(err => {
+                alert('Export failed. Ensure all map layers support CORS.');
+            });
+        }, 300);
     }
 
     function exportMapPDF() {
@@ -1081,7 +1084,7 @@
         const includeLegend = document.getElementById('chk-legend').checked;
         const legendText = document.getElementById('print-legend-content').innerText;
 
-        html2canvas(document.getElementById('map'), { useCORS: true, allowTaint: true }).then(canvas => {
+        html2canvas(document.getElementById('map'), { useCORS: true, allowTaint: true, logging: false }).then(canvas => {
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF('landscape', 'mm', 'a4');
             pdf.setFillColor(26, 31, 41);
@@ -1114,6 +1117,8 @@
             pdf.text('Waqar GIS Portal | waqar560ahmad@gmail.com', 14, 208);
             pdf.save(`${title.replace(/\s+/g, '_')}_Report.pdf`);
             showToast('PDF exported successfully!');
+        }).catch(err => {
+            alert('PDF generation failed.');
         });
     }
 
