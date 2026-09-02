@@ -23,7 +23,8 @@
         html, body { height: 100%; width: 100%; overflow: hidden; background: #15181e; display: flex; flex-direction: column; }
         
         .app-header { height: 60px; min-height: 60px; background: #1a1f29; border-bottom: 2px solid #c5a059; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; z-index: 1002; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        .header-left, .header-center, .header-right { display: flex; align-items: center; gap: 10px; }
+        .header-left, .header-center, .header-right { display: flex; align-items: center; gap: 12px; }
+        .header-center { flex-wrap: nowrap; }
         .header-btn { background: #252a34; color: #c5a059; border: 1px solid rgba(197,160,89,0.4); border-radius: 6px; padding: 6px 12px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease; }
         .header-btn:hover { background: #c5a059; color: #15181e; }
         .header-btn.remove-point-btn { background: #3a2530; color: #f3a8a8; border-color: rgba(239,68,68,0.4); }
@@ -66,10 +67,22 @@
         .leaflet-draw-toolbar a { background-color: #ffffff !important; border-bottom: 1px solid #f0e6d2 !important; color: #15181e !important; }
         .leaflet-draw-toolbar a:hover { background-color: #d4af37 !important; color: #ffffff !important; }
 
-        .leaflet-editing-icon { background-color: #d4af37 !important; border: 2px solid #ffffff !important; border-radius: 4px !important; width: 10px !important; height: 10px !important; margin-left: -5px !important; margin-top: -5px !important; }
-        .leaflet-editing-icon:hover { background-color: #f3e5ab !important; transform: scale(1.2); }
+        /* Custom Vertex Styling (Gold Theme) */
+        .leaflet-editing-icon {
+            background-color: #d4af37 !important;
+            border: 2px solid #ffffff !important;
+            border-radius: 4px !important;
+            width: 10px !important;
+            height: 10px !important;
+            margin-left: -5px !important;
+            margin-top: -5px !important;
+        }
+        .leaflet-editing-icon:hover {
+            background-color: #f3e5ab !important;
+            transform: scale(1.2);
+        }
 
-        .leaflet-tooltip.dimension-tooltip { background: rgba(21, 24, 30, 0.95); border: 1.5px solid #c5a059; color: #f8fafc; font-size: 11px; font-family: monospace; padding: 4px 8px; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.6); }
+        .leaflet-tooltip.dimension-tooltip { background: rgba(21, 24, 30, 0.95); border: 1.5px solid #c5a059; color: #f8fafc; font-size: 11px; font-family: monospace; padding: 5px 10px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.6); }
 
         #attribute-panel { height: 180px; background: rgba(21,24,30,0.95); border-top: 2px solid #c5a059; padding: 10px 16px; overflow-y: auto; backdrop-filter: blur(10px); z-index: 10; }
         #attribute-panel h4 { color: #d4af37; font-size: 12px; margin-bottom: 8px; font-family: 'Cinzel', serif; }
@@ -81,6 +94,8 @@
         #cursor-hud { position: absolute; bottom: 190px; right: 20px; background: rgba(21,24,30,0.85); color: #c5a059; padding: 6px 12px; border-radius: 6px; font-size: 11px; border: 1px solid rgba(197,160,89,0.3); z-index: 500; pointer-events: none; font-family: monospace; }
         #top-right-controls { position: absolute; top: 15px; right: 15px; z-index: 1000; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
         .note-action-row { display: flex; gap: 6px; }
+        #note-mode-btn { background: linear-gradient(135deg,#c5a059 0%,#967635 100%); color: #0f1217; border: 1px solid #f3e5ab; border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: 700; cursor: pointer; }
+        #clear-notes-btn { background: #252a34; color: #f87171; border: 1px solid rgba(248,113,113,0.4); border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: 700; cursor: pointer; }
 
         .custom-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
         .modal-content { background: #1a1f29 !important; border: 2px solid #c5a059 !important; border-radius: 12px; width: 90%; max-width: 550px; padding: 26px; color: #ffffff !important; box-shadow: 0 10px 30px rgba(0,0,0,0.8); position: relative; max-height: 80vh; overflow-y: auto; }
@@ -99,6 +114,25 @@
         #coord-copy-popup .cp-btn { background: #252a34; border: 1px solid rgba(197,160,89,0.35); border-radius: 4px; color: #c5a059; font-size: 9px; font-weight: 700; padding: 3px 7px; cursor: pointer; }
         #coord-copy-popup .cp-close { position: absolute; top: 6px; right: 8px; background: none; border: none; color: #f87171; cursor: pointer; font-size: 14px; font-weight: 700; }
 
+        #measure-hud { position: absolute; bottom: 190px; left: 20px; background: rgba(21,24,30,0.92); color: #e2e8f0; padding: 8px 12px; border-radius: 8px; font-size: 11px; border: 1px solid rgba(197,160,89,0.4); z-index: 500; pointer-events: none; font-family: monospace; line-height: 1.8; display: none; }
+        #measure-hud strong { color: #d4af37; }
+        #measure-mode-btn { background: linear-gradient(135deg,#1d4ed8,#1e40af); color: #fff; border: 1px solid #60a5fa; border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: 700; cursor: pointer; }
+        #measure-mode-btn.active { background: #ef4444; border-color: #f87171; }
+        #clear-measure-btn { background: #252a34; color: #93c5fd; border: 1px solid rgba(96,165,250,0.4); border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: 700; cursor: pointer; }
+
+        #print-layout-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 3000; justify-content: center; align-items: center; backdrop-filter: blur(6px); }
+        #print-layout-inner { background: #1a1f29; border: 2px solid #c5a059; border-radius: 12px; width: 95%; max-width: 700px; padding: 20px; color: #fff; }
+        #print-layout-inner h2 { font-family: 'Cinzel', serif; color: #d4af37; margin-bottom: 14px; font-size: 18px; }
+        .print-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+        .print-ctrl-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #e2e8f0; }
+        .print-ctrl-item input[type=text] { background: #15181e; border: 1px solid rgba(197,160,89,0.35); border-radius: 5px; color: #f8fafc; padding: 5px 8px; font-size: 11px; width: 160px; outline: none; }
+        #print-preview-box { background: #fff; border-radius: 6px; overflow: hidden; position: relative; }
+        #print-preview-header { background: #1a1f29; padding: 8px 14px; display: flex; justify-content: space-between; align-items: center; }
+        #print-map-canvas { height: 300px; position: relative; overflow: hidden; background: #222; }
+        #print-preview-footer { background: #1a1f29; padding: 7px 14px; display: flex; justify-content: space-between; align-items: center; }
+        #print-legend-box { position: absolute; bottom: 10px; right: 10px; background: rgba(21,24,30,0.95); border: 1px solid rgba(197,160,89,0.5); border-radius: 5px; padding: 8px 12px; font-size: 11px; color: #e2e8f0; min-width: 140px; }
+        #print-legend-content { outline: none; border: 1px dashed rgba(197,160,89,0.4); padding: 4px; min-height: 40px; background: rgba(15,18,23,0.5); border-radius: 3px; font-size: 10px; line-height: 1.4; color: #f8fafc; }
+
         #global-toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #059669; color: #fff; border-radius: 8px; padding: 8px 18px; font-size: 12px; font-weight: 700; opacity: 0; pointer-events: none; z-index: 9999; transition: opacity 0.3s; white-space: nowrap; }
         #global-toast.show { opacity: 1; }
     </style>
@@ -116,9 +150,11 @@
         <button class="header-btn" onclick="undoLastAction()">↩️ Undo</button>
         <button class="header-btn" onclick="redoLastAction()">🔁 Redo</button>
         <button class="header-btn remove-point-btn" onclick="removeLastPoint()">⌫ Remove Point</button>
+        <button class="header-btn" id="measure-mode-btn" onclick="toggleMeasureMode()">📏 Measure</button>
+        <button class="header-btn" id="clear-measure-btn" onclick="clearMeasurement()">✕ Clear Measure</button>
         <button class="header-btn" onclick="openPrintLayout()">🖨️ Print Map</button>
     </div>
-    <div class="header-right"></div>
+    <div class="header-right" id="header-right-slot"></div>
 </header>
 
 <button id="floating-menu-btn" onclick="toggleSidebar()">☰</button>
@@ -132,6 +168,13 @@
     <div class="cp-row"><span>UTM</span><span class="cp-val" id="cp-utm" style="font-size:10px;">—</span><button class="cp-btn" onclick="doCopy('cp-utm',this)">Copy</button></div>
 </div>
 
+<div id="measure-hud">
+    <strong>📏 Measurement</strong><br>
+    Distance: <strong id="meas-dist">0 m</strong><br>
+    Area: <strong id="meas-area">—</strong><br>
+    Points: <strong id="meas-pts">0</strong>
+</div>
+
 <div class="app-body">
     <div class="sidebar" id="app-sidebar">
         <div class="portal-brand">
@@ -140,17 +183,6 @@
                 <div class="portal-title">Waqar GIS Portal</div>
             </div>
             <button class="menu-toggle-btn" onclick="toggleSidebar()">✕</button>
-        </div>
-
-        <div class="panel-box" style="border-color:#d4af37; background:rgba(212,175,55,0.08);">
-            <h3 style="color:#d4af37;">📏 Measurement Unit Choice</h3>
-            <select id="unit-pref-select" onchange="updateAllDimensionsDisplay()" style="border-color:#d4af37; font-weight:700;">
-                <option value="all" selected>Show All (Meter, Feet, KM)</option>
-                <option value="meters">Meters Only (m)</option>
-                <option value="feet">Feet Only (ft)</option>
-                <option value="km">Kilometers Only (km)</option>
-            </select>
-            <div style="font-size:10px; color:#94a3b8; margin-top:2px;">Select your preferred unit for drawing dimensions.</div>
         </div>
 
         <div class="panel-box">
@@ -168,6 +200,48 @@
             <button class="btn btn-gold" onclick="goToCoordinates()">LOCATE</button>
         </div>
 
+        <div class="panel-box" style="border-color:#059669;">
+            <h3 style="color:#34d399;">Split-Screen Compare</h3>
+            <select id="left-layer-select" style="margin-bottom:6px;">
+                <option value="googleSat" selected>Left: Google Satellite</option>
+                <option value="sentinel2">Left: Sentinel-2</option>
+                <option value="osm">Left: OpenStreetMap</option>
+            </select>
+            <select id="right-layer-select" style="margin-bottom:8px;">
+                <option value="esriSat">Right: Esri Imagery</option>
+                <option value="dark" selected>Right: Dark Canvas</option>
+                <option value="topo">Right: Topographic</option>
+            </select>
+            <button id="slider-toggle-btn" class="btn btn-emerald" onclick="toggleSplitScreen()">ENABLE SLIDER COMPARISON</button>
+        </div>
+
+        <div class="panel-box">
+            <h3>Bookmarks</h3>
+            <input type="text" id="bookmark-name" placeholder="Name this view..." />
+            <button class="btn btn-gold" onclick="saveBookmark()" style="margin-bottom:8px;">SAVE CURRENT VIEW</button>
+            <div id="bookmark-list"></div>
+        </div>
+
+        <div class="panel-box">
+            <h3>Import GeoJSON / KML</h3>
+            <input type="file" id="file-input" accept=".geojson,.json,.kml" />
+            <button class="btn btn-gold" onclick="loadSpatialFile()">UPLOAD & VIEW</button>
+        </div>
+
+        <div class="panel-box">
+            <h3>Spatial Buffer Tool (M)</h3>
+            <input type="number" id="buffer-radius" placeholder="Buffer Distance (Meters)" value="100" />
+            <button class="btn btn-gold" onclick="createBuffer()">GENERATE BUFFER</button>
+        </div>
+
+        <div class="panel-box">
+            <h3>Feature Styling</h3>
+            <div class="style-inputs">
+                <input type="color" id="fill-color" value="#c5a059" title="Fill Color" style="height:35px; cursor:pointer;" />
+                <input type="color" id="stroke-color" value="#d4af37" title="Stroke Color" style="height:35px; cursor:pointer;" />
+            </div>
+        </div>
+
         <div class="panel-box">
             <h3>Basemap Selector</h3>
             <select id="basemap-select" onchange="switchBasemap(this.value)">
@@ -175,6 +249,7 @@
                 <option value="sentinel2">Sentinel-2 Cloudless</option>
                 <option value="esriSat">Esri World Imagery</option>
                 <option value="osm">OpenStreetMap</option>
+                <option value="topo">Esri Topographic</option>
                 <option value="dark">Dark Gray Canvas</option>
             </select>
         </div>
@@ -184,6 +259,15 @@
             <button class="btn btn-emerald" onclick="exportGeoJSON()" style="margin-bottom:6px;">Download GeoJSON</button>
             <button class="btn btn-emerald" onclick="exportCSV()" style="margin-bottom:6px;">Download CSV Attributes</button>
             <button class="btn btn-dark" onclick="exportMapImage()" style="margin-bottom:6px;">Export PNG Image</button>
+            <button class="btn btn-dark" onclick="openPrintLayout()">Export PDF Report</button>
+        </div>
+
+        <div class="panel-box">
+            <h3>Main Pages</h3>
+            <button class="btn btn-dark" onclick="openModal('homeModal')" style="margin-bottom:6px;">🏠 Home</button>
+            <button class="btn btn-dark" onclick="openModal('aboutModal')" style="margin-bottom:6px;">ℹ️ About Us</button>
+            <button class="btn btn-dark" onclick="openModal('servicesModal')" style="margin-bottom:6px;">🛠️ Services</button>
+            <button class="btn btn-dark" onclick="openModal('contactModal')" style="margin-bottom:6px;">📞 Contact Us</button>
         </div>
 
         <div class="panel-box" style="border-color:#d4af37;">
@@ -202,6 +286,13 @@
 
         <div id="locate-control">
             <button id="locate-btn" title="Find My Location">📍</button>
+        </div>
+
+        <div id="top-right-controls">
+            <div class="note-action-row">
+                <button id="note-mode-btn" onclick="toggleNoteMode()">📍 Add Note</button>
+                <button id="clear-notes-btn" onclick="clearAllNotes()">🗑️ Clear Notes</button>
+            </div>
         </div>
 
         <div id="cursor-hud">Lat: 0.00000 | Lng: 0.00000<br>UTM: --</div>
@@ -228,15 +319,50 @@
     </div>
 </div>
 
-<div id="print-layout-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:3000; justify-content:center; align-items:center;">
-    <div style="background:#1a1f29; border:2px solid #c5a059; border-radius:12px; width:95%; max-width:600px; padding:20px; color:#fff;">
-        <h2 style="font-family:'Cinzel',serif; color:#d4af37; margin-bottom:14px; font-size:18px;">🖨️ Export Map Image</h2>
-        <button class="btn btn-gold" onclick="exportMapImage()">Download Snapshot PNG</button>
-        <button class="btn btn-dark" onclick="document.getElementById('print-layout-modal').style.display='none'" style="margin-top:8px;">Close</button>
+<div id="print-layout-modal">
+    <div id="print-layout-inner">
+        <h2>🖨️ Print / Export Map Report</h2>
+        <div class="print-controls">
+            <div class="print-ctrl-item">
+                <label>Map Title:</label>
+                <input type="text" id="print-title-inp" value="Waqar GIS Portal — Map" oninput="updatePrintPreview()" />
+            </div>
+        </div>
+        <div id="print-preview-box">
+            <div id="print-preview-header">
+                <div style="color:#d4af37; font-size:13px; font-weight:700;" id="print-title-disp">Waqar GIS Portal — Map</div>
+                <div style="color:#788294; font-size:10px;">Scale: 1:25,000 | CRS: WGS84</div>
+            </div>
+            <div id="print-map-canvas">
+                <div id="print-legend-box">
+                    <div style="font-size:10px; color:#d4af37; font-weight:700; margin-bottom:4px;">Legend / Notes</div>
+                    <div id="print-legend-content" contenteditable="true">
+                        • Study Area Features<br>
+                        • Digitized Geometries
+                    </div>
+                </div>
+            </div>
+            <div id="print-preview-footer">
+                <div style="color:#c5a059; font-size:10px; font-weight:700;">Waqar GIS Portal</div>
+                <div style="color:#788294; font-size:10px;" id="print-date-disp"></div>
+            </div>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:14px;">
+            <button class="btn btn-gold" onclick="exportMapPDF()" style="width:auto; padding:8px 20px;">⬇️ Export PDF</button>
+            <button class="btn btn-dark" onclick="exportMapImage()" style="width:auto; padding:8px 20px;">🖼️ Export PNG</button>
+            <button class="btn btn-dark" onclick="closePrintLayout()" style="width:auto; padding:8px 20px; color:#f87171;">✕ Close</button>
+        </div>
     </div>
 </div>
 
+<div id="homeModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('homeModal')">×</button><h2>🏠 Home</h2><p>Welcome to Waqar GIS Portal Executive Spatial Suite.</p></div></div>
+<div id="aboutModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('aboutModal')">×</button><h2>ℹ️ About</h2><p>Engineered for high-performance spatial analysis and Web GIS mapping.</p></div></div>
+<div id="servicesModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('servicesModal')">×</button><h2>🛠️ Services</h2><p>Vector digitization, Masavi conversions, buffers, and spatial exports.</p></div></div>
+<div id="contactModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('contactModal')">×</button><h2>📞 Contact</h2><p>Waqar Ahmad (Geomatics Specialist)<br>Phone: 03201975800<br>Email: waqar560ahmad@gmail.com</p></div></div>
+
 <script>
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     function showToast(msg, dur) {
         const t = document.getElementById('global-toast');
         t.textContent = msg;
@@ -255,6 +381,7 @@
             L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, opacity: 0.95, crossOrigin: true })
         ]),
         osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, crossOrigin: true }),
+        topo: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, crossOrigin: true }),
         dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, crossOrigin: true })
     };
 
@@ -269,10 +396,39 @@
         setTimeout(() => { map.invalidateSize(); }, 310);
     }
 
+    let splitControl = null, leftLayerObj = null, rightLayerObj = null, isSplitActive = false;
+    function toggleSplitScreen() {
+        const btn = document.getElementById('slider-toggle-btn');
+        const leftKey = document.getElementById('left-layer-select').value;
+        const rightKey = document.getElementById('right-layer-select').value;
+        if (!isSplitActive) {
+            if (currentBasemap) map.removeLayer(currentBasemap);
+            leftLayerObj = basemaps[leftKey] || basemaps.googleSat;
+            rightLayerObj = basemaps[rightKey] || basemaps.dark;
+            leftLayerObj.addTo(map);
+            rightLayerObj.addTo(map);
+            splitControl = L.control.sideBySide(leftLayerObj, rightLayerObj);
+            splitControl.addTo(map);
+            isSplitActive = true;
+            btn.innerText = 'DISABLE SLIDER COMPARISON';
+            btn.classList.add('btn-active');
+        } else {
+            if (splitControl) { map.removeControl(splitControl); splitControl = null; }
+            if (leftLayerObj) map.removeLayer(leftLayerObj);
+            if (rightLayerObj) map.removeLayer(rightLayerObj);
+            isSplitActive = false;
+            switchBasemap(document.getElementById('basemap-select').value);
+            btn.innerText = 'ENABLE SLIDER COMPARISON';
+            btn.classList.remove('btn-active');
+        }
+    }
+
     let coordMarker = null;
     let uploadedLayerGroup = L.layerGroup().addTo(map);
+    let bufferLayerGroup = L.layerGroup().addTo(map);
+    let notesLayerGroup = L.layerGroup().addTo(map);
     let mouzaGeoLayer = null;
-    let featureCounter = 0, featureRecords = [];
+    let featureCounter = 0, featureRecords = [], noteMode = false, noteCounter = 0;
     let mouzaItemsData = [], mouzaCount = 0;
     let actionHistory = [], redoStack = [];
 
@@ -322,7 +478,70 @@
         });
     }
 
+    let measureMode = false, measurePoints = [], measurePolyline = null, measurePolygon = null, measureMarkers = [];
+    function toggleMeasureMode() {
+        measureMode = !measureMode;
+        const btn = document.getElementById('measure-mode-btn');
+        btn.classList.toggle('active', measureMode);
+        btn.textContent = measureMode ? '⏹ Stop Measure' : '📏 Measure';
+        map.getContainer().style.cursor = measureMode ? 'crosshair' : '';
+        document.getElementById('measure-hud').style.display = measureMode || measurePoints.length > 0 ? 'block' : 'none';
+        if (!measureMode && measurePoints.length < 2) clearMeasurement();
+    }
+
+    function clearMeasurement() {
+        measureMode = false;
+        measurePoints = [];
+        document.getElementById('measure-mode-btn').classList.remove('active');
+        document.getElementById('measure-mode-btn').textContent = '📏 Measure';
+        map.getContainer().style.cursor = '';
+        if (measurePolyline) { map.removeLayer(measurePolyline); measurePolyline = null; }
+        if (measurePolygon) { map.removeLayer(measurePolygon); measurePolygon = null; }
+        measureMarkers.forEach(m => map.removeLayer(m));
+        measureMarkers = [];
+        document.getElementById('measure-hud').style.display = 'none';
+        document.getElementById('meas-dist').textContent = '0 m';
+        document.getElementById('meas-area').textContent = '—';
+        document.getElementById('meas-pts').textContent = '0';
+    }
+
+    map.on('click', function(e) {
+        if (!measureMode) return;
+        measurePoints.push([e.latlng.lat, e.latlng.lng]);
+        const marker = L.circleMarker([e.latlng.lat, e.latlng.lng], { radius: 5, color: '#fff', weight: 2, fillColor: '#d4af37', fillOpacity: 1 }).addTo(map);
+        measureMarkers.push(marker);
+        if (measurePolyline) map.removeLayer(measurePolyline);
+        if (measurePoints.length >= 2) {
+            measurePolyline = L.polyline(measurePoints, { color: '#d4af37', weight: 2.5, dashArray: '6,4' }).addTo(map);
+            const distKm = turf.length({ type: 'Feature', geometry: { type: 'LineString', coordinates: measurePoints.map(p => [p[1], p[0]]) } }, { units: 'kilometers' });
+            const distM = distKm * 1000;
+            const distFt = distM * 3.28084;
+            document.getElementById('meas-dist').textContent = distKm >= 1 ? `${distKm.toFixed(3)} km (${distFt.toFixed(1)} ft)` : `${distM.toFixed(1)} m (${distFt.toFixed(1)} ft)`;
+        }
+        if (measurePoints.length >= 3) {
+            if (measurePolygon) map.removeLayer(measurePolygon);
+            measurePolygon = L.polygon(measurePoints, { color: '#d4af37', weight: 1.5, fillColor: '#c5a059', fillOpacity: 0.2 }).addTo(map);
+            const areaSqM = turf.area({ type: 'Feature', geometry: { type: 'Polygon', coordinates: [[...measurePoints, measurePoints[0]].map(p => [p[1], p[0]])] } });
+            document.getElementById('meas-area').textContent = calculateMassaviArea(areaSqM).formattedText;
+        }
+        document.getElementById('meas-pts').textContent = measurePoints.length;
+    });
+
+    function openPrintLayout() {
+        document.getElementById('print-date-disp').textContent = 'Date: ' + new Date().toLocaleDateString();
+        document.getElementById('print-layout-modal').style.display = 'flex';
+    }
+
+    function closePrintLayout() {
+        document.getElementById('print-layout-modal').style.display = 'none';
+    }
+
+    function updatePrintPreview() {
+        document.getElementById('print-title-disp').textContent = document.getElementById('print-title-inp').value || 'Waqar GIS Map';
+    }
+
     function switchBasemap(key) {
+        if (isSplitActive) return;
         if (currentBasemap) map.removeLayer(currentBasemap);
         if (basemaps[key]) {
             currentBasemap = basemaps[key];
@@ -330,20 +549,13 @@
         }
     }
 
-    function formatLengthByPreference(meters) {
-        const pref = document.getElementById('unit-pref-select').value;
+    function formatDistance(meters) {
         const feet = meters * 3.28084;
-        const km = meters / 1000;
-
-        if (pref === 'meters') return `${meters.toFixed(1)} m`;
-        if (pref === 'feet') return `${feet.toFixed(1)} ft`;
-        if (pref === 'km') return `${km.toFixed(3)} km`;
-
-        // Default 'all' format
         if (meters >= 1000) {
-            return `${km.toFixed(3)} km (${feet.toFixed(1)} ft)`;
+            const km = meters / 1000;
+            return `${km.toFixed(3)} km / ${feet.toFixed(1)} ft`;
         } else {
-            return `${meters.toFixed(1)} m (${feet.toFixed(1)} ft)`;
+            return `${meters.toFixed(1)} m / ${feet.toFixed(1)} ft`;
         }
     }
 
@@ -422,6 +634,55 @@
         coordMarker = L.marker([lat, lng]).addTo(map).bindPopup(`Lat: ${lat}<br>Lng: ${lng}`).openPopup();
     }
 
+    function saveBookmark() {
+        const nameInput = document.getElementById('bookmark-name');
+        const name = nameInput.value.trim() || `View ${new Date().toLocaleTimeString()}`;
+        const center = map.getCenter();
+        const saved = JSON.parse(localStorage.getItem('waqar_gis_bookmarks') || '[]');
+        saved.push({ name, lat: center.lat, lng: center.lng, zoom: map.getZoom() });
+        localStorage.setItem('waqar_gis_bookmarks', JSON.stringify(saved));
+        nameInput.value = '';
+        loadBookmarks();
+    }
+
+    function loadBookmarks() {
+        const saved = JSON.parse(localStorage.getItem('waqar_gis_bookmarks') || '[]');
+        const list = document.getElementById('bookmark-list');
+        list.innerHTML = '';
+        saved.forEach((b, idx) => {
+            const row = document.createElement('div');
+            row.className = 'bookmark-item';
+            row.innerHTML = `<span onclick="map.setView([${b.lat}, ${b.lng}], ${b.zoom})">📌 ${b.name}</span><button onclick="deleteBookmark(${idx})">✕</button>`;
+            list.appendChild(row);
+        });
+    }
+
+    function deleteBookmark(idx) {
+        const saved = JSON.parse(localStorage.getItem('waqar_gis_bookmarks') || '[]');
+        saved.splice(idx, 1);
+        localStorage.setItem('waqar_gis_bookmarks', JSON.stringify(saved));
+        loadBookmarks();
+    }
+    loadBookmarks();
+
+    function toggleNoteMode() {
+        noteMode = !noteMode;
+        document.getElementById('note-mode-btn').classList.toggle('active', noteMode);
+        map.getContainer().style.cursor = noteMode ? 'crosshair' : '';
+    }
+
+    function clearAllNotes() {
+        if (confirm('Delete all notes?')) notesLayerGroup.clearLayers();
+    }
+
+    map.on('click', function(e) {
+        if (!noteMode) return;
+        noteCounter++;
+        const marker = L.marker(e.latlng).addTo(notesLayerGroup);
+        marker.bindPopup(`<strong>Note #${noteCounter}</strong>`).openPopup();
+        toggleNoteMode();
+    });
+
     const drawnItems = new L.FeatureGroup();
     map.addLayer(drawnItems);
     const drawControl = new L.Control.Draw({
@@ -436,6 +697,9 @@
 
     let activeDrawHandler = null;
     map.on('draw:drawstart', function(e) {
+        if (measureMode) {
+            clearMeasurement();
+        }
         activeDrawHandler = e.layerType ? drawControl._toolbars.draw._modes[e.layerType].handler : null;
     });
     map.on('draw:drawstop', () => activeDrawHandler = null);
@@ -475,15 +739,11 @@
         featureCounter++;
         layer._custom_id = featureCounter;
         drawnItems.addLayer(layer);
-        
-        processAndDisplayDimensions(layer, featureCounter, e.layerType);
-    });
-
-    function processAndDisplayDimensions(layer, fId, layerType) {
         const geojson = layer.toGeoJSON();
-        let areaText = 'N/A', lenText = 'N/A';
+        const type = e.layerType;
+        let areaText = 'N/A', lenText = 'N/A', coordsText = 'Geometry';
         
-        if (layerType === 'polygon' || layer.toGeoJSON().geometry.type === 'Polygon') {
+        if (type === 'polygon') {
             areaText = calculateMassaviArea(turf.area(geojson)).formattedText;
             let latlngs = layer.getLatLngs();
             let flatLatLngs = Array.isArray(latlngs[0]) && Array.isArray(latlngs[0][0]) ? latlngs[0] : (Array.isArray(latlngs[0]) ? latlngs[0] : latlngs);
@@ -493,51 +753,35 @@
                 let p2 = flatLatLngs[(i + 1) % flatLatLngs.length];
                 perimeterMeters += p1.distanceTo(p2);
             }
-            lenText = formatLengthByPreference(perimeterMeters);
+            lenText = formatDistance(perimeterMeters);
             
-            layer.bindTooltip(`<b>Polygon #${fId}</b><br>Area: ${areaText}<br>Perimeter: ${lenText}`, { permanent: true, direction: 'center', className: 'dimension-tooltip' }).openTooltip();
-            
-            // Store raw meters for unit updates
-            layer._rawMeters = perimeterMeters;
-            layer._rawAreaSqM = turf.area(geojson);
-            layer._featureType = 'polygon';
-            layer._featureId = fId;
-
-        } else if (layerType === 'polyline' || layer.toGeoJSON().geometry.type === 'LineString') {
+            layer.bindTooltip(`<b>Polygon #${featureCounter}</b><br>Area: ${areaText}<br>Perimeter: ${lenText}`, { permanent: true, direction: 'center', className: 'dimension-tooltip' }).openTooltip();
+        } else if (type === 'polyline') {
             let lineLatLngs = layer.getLatLngs();
             let lineMeters = 0;
             for (let i = 0; i < lineLatLngs.length - 1; i++) {
                 lineMeters += lineLatLngs[i].distanceTo(lineLatLngs[i+1]);
             }
-            lenText = formatLengthByPreference(lineMeters);
+            lenText = formatDistance(lineMeters);
             
-            layer.bindTooltip(`<b>Line #${fId}</b><br>Length: ${lenText}`, { permanent: true, direction: 'center', className: 'dimension-tooltip' }).openTooltip();
-            
-            layer._rawMeters = lineMeters;
-            layer._featureType = 'polyline';
-            layer._featureId = fId;
+            layer.bindTooltip(`<b>Line #${featureCounter}</b><br>Length: ${lenText}`, { permanent: true, direction: 'center', className: 'dimension-tooltip' }).openTooltip();
         }
 
-        const record = { id: fId, type: layerType.toUpperCase(), massaviArea: areaText, length: lenText, coords: 'Geometry' };
+        const record = { id: featureCounter, type: type.toUpperCase(), massaviArea: areaText, length: lenText, coords: coordsText };
         featureRecords.push(record);
         updateAttributeTable();
         pushHistory({ type: 'create', layer, record });
-    }
+    });
 
-    function updateAllDimensionsDisplay() {
-        drawnItems.eachLayer(layer => {
-            if (layer._featureType) {
-                if (layer._featureType === 'polygon') {
-                    const lenText = formatLengthByPreference(layer._rawMeters);
-                    const areaText = calculateMassaviArea(layer._rawAreaSqM).formattedText;
-                    layer.setTooltipContent(`<b>Polygon #${layer._featureId}</b><br>Area: ${areaText}<br>Perimeter: ${lenText}`);
-                } else if (layer._featureType === 'polyline') {
-                    const lenText = formatLengthByPreference(layer._rawMeters);
-                    layer.setTooltipContent(`<b>Line #${layer._featureId}</b><br>Length: ${lenText}`);
-                }
-            }
-        });
-        showToast('Units updated successfully! ✓');
+    function createBuffer() {
+        const data = drawnItems.toGeoJSON();
+        const radius = parseFloat(document.getElementById('buffer-radius').value);
+        if (!data.features.length) return alert('Draw a feature first!');
+        bufferLayerGroup.clearLayers();
+        bufferLayerGroup.addLayer(L.geoJSON(turf.buffer(data, radius / 1000, { units: 'kilometers' }), {
+            style: { color: '#ef4444', fillColor: '#f87171', fillOpacity: 0.35 }
+        }));
+        showToast('Buffer generated!');
     }
 
     function updateAttributeTable() {
@@ -568,12 +812,8 @@
         a.click();
     }
 
-    function openPrintLayout() {
-        document.getElementById('print-layout-modal').style.display = 'flex';
-    }
-
     function exportMapImage() {
-        document.getElementById('print-layout-modal').style.display = 'none';
+        closePrintLayout();
         setTimeout(() => {
             html2canvas(document.getElementById('map'), { useCORS: true, allowTaint: true }).then(canvas => {
                 const a = document.createElement('a');
@@ -582,6 +822,23 @@
                 a.click();
             });
         }, 300);
+    }
+
+    function exportMapPDF() {
+        const title = document.getElementById('print-title-inp').value || 'Waqar GIS Portal';
+        html2canvas(document.getElementById('map'), { useCORS: true, allowTaint: true }).then(canvas => {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('landscape', 'mm', 'a4');
+            pdf.setFillColor(26, 31, 41);
+            pdf.rect(0, 0, 297, 210, 'F');
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(18);
+            pdf.setTextColor(212, 175, 55);
+            pdf.text(title, 14, 16);
+            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 14, 28, 265, 155);
+            pdf.save(`${title.replace(/\s+/g, '_')}_Report.pdf`);
+            showToast('PDF exported successfully!');
+        });
     }
 
     fetch('Jammat_Polygon.json')
