@@ -67,6 +67,9 @@
         .leaflet-draw-toolbar a { background-color: #ffffff !important; border-bottom: 1px solid #f0e6d2 !important; color: #15181e !important; }
         .leaflet-draw-toolbar a:hover { background-color: #d4af37 !important; color: #ffffff !important; }
 
+        /* Map Tooltip Dimension Styling */
+        .leaflet-tooltip.dimension-tooltip { background: rgba(21, 24, 30, 0.9); border: 1px solid #c5a059; color: #f8fafc; font-size: 10px; font-family: monospace; padding: 4px 8px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+
         #attribute-panel { height: 180px; background: rgba(21,24,30,0.95); border-top: 2px solid #c5a059; padding: 10px 16px; overflow-y: auto; backdrop-filter: blur(10px); z-index: 10; }
         #attribute-panel h4 { color: #d4af37; font-size: 12px; margin-bottom: 8px; font-family: 'Cinzel', serif; }
         .table-wrapper { overflow-x: auto; }
@@ -722,6 +725,9 @@
                 perimeterMeters += p1.distanceTo(p2);
             }
             lenText = perimeterMeters >= 1000 ? `${(perimeterMeters / 1000).toFixed(2)} km` : `${perimeterMeters.toFixed(2)} m`;
+            
+            // Set permanent map dimension tooltip for Polygons
+            layer.bindTooltip(`<b>Polygon #${featureCounter}</b><br>Area: ${areaText}<br>Perj: ${lenText}`, { permanent: true, direction: 'center', className: 'dimension-tooltip' }).openTooltip();
         } else if (type === 'polyline') {
             let lineLatLngs = layer.getLatLngs();
             let lineMeters = 0;
@@ -729,6 +735,9 @@
                 lineMeters += lineLatLngs[i].distanceTo(lineLatLngs[i+1]);
             }
             lenText = lineMeters >= 1000 ? `${(lineMeters / 1000).toFixed(2)} km` : `${lineMeters.toFixed(2)} m`;
+            
+            // Set permanent map dimension tooltip for Lines
+            layer.bindTooltip(`<b>Line #${featureCounter}</b><br>Length: ${lenText}`, { permanent: true, direction: 'center', className: 'dimension-tooltip' }).openTooltip();
         }
 
         const record = { id: featureCounter, type: type.toUpperCase(), massaviArea: areaText, length: lenText, coords: coordsText };
