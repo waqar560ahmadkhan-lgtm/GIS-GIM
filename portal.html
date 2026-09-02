@@ -82,7 +82,7 @@
             transform: scale(1.2);
         }
 
-        .leaflet-tooltip.dimension-tooltip { background: rgba(21, 24, 30, 0.9); border: 1px solid #c5a059; color: #f8fafc; font-size: 10px; font-family: monospace; padding: 4px 8px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+        .leaflet-tooltip.dimension-tooltip { background: rgba(21, 24, 30, 0.95); border: 1.5px solid #c5a059; color: #f8fafc; font-size: 11px; font-family: monospace; padding: 5px 10px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.6); }
 
         #attribute-panel { height: 180px; background: rgba(21,24,30,0.95); border-top: 2px solid #c5a059; padding: 10px 16px; overflow-y: auto; backdrop-filter: blur(10px); z-index: 10; }
         #attribute-panel h4 { color: #d4af37; font-size: 12px; margin-bottom: 8px; font-family: 'Cinzel', serif; }
@@ -514,7 +514,9 @@
         if (measurePoints.length >= 2) {
             measurePolyline = L.polyline(measurePoints, { color: '#d4af37', weight: 2.5, dashArray: '6,4' }).addTo(map);
             const distKm = turf.length({ type: 'Feature', geometry: { type: 'LineString', coordinates: measurePoints.map(p => [p[1], p[0]]) } }, { units: 'kilometers' });
-            document.getElementById('meas-dist').textContent = distKm >= 1 ? `${distKm.toFixed(3)} km` : `${(distKm * 1000).toFixed(1)} m`;
+            const distM = distKm * 1000;
+            const distFt = distM * 3.28084;
+            document.getElementById('meas-dist').textContent = distKm >= 1 ? `${distKm.toFixed(3)} km (${distFt.toFixed(1)} ft)` : `${distM.toFixed(1)} m (${distFt.toFixed(1)} ft)`;
         }
         if (measurePoints.length >= 3) {
             if (measurePolygon) map.removeLayer(measurePolygon);
@@ -547,6 +549,16 @@
         }
     }
 
+    function formatDistance(meters) {
+        const feet = meters * 3.28084;
+        if (meters >= 1000) {
+            const km = meters / 1000;
+            return `${km.toFixed(3)} km / ${feet.toFixed(1)} ft`;
+        } else {
+            return `${meters.toFixed(1)} m / ${feet.toFixed(1)} ft`;
+        }
+    }
+
     function calculateMassaviArea(areaSqMeters) {
         let totalSqFt = areaSqMeters * 10.7639;
         let kanals = Math.floor(totalSqFt / 5445.0);
@@ -555,7 +567,7 @@
         let finalSqFt = Math.round(rem % 272.25);
         if (finalSqFt >= 270) { marlas++; finalSqFt = 0; }
         if (marlas >= 20) { kanals++; marlas -= 20; }
-        return { formattedText: `${kanals} Kanal, ${marlas} Marla, ${finalSqFt} SqFt` };
+        return { formattedText: `${kanals} Kanal, ${marlas} Marla, ${finalSqFt} SqFt (${Math.round(totalSqFt).toLocaleString()} SqFt)` };
     }
 
     function searchLocation() {
@@ -741,16 +753,16 @@
                 let p2 = flatLatLngs[(i + 1) % flatLatLngs.length];
                 perimeterMeters += p1.distanceTo(p2);
             }
-            lenText = perimeterMeters >= 1000 ? `${(perimeterMeters / 1000).toFixed(2)} km` : `${perimeterMeters.toFixed(2)} m`;
+            lenText = formatDistance(perimeterMeters);
             
-            layer.bindTooltip(`<b>Polygon #${featureCounter}</b><br>Area: ${areaText}<br>Perj: ${lenText}`, { permanent: true, direction: 'center', className: 'dimension-tooltip' }).openTooltip();
+            layer.bindTooltip(`<b>Polygon #${featureCounter}</b><br>Area: ${areaText}<br>Perimeter: ${lenText}`, { permanent: true, direction: 'center', className: 'dimension-tooltip' }).openTooltip();
         } else if (type === 'polyline') {
             let lineLatLngs = layer.getLatLngs();
             let lineMeters = 0;
             for (let i = 0; i < lineLatLngs.length - 1; i++) {
                 lineMeters += lineLatLngs[i].distanceTo(lineLatLngs[i+1]);
             }
-            lenText = lineMeters >= 1000 ? `${(lineMeters / 1000).toFixed(2)} km` : `${lineMeters.toFixed(2)} m`;
+            lenText = formatDistance(lineMeters);
             
             layer.bindTooltip(`<b>Line #${featureCounter}</b><br>Length: ${lenText}`, { permanent: true, direction: 'center', className: 'dimension-tooltip' }).openTooltip();
         }
