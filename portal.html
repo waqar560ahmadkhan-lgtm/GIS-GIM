@@ -67,6 +67,21 @@
         .leaflet-draw-toolbar a { background-color: #ffffff !important; border-bottom: 1px solid #f0e6d2 !important; color: #15181e !important; }
         .leaflet-draw-toolbar a:hover { background-color: #d4af37 !important; color: #ffffff !important; }
 
+        /* Custom Vertex Styling (Gold Theme) */
+        .leaflet-editing-icon {
+            background-color: #d4af37 !important;
+            border: 2px solid #ffffff !important;
+            border-radius: 4px !important;
+            width: 10px !important;
+            height: 10px !important;
+            margin-left: -5px !important;
+            margin-top: -5px !important;
+        }
+        .leaflet-editing-icon:hover {
+            background-color: #f3e5ab !important;
+            transform: scale(1.2);
+        }
+
         .leaflet-tooltip.dimension-tooltip { background: rgba(21, 24, 30, 0.9); border: 1px solid #c5a059; color: #f8fafc; font-size: 10px; font-family: monospace; padding: 4px 8px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5); }
 
         #attribute-panel { height: 180px; background: rgba(21,24,30,0.95); border-top: 2px solid #c5a059; padding: 10px 16px; overflow-y: auto; backdrop-filter: blur(10px); z-index: 10; }
@@ -670,7 +685,6 @@
 
     let activeDrawHandler = null;
     map.on('draw:drawstart', function(e) {
-        // Agar Measure Mode on ho to usay khud hi off kar do taake conflict na ho
         if (measureMode) {
             clearMeasurement();
         }
