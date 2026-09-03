@@ -132,9 +132,6 @@
     #coord-copy-popup .cp-btn.copied { background: #059669; border-color: #34d399; color: #fff; }
     #coord-copy-popup .cp-close { position: absolute; top: 6px; right: 8px; background: none; border: none; color: #f87171; cursor: pointer; font-size: 14px; font-weight: 700; }
 
-    /* ===== MEASUREMENT HUD (Hidden as requested) ===== */
-    #measure-hud { display: none !important; }
-
     /* ===== DIMENSION LABELS ===== */
     .dim-label { background: rgba(21,24,30,0.92); color: #d4af37; border: 1.5px solid #c5a059; border-radius: 5px; padding: 2px 8px; font-size: 11px; font-weight: 700; font-family: 'Plus Jakarta Sans', monospace; white-space: nowrap; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.6); user-select: none; transition: background 0.15s; }
     .dim-label:hover { background: rgba(197,160,89,0.22); }
@@ -171,7 +168,11 @@
     #print-map-canvas { height:min(62vh,620px); min-height:360px; position:relative; overflow:hidden; background:#1e232a; }
     #print-map-live { position:absolute; inset:0; width:100%; height:100%; overflow:hidden; }
     #print-map-live .leaflet-control-container { display:none !important; }
+    #print-map-live .leaflet-container { width:100% !important; height:100% !important; background:#1e232a; font-family:'Plus Jakarta Sans',sans-serif; }
     #print-map-live .leaflet-tile { max-width:none !important; }
+    #print-map-live .leaflet-overlay-pane { z-index:400 !important; }
+    #print-map-live .leaflet-marker-pane { z-index:600 !important; }
+    #print-map-live .leaflet-shadow-pane { z-index:650 !important; }
     #print-preview-footer { background:#1a1f29; padding:7px 14px; display:flex; justify-content:space-between; align-items:center; border-top:1px solid rgba(197,160,89,.3); }
     .print-overlay-item { position:absolute; z-index:1000; cursor:move; user-select:none; touch-action:none; }
     .print-overlay-item.editing { outline:1px dashed rgba(212,175,55,.9); outline-offset:3px; }
@@ -540,11 +541,6 @@
     setTimeout(() => t.classList.remove('show'), dur || 2000);
   }
 
-  // ============================================================
-  // EDITABLE MAP LEGEND - CHANGE ONLY THIS SECTION
-  // symbol: 'line' | 'polygon' | 'point'
-  // color: any CSS color, e.g. '#FFFF00', 'red', 'blue'
-  // ============================================================
   let LEGEND_TITLE = 'LEGEND';
   const LEGEND_ITEMS = [
     { name: 'Mouza Boundary', symbol: 'line',    color: '#FFFF00' },
@@ -552,7 +548,6 @@
     { name: 'Drawn Line',     symbol: 'line',    color: '#FFFF00' },
     { name: 'Map Point / Note', symbol: 'point', color: '#c5a059' }
   ];
-  // ============================================================
 
   const map = L.map('map', { crossOrigin: true, maxZoom: 20, zoomControl: true }).setView([34.0, 71.5], 13);
   L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
@@ -569,6 +564,7 @@
     dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, crossOrigin: true })
   };
   let currentBasemap = basemaps.googleSat;
+  let currentBasemapKey = 'googleSat';
   currentBasemap.addTo(map);
 
   function toggleSidebar() {
@@ -839,7 +835,7 @@
     else     delete dimStore[featureId].manualValues[segIndex];
     closeDimEdit();
     refreshDimensionLabels(featureId);
-    showToast(val ? '✓ Manual dimension saved!' : '↺ Reset to auto');
+    showToast(val ? '✓ Manual dimension saved! (green label)' : '↺ Reset to auto');
   }
 
   function resetDimEdit() {
@@ -878,7 +874,12 @@
   function switchBasemap(key) {
     if (isSplitActive) return;
     if (currentBasemap) map.removeLayer(currentBasemap);
-    if (basemaps[key]) { currentBasemap = basemaps[key]; currentBasemap.addTo(map); changeOpacity(document.getElementById('opacity-slider').value); }
+    if (basemaps[key]) {
+      currentBasemap = basemaps[key];
+      currentBasemapKey = key;
+      currentBasemap.addTo(map);
+      changeOpacity(document.getElementById('opacity-slider').value);
+    }
   }
   function changeOpacity(val) {
     if (currentBasemap && !isSplitActive) {
@@ -975,8 +976,12 @@
   }
 
   function legendSymbolHTML(item) {
-    if (item.symbol === 'polygon') return `<span class="legend-fill" style="border-color:${item.color};background:${item.color};"></span>`;
-    if (item.symbol === 'point') return `<span class="legend-point" style="background:${item.color};"></span>`;
+    if (item.symbol === 'polygon') {
+      return `<span class="legend-fill" style="border-color:${item.color};background:${item.color};"></span>`;
+    }
+    if (item.symbol === 'point') {
+      return `<span class="legend-point" style="background:${item.color};"></span>`;
+    }
     return `<span class="legend-line" style="border-top-color:${item.color};"></span>`;
   }
 
@@ -992,14 +997,14 @@
     titleInput.value = LEGEND_TITLE;
     rows.innerHTML = LEGEND_ITEMS.map((item, i) => `
       <div class="legend-edit-row">
-        <input type="text" value="${String(item.name).replace(/"/g,'&quot;')}" oninput="updateLegendItem(${i},'name',this.value)">
+        <input type="text" value="${String(item.name).replace(/"/g,'&quot;')}" oninput="updateLegendItem(${i},'name',this.value)" placeholder="Legend name">
         <select onchange="updateLegendItem(${i},'symbol',this.value)">
           <option value="line" ${item.symbol==='line'?'selected':''}>Line</option>
           <option value="polygon" ${item.symbol==='polygon'?'selected':''}>Polygon</option>
           <option value="point" ${item.symbol==='point'?'selected':''}>Point</option>
         </select>
-        <input type="color" value="${item.color}" onchange="updateLegendItem(${i},'color',this.value)">
-        <button type="button" class="legend-remove-btn" onclick="removeLegendItem(${i})">×</button>
+        <input type="color" value="${item.color}" onchange="updateLegendItem(${i},'color',this.value)" title="Symbol color">
+        <button type="button" class="legend-remove-btn" onclick="removeLegendItem(${i})" title="Remove">×</button>
       </div>
     `).join('');
   }
@@ -1017,13 +1022,16 @@
   }
 
   function addLegendItem() {
-    LEGEND_ITEMS.push({ name:'New Item', symbol:'line', color:'#FFFF00' });
+    LEGEND_ITEMS.push({ name:'New Legend Item', symbol:'line', color:'#FFFF00' });
     renderLegendEditor();
     updatePrintPreview();
   }
 
   function removeLegendItem(index) {
-    if (LEGEND_ITEMS.length <= 1) return alert('Minimum 1 item required.');
+    if (LEGEND_ITEMS.length <= 1) {
+      alert('Kam az kam 1 legend item hona chahiye.');
+      return;
+    }
     LEGEND_ITEMS.splice(index, 1);
     renderLegendEditor();
     updatePrintPreview();
@@ -1052,6 +1060,19 @@
   function clearAllNotes() {
     if (confirm('Delete all notes?')) notesLayerGroup.clearLayers();
   }
+  map.on('click', function(e) {
+    if (!noteMode) return;
+    noteCounter++;
+    const marker = L.marker(e.latlng, {
+      icon: L.divIcon({ className:'', html:'<div style="background:#c5a059;border:2px solid #fff;border-radius:50% 50% 50% 0;width:16px;height:16px;transform:rotate(-45deg);box-shadow:0 0 6px rgba(0,0,0,0.6);"></div>', iconSize:[16,16] })
+    }).addTo(notesLayerGroup);
+    marker.on('dblclick', ev => { L.DomEvent.stopPropagation(ev); notesLayerGroup.removeLayer(marker); });
+    const pc = document.createElement('div');
+    pc.innerHTML = `<textarea class="note-popup-input" rows="3">Note #${noteCounter}</textarea><br><button class="note-popup-save">Save</button>`;
+    pc.querySelector('button').onclick = () => marker.bindPopup(`<strong>Note #${noteCounter}</strong><br>${pc.querySelector('textarea').value}`).openPopup();
+    marker.bindPopup(pc).openPopup();
+    toggleNoteMode();
+  });
 
   function loadSpatialFile() {
     const file = document.getElementById('file-input').files[0];
@@ -1096,14 +1117,14 @@
   function toggleEditMode() {
     const handler = getEditHandler();
     const btn = document.getElementById('edit-mode-btn');
-    if (!handler) { alert('Edit tool not loaded.'); return; }
-    if (!drawnItems.getLayers().length) { alert('Draw a feature first.'); return; }
+    if (!handler) { alert('Edit tool load nahi hua. Page ko Ctrl + F5 se refresh karein.'); return; }
+    if (!drawnItems.getLayers().length) { alert('Pehle koi line ya polygon draw karein.'); return; }
     if (!editModeActive) {
       handler.enable();
       editModeActive = true;
       btn.classList.add('active');
       btn.textContent = '✓ Editing...';
-      showToast('✏️ Edit mode ON');
+      showToast('✏️ Edit mode ON — vertices drag karein');
     } else {
       handler.disable();
       editModeActive = false;
@@ -1114,6 +1135,17 @@
     }
   }
 
+  map.on(L.Draw.Event.EDITSTART, function() {
+    editModeActive = true;
+    const btn = document.getElementById('edit-mode-btn');
+    if (btn) { btn.classList.add('active'); btn.textContent = '✓ Editing...'; }
+  });
+  map.on(L.Draw.Event.EDITSTOP, function() {
+    editModeActive = false;
+    const btn = document.getElementById('edit-mode-btn');
+    if (btn) { btn.classList.remove('active'); btn.textContent = '✏️ Edit'; }
+  });
+
   function removeFeature(layer) {
     if (layer._custom_id) removeDimensionLabels(layer._custom_id);
     drawnItems.removeLayer(layer);
@@ -1122,14 +1154,27 @@
   }
 
   let activeDrawHandler = null;
-  map.on('draw:drawstart', function(e) { activeDrawHandler = e.handler; });
-  map.on('draw:drawstop', function() { activeDrawHandler = null; });
+
+  map.on('draw:drawstart', function(e) {
+    activeDrawHandler = e.handler;
+    map.once('dblclick', function() {});
+  });
+
+  map.on('draw:drawstop', function() {
+    activeDrawHandler = null;
+  });
+
+  document.getElementById('map').addEventListener('dblclick', function(e) {
+    if (activeDrawHandler) {
+      e.stopPropagation();
+    }
+  }, true);
 
   function removeLastPoint() {
     if (activeDrawHandler && typeof activeDrawHandler.deleteLastVertex === 'function') {
       activeDrawHandler.deleteLastVertex();
     } else {
-      alert('Start drawing a polygon or line first.');
+      alert('Pehle Polygon ya Line draw shuru karein.');
     }
   }
 
@@ -1138,11 +1183,61 @@
       e.preventDefault();
       activeDrawHandler.deleteLastVertex();
     }
+
     if (e.key === 'F2' && activeDrawHandler) {
       e.preventDefault();
-      if (typeof activeDrawHandler.completeShape === 'function') activeDrawHandler.completeShape();
-      else if (typeof activeDrawHandler._finishShape === 'function') activeDrawHandler._finishShape();
+      if (typeof activeDrawHandler.completeShape === 'function') {
+        activeDrawHandler.completeShape();
+      } else if (typeof activeDrawHandler._finishShape === 'function') {
+        activeDrawHandler._finishShape();
+      } else {
+        const finishBtn = document.querySelector('.leaflet-draw-actions a[title="Finish"]') ||
+                          document.querySelector('.leaflet-draw-actions li:first-child a');
+        if (finishBtn) finishBtn.click();
+      }
+      showToast('✓ Drawing completed (F2)');
     }
+
+    if (e.key === 'Escape' && activeDrawHandler) {
+      activeDrawHandler.disable();
+    }
+  });
+
+  function undoLastAction() {
+    if (!actionHistory.length) { alert('Koi action nahi!'); return; }
+    const a = actionHistory.pop();
+    if (a.type === 'create') {
+      if (a.layer._custom_id) removeDimensionLabels(a.layer._custom_id);
+      drawnItems.removeLayer(a.layer);
+      featureRecords = featureRecords.filter(f => f.id !== a.layer._custom_id);
+    } else if (a.type === 'delete') {
+      a.layers.forEach(l => drawnItems.addLayer(l));
+      a.records.forEach(r => featureRecords.push(r));
+    }
+    updateAttributeTable(); redoStack.push(a);
+  }
+  function redoLastAction() {
+    if (!redoStack.length) { alert('Koi redo nahi!'); return; }
+    const a = redoStack.pop();
+    if (a.type === 'create') {
+      drawnItems.addLayer(a.layer); featureRecords.push(a.record);
+      if (a.layerType && (a.layerType === 'polygon' || a.layerType === 'polyline')) addDimensionLabels(a.layer, a.layer._custom_id, a.layerType);
+    } else if (a.type === 'delete') {
+      a.layers.forEach(l => { removeDimensionLabels(l._custom_id); drawnItems.removeLayer(l); });
+      const ids = a.layers.map(l => l._custom_id);
+      featureRecords = featureRecords.filter(f => !ids.includes(f.id));
+    }
+    updateAttributeTable(); actionHistory.push(a);
+  }
+
+  map.on(L.Draw.Event.DELETED, function(e) {
+    const dl = [], dr = [];
+    e.layers.eachLayer(layer => {
+      const rec = featureRecords.find(f => f.id === layer._custom_id);
+      if (rec) dr.push(rec);
+      dl.push(layer); removeFeature(layer);
+    });
+    pushHistory({ type:'delete', layers:dl, records:dr });
   });
 
   map.on(L.Draw.Event.CREATED, function(e) {
@@ -1151,6 +1246,20 @@
     featureCounter++;
     layer._custom_id = featureCounter;
     drawnItems.addLayer(layer);
+
+    if (e.layerType === 'polygon' || e.layerType === 'polyline') {
+      const lls = layer.getLatLngs();
+      let pts = Array.isArray(lls[0]) ? lls[0] : lls;
+      if (pts.length >= 2) {
+        const last = pts[pts.length - 1];
+        const secondLast = pts[pts.length - 2];
+        if (Math.abs(last.lat - secondLast.lat) < 0.000001 && Math.abs(last.lng - secondLast.lng) < 0.000001) {
+          pts.pop();
+          if (e.layerType === 'polygon') layer.setLatLngs([pts]);
+          else layer.setLatLngs(pts);
+        }
+      }
+    }
 
     const geojson = layer.toGeoJSON();
     const type    = e.layerType;
@@ -1170,9 +1279,19 @@
       const lls = layer.getLatLngs();
       const pts = (Array.isArray(lls[0]) ? lls[0] : lls).map(ll => [ll.lat, ll.lng]);
       segLengthsText = getSegmentLengthsText(pts, false);
+    } else if (type === 'marker') {
+      coordsText = `${geojson.geometry.coordinates[1].toFixed(5)}, ${geojson.geometry.coordinates[0].toFixed(5)}`;
+      segLengthsText = 'N/A';
     }
 
-    const record = { id: featureCounter, type: type.toUpperCase(), massaviArea: areaText, length: lenText, segLengths: segLengthsText, coords: coordsText };
+    const record = {
+      id: featureCounter,
+      type: type.toUpperCase(),
+      massaviArea: areaText,
+      length: lenText,
+      segLengths: segLengthsText,
+      coords: coordsText
+    };
     featureRecords.push(record);
     updateAttributeTable();
     pushHistory({ type:'create', layer, record, layerType: type });
@@ -1203,7 +1322,7 @@
         <td><strong>${f.type}</strong></td>
         <td style="color:#d4af37;font-weight:bold;">${f.massaviArea}</td>
         <td>${f.length}</td>
-        <td style="color:#7dd3fc;font-size:10px;">${f.segLengths || 'N/A'}</td>
+        <td style="color:#7dd3fc;font-size:10px;max-width:200px;word-break:break-word;">${f.segLengths || 'N/A'}</td>
         <td>${f.coords}</td>
       </tr>`
     ).join('');
@@ -1224,7 +1343,6 @@
     a.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));
     a.download = 'waqar_gis_data.geojson'; a.click();
   }
-
   function exportCSV() {
     if (!featureRecords.length) return alert('No data!');
     let csv = 'ID,Type,Area,Length,SegmentLengths,Coordinates\n';
@@ -1232,71 +1350,170 @@
       csv += `${f.id},${f.type},"${f.massaviArea}",${f.length},"${f.segLengths || 'N/A'}","${f.coords}"\n`;
     });
     const a = document.createElement('a');
-    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-    a.download = 'waqar_gis_table.csv'; a.click();
+    a.href = encodeURI('data:text/csv;charset=utf-8,' + csv);
+    a.download = 'waqar_gis_attributes.csv'; a.click();
   }
 
-  function exportMapImage() {
-    showToast('Exporting Map PNG...');
-    html2canvas(document.getElementById('map')).then(canvas => {
-      const a = document.createElement('a');
-      a.href = canvas.toDataURL('image/png');
-      a.download = 'waqar_gis_map.png'; a.click();
-      showToast('PNG Exported! ✓');
-    });
+  function showExportOverlay(msg) {
+    document.getElementById('export-overlay-msg').textContent = msg || 'Exporting...';
+    document.getElementById('export-progress-fill').style.width = '0%';
+    document.getElementById('export-overlay').style.display = 'flex';
+  }
+  function hideExportOverlay() {
+    document.getElementById('export-overlay').style.display = 'none';
   }
 
-  let printMapInstance = null;
+  let printLiveMap = null;
+
   function openPrintLayout() {
     document.getElementById('print-layout-modal').style.display = 'flex';
     document.getElementById('print-date-disp').textContent = new Date().toLocaleDateString();
     updatePrintPreview();
   }
+
   function closePrintLayout() {
     document.getElementById('print-layout-modal').style.display = 'none';
+    if (printLiveMap) { printLiveMap.remove(); printLiveMap = null; }
   }
 
   function updatePrintPreview() {
-    const title = document.getElementById('print-title-inp').value;
+    const title = document.getElementById('print-title-inp').value || 'Waqar GIS Portal — Map';
     document.getElementById('print-title-disp').textContent = title;
+
     document.getElementById('print-north-arrow').style.display = document.getElementById('chk-north').checked ? 'flex' : 'none';
     document.getElementById('print-scale-bar').style.display = document.getElementById('chk-scale').checked ? 'block' : 'none';
-    const lb = document.getElementById('print-legend-box');
-    lb.style.display = document.getElementById('chk-legend').checked ? 'block' : 'none';
-    lb.innerHTML = buildLegendHTML();
-
-    if (!printMapInstance) {
-      setTimeout(() => {
-        printMapInstance = L.map('print-map-live', { zoomControl:false, attributionControl:false }).setView(map.getCenter(), map.getZoom());
-        L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0','mt1','mt2','mt3'] }).addTo(printMapInstance);
-      }, 200);
+    
+    const legendBox = document.getElementById('print-legend-box');
+    if (document.getElementById('chk-legend').checked) {
+      legendBox.style.display = 'block';
+      legendBox.innerHTML = buildLegendHTML();
     } else {
-      printMapInstance.setView(map.getCenter(), map.getZoom());
-      printMapInstance.invalidateSize();
+      legendBox.style.display = 'none';
+    }
+
+    if (!printLiveMap) {
+      setTimeout(() => {
+        const container = document.getElementById('print-map-live');
+        if (!container || printLiveMap) return;
+        printLiveMap = L.map(container, { zoomControl:false, attributionControl:false, dragging:false, scrollWheelZoom:false });
+        L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0','mt1','mt2','mt3'], crossOrigin:true }).addTo(printLiveMap);
+        printLiveMap.setView(map.getCenter(), map.getZoom());
+
+        // Clone layers to print map
+        drawnItems.eachLayer(layer => {
+          const lClone = L.geoJSON(layer.toGeoJSON(), {
+            style: { color: '#FFFF00', fillColor: '#c5a059', fillOpacity: 0.5, weight: 2.5 }
+          });
+          lClone.addTo(printLiveMap);
+        });
+      }, 150);
+    } else {
+      printLiveMap.setView(map.getCenter(), map.getZoom());
+      printLiveMap.invalidateSize();
     }
   }
 
   function exportMapPDF() {
-    document.body.classList.add('printing');
     window.print();
-    setTimeout(() => document.body.classList.remove('printing'), 1000);
+  }
+
+  function exportMapImage() {
+    showExportOverlay('Generating PNG image...');
+    setTimeout(() => {
+      html2canvas(document.getElementById('print-preview-box'), { useCORS: true, scale: 2 }).then(canvas => {
+        hideExportOverlay();
+        const a = document.createElement('a');
+        a.href = canvas.toDataURL('image/png');
+        a.download = 'waqar_gis_map_export.png';
+        a.click();
+        showToast('PNG Exported Successfully! ✓');
+      }).catch(err => {
+        hideExportOverlay();
+        alert('Export failed: ' + err.message);
+      });
+    }, 400);
   }
 
   function resetPrintElementPositions() {
-    document.getElementById('print-north-arrow').style.top = '12px';
-    document.getElementById('print-north-arrow').style.right = '14px';
-    document.getElementById('print-north-arrow').style.bottom = '';
-    document.getElementById('print-north-arrow').style.left = '';
-    document.getElementById('print-scale-bar').style.bottom = '12px';
-    document.getElementById('print-scale-bar').style.left = '14px';
-    document.getElementById('print-scale-bar').style.top = '';
-    document.getElementById('print-scale-bar').style.right = '';
-    document.getElementById('print-legend-box').style.bottom = '12px';
-    document.getElementById('print-legend-box').style.right = '14px';
-    document.getElementById('print-legend-box').style.top = '';
-    document.getElementById('print-legend-box').style.left = '';
-    showToast('Elements reset');
+    const na = document.getElementById('print-north-arrow');
+    const sb = document.getElementById('print-scale-bar');
+    const lb = document.getElementById('print-legend-box');
+    na.style.top = '12px'; na.style.right = '14px'; na.style.left = ''; na.style.bottom = '';
+    sb.style.bottom = '12px'; sb.style.left = '14px'; sb.style.right = ''; sb.style.top = '';
+    lb.style.bottom = '12px'; lb.style.right = '14px'; lb.style.left = ''; lb.style.top = '';
+    showToast('Elements position reset');
   }
+
+  // Draggable print overlay items
+  document.querySelectorAll('.print-overlay-item').forEach(el => {
+    let isDragging = false, startX, startY, initX, initY;
+    el.addEventListener('pointerdown', e => {
+      isDragging = true; el.classList.add('editing');
+      startX = e.clientX; startY = e.clientY;
+      const rect = el.getBoundingClientRect();
+      const parentRect = el.parentElement.getBoundingClientRect();
+      initX = rect.left - parentRect.left;
+      initY = rect.top - parentRect.top;
+      el.setPointerCapture(e.pointerId);
+      e.stopPropagation();
+    });
+    el.addEventListener('pointermove', e => {
+      if (!isDragging) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      el.style.left = (initX + dx) + 'px';
+      el.style.top = (initY + dy) + 'px';
+      el.style.right = 'auto'; el.style.bottom = 'auto';
+    });
+    el.addEventListener('pointerup', e => {
+      isDragging = false; el.classList.remove('editing');
+      el.releasePointerCapture(e.pointerId);
+    });
+  });
+
+  // Load Mouza Data on startup
+  fetch('Jammat_Polygon.json')
+    .then(r => r.json())
+    .then(data => {
+      mouzaGeoLayer = L.geoJSON(data, {
+        style: { color: '#FFFF00', fillColor: 'rgba(197,160,89,0.3)', weight: 1.5, fillOpacity: 0.3 },
+        onEachFeature: (feature, layer) => {
+          const props = feature.properties || {};
+          let html = '<strong>Mouza Details</strong><br>';
+          for (let k in props) { html += `${k}: ${props[k]}<br>`; }
+          layer.bindPopup(html);
+          layer.on('dblclick', () => {
+            if (layer.getBounds && layer.getBounds().isValid()) map.fitBounds(layer.getBounds());
+          });
+        }
+      }).addTo(map);
+
+      mouzaItemsData = data.features || [];
+      mouzaCount = mouzaItemsData.length;
+      const listEl = document.getElementById('mouza-container-list');
+      listEl.innerHTML = mouzaItemsData.map((f, i) => {
+        const name = (f.properties && (f.properties.Name || f.properties.NAME || f.properties.mouza || f.properties.Mouza)) || `Mouza #${i+1}`;
+        return `<div style="font-size:11px; padding:3px 6px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.05); color:#e2e8f0;" onclick="zoomToMouza(${i})">📍 ${name}</div>`;
+      }).join('');
+    })
+    .catch(err => {
+      document.getElementById('mouza-container-list').innerHTML = '<div style="font-size:10px; color:#f87171; text-align:center; padding:4px;">Jammat_Polygon.json not found</div>';
+    });
+
+  function zoomToMouza(idx) {
+    if (!mouzaGeoLayer) return;
+    let count = 0;
+    mouzaGeoLayer.eachLayer(layer => {
+      if (count === idx) {
+        if (layer.getBounds && layer.getBounds().isValid()) map.fitBounds(layer.getBounds());
+        else if (layer.getLatLng) map.setView(layer.getLatLng(), 18);
+        if (layer.openPopup) layer.openPopup();
+      }
+      count++;
+    });
+  }
+
+  showToast('Waqar GIS Portal Loaded Successfully! ✓');
 </script>
 </body>
 </html>
