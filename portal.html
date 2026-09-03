@@ -18,6 +18,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/proj4@2.9.0/dist/proj4.js"></script>
+  <script src="auth-guard.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
     html, body { height: 100%; width: 100%; overflow: hidden; background: #15181e; display: flex; flex-direction: column; }
@@ -121,6 +122,7 @@
     .user-location-pulse-wrap::before { content:''; position:absolute; top:50%; left:50%; width:16px; height:16px; margin:-8px 0 0 -8px; border-radius:50%; background:rgba(212,175,55,0.5); animation:user-dot-pulse 1.8s ease-out infinite; }
     @keyframes user-dot-pulse { 0%{transform:scale(1);opacity:0.7}100%{transform:scale(2.6);opacity:0} }
 
+    /* ===== COORD COPY POPUP ===== */
     #coord-copy-popup { position: absolute; background: #1a1f29; border: 1.5px solid #c5a059; border-radius: 10px; padding: 10px 12px; z-index: 800; display: none; min-width: 230px; box-shadow: 0 8px 24px rgba(0,0,0,0.7); }
     #coord-copy-popup .cp-title { font-size: 10px; color: #c5a059; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 7px; border-bottom: 1px solid rgba(197,160,89,0.25); padding-bottom: 5px; }
     #coord-copy-popup .cp-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: 11px; color: #e2e8f0; gap: 8px; }
@@ -130,15 +132,16 @@
     #coord-copy-popup .cp-btn.copied { background: #059669; border-color: #34d399; color: #fff; }
     #coord-copy-popup .cp-close { position: absolute; top: 6px; right: 8px; background: none; border: none; color: #f87171; cursor: pointer; font-size: 14px; font-weight: 700; }
 
-    #measure-hud { position: absolute; bottom: 190px; left: 20px; background: rgba(21,24,30,0.92); color: #e2e8f0; padding: 8px 12px; border-radius: 8px; font-size: 11px; border: 1px solid rgba(197,160,89,0.4); z-index: 500; pointer-events: none; font-family: monospace; line-height: 1.8; display: none; }
-    #measure-hud strong { color: #d4af37; }
-    #measure-mode-btn.active { background: #ef4444 !important; border-color: #f87171 !important; color: #fff !important; }
+    /* ===== MEASUREMENT HUD (Hidden as requested) ===== */
+    #measure-hud { display: none !important; }
 
+    /* ===== DIMENSION LABELS ===== */
     .dim-label { background: rgba(21,24,30,0.92); color: #d4af37; border: 1.5px solid #c5a059; border-radius: 5px; padding: 2px 8px; font-size: 11px; font-weight: 700; font-family: 'Plus Jakarta Sans', monospace; white-space: nowrap; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.6); user-select: none; transition: background 0.15s; }
     .dim-label:hover { background: rgba(197,160,89,0.22); }
-    .dim-label.manual { color: #34d399; border-color: #34d399; background: rgba(5,150,105,0.18); }
-    .dim-label.manual:hover { background: rgba(5,150,105,0.32); }
+    .dim-label.manual { color: #00ff66 !important; border-color: #00ff66 !important; background: rgba(0,255,102,0.25) !important; text-shadow: 0 0 4px rgba(0,255,102,0.5); }
+    .dim-label.manual:hover { background: rgba(0,255,102,0.4) !important; }
 
+    /* ===== DIMENSION EDIT POPUP ===== */
     #dim-edit-popup { position: absolute; background: #1a1f29; border: 2px solid #c5a059; border-radius: 10px; padding: 12px 14px; z-index: 1500; display: none; min-width: 230px; box-shadow: 0 8px 24px rgba(0,0,0,0.8); }
     #dim-edit-popup .dep-title { font-size: 10px; color: #c5a059; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
     #dim-edit-popup .dep-auto { font-size: 10px; color: #788294; margin-bottom: 8px; }
@@ -149,10 +152,12 @@
     #dim-edit-popup .dep-reset { padding: 7px 10px; border: 1px solid rgba(197,160,89,0.3); border-radius: 5px; background: #252a34; color: #e2e8f0; font-size: 11px; font-weight: 700; cursor: pointer; }
     #dim-edit-popup .dep-close { position: absolute; top: 8px; right: 10px; background: none; border: none; color: #f87171; cursor: pointer; font-size: 14px; font-weight: 700; }
 
+    /* ===== DIMENSION UNIT SELECTOR ===== */
     #dim-unit-wrap { display: flex; align-items: center; gap: 4px; background: #252a34; border: 1px solid rgba(197,160,89,0.4); border-radius: 6px; padding: 4px 8px; }
     #dim-unit-wrap label { font-size: 10px; color: #c5a059; font-weight: 700; white-space: nowrap; }
     #dim-unit-select { background: #15181e; color: #f8fafc; border: 1px solid rgba(197,160,89,0.3); border-radius: 4px; padding: 3px 5px; font-size: 10px; font-weight: 700; cursor: pointer; outline: none; }
 
+    /* ===== PRINT LAYOUT ===== */
     #print-layout-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 3000; justify-content: center; align-items: center; backdrop-filter: blur(6px); }
     #print-layout-inner { background: #1a1f29; border: 2px solid #c5a059; border-radius: 12px; width: 95%; max-width: 680px; padding: 20px; color: #fff; max-height: 90vh; overflow-y: auto; }
     #print-layout-inner h2 { font-family: 'Cinzel', serif; color: #d4af37; margin-bottom: 14px; font-size: 18px; }
@@ -175,6 +180,7 @@
     #print-legend-box .leg-title { color: #d4af37; font-weight: 700; margin-bottom: 4px; }
     #print-legend-box div { display: flex; align-items: center; gap: 5px; margin-bottom: 3px; }
 
+    /* ===== GLOBAL TOAST ===== */
     #global-toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: #059669; color: #fff; border-radius: 8px; padding: 8px 18px; font-size: 12px; font-weight: 700; opacity: 0; pointer-events: none; z-index: 9999; transition: opacity 0.3s; white-space: nowrap; }
     #global-toast.show { opacity: 1; }
 
@@ -224,13 +230,6 @@
   </div>
 </div>
 
-<div id="measure-hud">
-  <strong>📏 Measurement</strong><br>
-  Distance: <strong id="meas-dist">0 m</strong><br>
-  Area: <strong id="meas-area">—</strong><br>
-  Points: <strong id="meas-pts">0</strong>
-</div>
-
 <header class="app-header">
   <div class="header-left">
     <button class="header-btn" onclick="toggleSidebar()">☰ Menu</button>
@@ -240,8 +239,7 @@
     <button class="header-btn" onclick="undoLastAction()">↩️ Undo</button>
     <button class="header-btn" onclick="redoLastAction()">🔁 Redo</button>
     <button class="header-btn remove-point-btn" onclick="removeLastPoint()">⌫ Point</button>
-    <button class="header-btn" id="measure-mode-btn" onclick="toggleMeasureMode()">📏 Measure</button>
-    <button class="header-btn" onclick="clearMeasurement()">✕ Measure</button>
+    <!-- Measure button hidden/removed from top header as requested -->
     <button class="header-btn" id="dim-toggle-btn" onclick="toggleDimensions()" title="Show/Hide Dimension Labels">📐 Dims ON</button>
     <div id="dim-unit-wrap">
       <label>Unit:</label>
@@ -322,7 +320,7 @@
       <h3>Feature Styling</h3>
       <div class="style-inputs">
         <input type="color" id="fill-color" value="#c5a059" title="Fill Color" style="height:35px; cursor:pointer;" />
-        <input type="color" id="stroke-color" value="#d4af37" title="Stroke Color" style="height:35px; cursor:pointer;" />
+        <input type="color" id="stroke-color" value="#FFFF00" title="Stroke Color" style="height:35px; cursor:pointer;" />
       </div>
     </div>
 
@@ -457,9 +455,9 @@
         </div>
         <div id="print-legend-box" style="display:none;">
           <div class="leg-title">Legend</div>
-          <div><span style="display:inline-block;width:14px;height:3px;background:#ffcc00;margin-right:4px;"></span>Mouza</div>
-          <div><span style="display:inline-block;width:14px;height:3px;background:#ff4444;margin-right:4px;"></span>Road/Line</div>
-          <div><span style="display:inline-block;width:14px;height:3px;background:#c5a059;margin-right:4px;"></span>Drawn Feature</div>
+          <div><span style="display:inline-block;width:14px;height:3px;background:#FFFF00;margin-right:4px;"></span>Mouza</div>
+          <div><span style="display:inline-block;width:14px;height:3px;background:#FFFF00;margin-right:4px;"></span>Road/Line</div>
+          <div><span style="display:inline-block;width:14px;height:3px;background:#FFFF00;margin-right:4px;"></span>Drawn Feature</div>
         </div>
       </div>
       <div id="print-preview-footer">
@@ -610,53 +608,6 @@
     showToast('Copied! ✓');
   }
 
-  let measureMode = false, measurePoints = [], measurePolyline = null, measurePolygon = null, measureMarkers = [];
-
-  function toggleMeasureMode() {
-    measureMode = !measureMode;
-    const btn = document.getElementById('measure-mode-btn');
-    btn.classList.toggle('active', measureMode);
-    btn.textContent = measureMode ? '⏹ Stop' : '📏 Measure';
-    map.getContainer().style.cursor = measureMode ? 'crosshair' : '';
-    document.getElementById('measure-hud').style.display = (measureMode || measurePoints.length > 0) ? 'block' : 'none';
-  }
-
-  function clearMeasurement() {
-    measureMode = false; measurePoints = [];
-    const btn = document.getElementById('measure-mode-btn');
-    btn.classList.remove('active'); btn.textContent = '📏 Measure';
-    map.getContainer().style.cursor = '';
-    if (measurePolyline) { map.removeLayer(measurePolyline); measurePolyline = null; }
-    if (measurePolygon)  { map.removeLayer(measurePolygon);  measurePolygon  = null; }
-    measureMarkers.forEach(m => map.removeLayer(m)); measureMarkers = [];
-    document.getElementById('measure-hud').style.display = 'none';
-    document.getElementById('meas-dist').textContent = '0 m';
-    document.getElementById('meas-area').textContent  = '—';
-    document.getElementById('meas-pts').textContent   = '0';
-  }
-
-  map.on('click', function(e) {
-    if (!measureMode) return;
-    measurePoints.push([e.latlng.lat, e.latlng.lng]);
-    const m = L.circleMarker([e.latlng.lat, e.latlng.lng], { radius:5, color:'#fff', weight:2, fillColor:'#d4af37', fillOpacity:1 }).addTo(map);
-    measureMarkers.push(m);
-    if (measurePolyline) map.removeLayer(measurePolyline);
-    if (measurePoints.length >= 2) {
-      measurePolyline = L.polyline(measurePoints, { color:'#d4af37', weight:2.5, dashArray:'6,4' }).addTo(map);
-      const gj = { type:'Feature', geometry:{ type:'LineString', coordinates: measurePoints.map(p=>[p[1],p[0]]) } };
-      const dk = turf.length(gj, {units:'kilometers'});
-      document.getElementById('meas-dist').textContent = dk >= 1 ? `${dk.toFixed(3)} km` : `${(dk*1000).toFixed(1)} m`;
-      document.getElementById('measure-hud').style.display = 'block';
-    }
-    if (measurePoints.length >= 3) {
-      if (measurePolygon) map.removeLayer(measurePolygon);
-      measurePolygon = L.polygon(measurePoints, { color:'#d4af37', weight:1.5, fillColor:'#c5a059', fillOpacity:0.2, dashArray:'5,4' }).addTo(map);
-      const gj2 = { type:'Feature', geometry:{ type:'Polygon', coordinates:[ [...measurePoints, measurePoints[0]].map(p=>[p[1],p[0]]) ] } };
-      document.getElementById('meas-area').textContent = calculateMassaviArea(turf.area(gj2)).formattedText;
-    }
-    document.getElementById('meas-pts').textContent = measurePoints.length;
-  });
-
   let currentDimUnit = 'auto';
 
   function changeDimUnit(unit) {
@@ -676,6 +627,15 @@
         if (meters >= 1)    return meters.toFixed(1) + ' m';
         return (meters * 100).toFixed(0) + ' cm';
     }
+  }
+
+  function getSegmentLengthsText(coords, isPolygon) {
+    let parts = [];
+    for (let i = 0; i < coords.length - 1; i++) {
+      const d = haversineDist(coords[i], coords[i+1]);
+      parts.push(`S${i+1}: ${formatDimDist(d)}`);
+    }
+    return parts.join(' | ');
   }
 
   let dimensionsEnabled = true;
@@ -708,15 +668,6 @@
   }
 
   function midPt(a, b) { return [(a[0]+b[0])/2, (a[1]+b[1])/2]; }
-
-  function getSegmentLengthsText(coords, isPolygon) {
-    let parts = [];
-    for (let i = 0; i < coords.length - 1; i++) {
-      const d = haversineDist(coords[i], coords[i+1]);
-      parts.push(`S${i+1}: ${formatDimDist(d)}`);
-    }
-    return parts.join(' | ');
-  }
 
   function addDimensionLabels(layer, featureId, layerType) {
     removeDimensionLabels(featureId);
@@ -895,26 +846,6 @@
     if (!found) alert('No matching Mouza found!');
   }
 
-  function populateMouzaSidebarList() {
-    const c = document.getElementById('mouza-container-list');
-    if (!c) return;
-    c.innerHTML = '';
-    if (!mouzaItemsData.length) { c.innerHTML = '<div style="font-size:10px;color:#788294;text-align:center;padding:4px;">No mouzas found.</div>'; return; }
-    mouzaItemsData.forEach(item => {
-      const div = document.createElement('div');
-      div.style.cssText = 'padding:5px 8px;font-size:11px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.05);color:#e2e8f0;';
-      div.innerText = `📂 ${item.name}`;
-      div.onmouseover = () => { div.style.background = 'rgba(197,160,89,0.25)'; div.style.color = '#d4af37'; };
-      div.onmouseout  = () => { div.style.background = 'transparent'; div.style.color = '#e2e8f0'; };
-      div.ondblclick  = () => {
-        if (item.layer.getBounds && item.layer.getBounds().isValid()) map.fitBounds(item.layer.getBounds());
-        else if (item.layer.getLatLng) map.setView(item.layer.getLatLng(), 18);
-        if (item.layer.openPopup) item.layer.openPopup();
-      };
-      c.appendChild(div);
-    });
-  }
-
   function saveMouzaVectorData() {
     const data = drawnItems.toGeoJSON();
     if (!data.features.length) { alert('No vector features to save!'); return; }
@@ -1007,10 +938,12 @@
 
   const drawnItems = new L.FeatureGroup();
   map.addLayer(drawnItems);
+  
+  // Line and Polygon color explicitly set to #FFFF00 (Yellow)
   const drawControl = new L.Control.Draw({
     draw: {
-      polygon:  { allowIntersection:false, showArea:true, shapeOptions:{ color:'#d4af37', fillColor:'#c5a059', fillOpacity:0.45, weight:2 } },
-      polyline: { shapeOptions:{ color:'#d4af37', weight:3 } },
+      polygon:  { allowIntersection:false, showArea:true, shapeOptions:{ color:'#FFFF00', fillColor:'#c5a059', fillOpacity:0.45, weight:2 } },
+      polyline: { shapeOptions:{ color:'#FFFF00', weight:3 } },
       rectangle:false, circle:false, circlemarker:false
     },
     edit: { featureGroup: drawnItems, remove:true }
@@ -1354,9 +1287,9 @@
         if (inclLegend) {
           pdf.setFontSize(8); pdf.setTextColor(212,175,55);
           pdf.text('Legend', 14, 202);
-          pdf.setFillColor(255,204,0); pdf.rect(14,203,8,2,'F');
+          pdf.setFillColor(255,255,0); pdf.rect(14,203,8,2,'F');
           pdf.setTextColor(200,200,200); pdf.text('Mouza Boundary', 24,205);
-          pdf.setFillColor(197,160,89); pdf.rect(14,206,8,2,'F');
+          pdf.setFillColor(255,255,0); pdf.rect(14,206,8,2,'F');
           pdf.text('Drawn Feature', 24,208);
         }
         pdf.setFontSize(7); pdf.setTextColor(197,160,89);
@@ -1380,75 +1313,10 @@
           currentBasemap.addTo(map);
         }
         hideExportOverlay();
-        alert('PDF export failed. Esri basemap select karke try karein.');
+        alert('PDF export failed.');
       });
     }, 1800);
   }
-
-  fetch('Jammat_Polygon.json')
-    .then(r => r.json()).then(data => {
-      mouzaGeoLayer = L.geoJSON(data, {
-        style: { color:'#ffcc00', weight:2, fillColor:'#ffcc00', fillOpacity:0.3 },
-        onEachFeature: function(feature, layer) {
-          if (feature.properties) {
-            let pName = feature.properties.name || feature.properties.NAME || feature.properties.Mouza || feature.properties.mouza || `Mouza #${++mouzaCount}`;
-            mouzaItemsData.push({ name:pName, layer });
-            let pt = '<b>Khasra / Mouza Info:</b><br>';
-            for (let k in feature.properties) pt += `<b>${k}:</b> ${feature.properties[k]}<br>`;
-            layer.bindPopup(pt);
-            layer.on('dblclick', function(e) {
-              L.DomEvent.stopPropagation(e);
-              if (layer.getBounds && layer.getBounds().isValid()) map.fitBounds(layer.getBounds());
-              else if (layer.getLatLng) map.setView(layer.getLatLng(), 18);
-              if (layer.openPopup) layer.openPopup();
-            });
-          }
-        }
-      }).addTo(map);
-      populateMouzaSidebarList();
-      if (mouzaGeoLayer.getBounds().isValid()) map.fitBounds(mouzaGeoLayer.getBounds());
-    })
-    .catch(() => {
-      document.getElementById('mouza-container-list').innerHTML =
-        '<div style="font-size:10px;color:#ef4444;text-align:center;padding:4px;">Error loading Jammat_Polygon.json</div>';
-    });
-
-  fetch('Jammat_Line.json')
-    .then(r => r.json()).then(data => {
-      mouzaLineLayer = L.geoJSON(data, { style:{ color:'#ff0000', weight:3 } }).addTo(map);
-    }).catch(() => console.log('Jammat_Line.json not found'));
-
-  (function() {
-    const btn = document.getElementById('locate-btn');
-    let userMarker = null;
-    function clear() { if (userMarker) { map.removeLayer(userMarker); userMarker = null; } }
-    function show(lat, lng) {
-      clear();
-      userMarker = L.marker([lat,lng], {
-        icon: L.divIcon({ className:'', html:'<div class="user-location-pulse-wrap"><div class="user-location-marker"></div></div>', iconSize:[16,16], iconAnchor:[8,8] }),
-        zIndexOffset:1000
-      }).addTo(map);
-      userMarker.bindPopup('<strong style="color:#8a6d2b;">📍 You are here</strong>');
-      map.flyTo([lat,lng], 16, { animate:true, duration:1.2 });
-    }
-    function setState(s) { btn.classList.remove('locating','active','locate-error'); if (s) btn.classList.add(s); }
-    function handleError(err) {
-      setState('locate-error'); setTimeout(() => setState(null), 1800);
-      let msg = 'Unable to get location.';
-      if (err.code===1) msg = 'Location denied. Enable in browser settings.';
-      else if (err.code===2) msg = 'Location unavailable. Check GPS/network.';
-      else if (err.code===3) msg = 'Location request timed out.';
-      alert(msg);
-    }
-    btn.addEventListener('click', function() {
-      if (!navigator.geolocation) { alert('Browser does not support Geolocation.'); return; }
-      setState('locating');
-      navigator.geolocation.getCurrentPosition(
-        pos => { setState('active'); show(pos.coords.latitude, pos.coords.longitude); },
-        handleError, { enableHighAccuracy:true, timeout:10000, maximumAge:0 }
-      );
-    });
-  })();
 </script>
 </body>
 </html>
