@@ -1395,7 +1395,7 @@
       setTimeout(() => {
         const container = document.getElementById('print-map-live');
         if (!container || printLiveMap) return;
-        printLiveMap = L.map(container, { zoomControl:false, attributionControl:false, dragging:false, scrollWheelZoom:false });
+       printLiveMap = L.map(container, { zoomControl:true, attributionControl:false, dragging:true, scrollWheelZoom:true, doubleClickZoom:true });
         L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0','mt1','mt2','mt3'], crossOrigin:true }).addTo(printLiveMap);
         printLiveMap.setView(map.getCenter(), map.getZoom());
 
