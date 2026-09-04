@@ -1399,14 +1399,21 @@
         L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0','mt1','mt2','mt3'], crossOrigin:true }).addTo(printLiveMap);
         printLiveMap.setView(map.getCenter(), map.getZoom());
 
-    // Clone layers and their dimensions/tooltips to print map
+  // Clone layers and their dimensions/tooltips to print map
 drawnItems.eachLayer(layer => {
   const lClone = L.geoJSON(layer.toGeoJSON(), {
     style: { color: '#FFFF00', fillColor: '#c5a059', fillOpacity: 0.5, weight: 2.5 }
   });
   
-  // Check for tooltips or popup text on the layer
   if (layer.getTooltip()) {
+    const tooltipContent = layer.getTooltip().getContent();
+    lClone.bindTooltip(tooltipContent, { permanent: true, direction: 'center', className: 'dimension-tooltip' });
+  } else if (layer.feature && layer.feature.properties && layer.feature.properties.tooltip) {
+    lClone.bindTooltip(layer.feature.properties.tooltip, { permanent: true, direction: 'center', className: 'dimension-tooltip' });
+  }
+  
+  lClone.addTo(printLiveMap);
+});
     const tooltipContent = layer.getTooltip().getContent();
     lClone.bindTooltip(tooltipContent, { permanent: true, direction: 'center', className: 'dimension-tooltip' });
   } else if (layer.feature && layer.feature.properties && layer.feature.properties.tooltip) {
