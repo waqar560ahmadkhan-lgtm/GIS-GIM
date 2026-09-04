@@ -478,6 +478,7 @@
       <div class="print-ctrl-item"><input type="checkbox" id="chk-north" checked onchange="updatePrintPreview()" /> North Arrow</div>
       <div class="print-ctrl-item"><input type="checkbox" id="chk-scale" checked onchange="updatePrintPreview()" /> Scale Bar</div>
       <div class="print-ctrl-item"><input type="checkbox" id="chk-legend" checked onchange="updatePrintPreview()" /> Legend</div>
+      <div class="print-ctrl-item"><input type="checkbox" id="chk-dims" checked onchange="updatePrintPreview()" /> Dimension Labels</div>
     </div>
 
     <div id="legend-editor">
@@ -1363,7 +1364,12 @@
     document.getElementById('export-overlay').style.display = 'none';
   }
 
+  /* ============================================================
+     PRINT / EXPORT MAP  (fixed: no more broken duplicate block,
+     and dimension labels are now cloned onto the print map too)
+     ============================================================ */
   let printLiveMap = null;
+  let printCloneGroup = null;
 
   function openPrintLayout() {
     document.getElementById('print-layout-modal').style.display = 'flex';
@@ -1373,7 +1379,62 @@
 
   function closePrintLayout() {
     document.getElementById('print-layout-modal').style.display = 'none';
-    if (printLiveMap) { printLiveMap.remove(); printLiveMap = null; }
+    if (printLiveMap) { printLiveMap.remove(); printLiveMap = null; printCloneGroup = null; }
+  }
+
+  // Clones current drawn features + their dimension labels onto the print map
+  function populatePrintClones() {
+    if (!printLiveMap) return;
+
+    if (printCloneGroup) {
+      printCloneGroup.clearLayers();
+    } else {
+      printCloneGroup = L.layerGroup().addTo(printLiveMap);
+    }
+
+    // Clone every drawn polygon/line/marker
+    drawnItems.eachLayer(layer => {
+      const lClone = L.geoJSON(layer.toGeoJSON(), {
+        style: { color: '#FFFF00', fillColor: '#c5a059', fillOpacity: 0.5, weight: 2.5 }
+      });
+      lClone.addTo(printCloneGroup);
+    });
+
+    // Clone dimension labels, respecting the "Dimension Labels" checkbox
+    const showDims = document.getElementById('chk-dims') ? document.getElementById('chk-dims').checked : dimensionsEnabled;
+    if (showDims) {
+      Object.keys(dimStore).forEach(fid => {
+        const entry = dimStore[fid];
+        if (!entry || !entry.layer) return;
+        const layer = entry.layer;
+        const layerType = entry.layerType;
+        let coords = [];
+        if (layerType === 'polygon') {
+          coords = layer.getLatLngs()[0].map(ll => [ll.lat, ll.lng]);
+          coords.push(coords[0]);
+        } else if (layerType === 'polyline') {
+          const lls = layer.getLatLngs();
+          coords = (Array.isArray(lls[0]) ? lls[0] : lls).map(ll => [ll.lat, ll.lng]);
+        } else {
+          return;
+        }
+        const manualValues = entry.manualValues || {};
+        for (let i = 0; i < coords.length - 1; i++) {
+          const a = coords[i], b = coords[i + 1];
+          const dist = haversineDist(a, b);
+          const autoVal = formatDimDist(dist);
+          const displayVal = manualValues[i] || autoVal;
+          const isManual = !!manualValues[i];
+          const mid = midPt(a, b);
+          const icon = L.divIcon({
+            className: '',
+            html: `<div class="dim-label${isManual ? ' manual' : ''}">${displayVal}</div>`,
+            iconSize: null, iconAnchor: null
+          });
+          L.marker(mid, { icon, interactive: false, zIndexOffset: 600 }).addTo(printCloneGroup);
+        }
+      });
+    }
   }
 
   function updatePrintPreview() {
@@ -1382,7 +1443,7 @@
 
     document.getElementById('print-north-arrow').style.display = document.getElementById('chk-north').checked ? 'flex' : 'none';
     document.getElementById('print-scale-bar').style.display = document.getElementById('chk-scale').checked ? 'block' : 'none';
-    
+
     const legendBox = document.getElementById('print-legend-box');
     if (document.getElementById('chk-legend').checked) {
       legendBox.style.display = 'block';
@@ -1395,47 +1456,15 @@
       setTimeout(() => {
         const container = document.getElementById('print-map-live');
         if (!container || printLiveMap) return;
-       printLiveMap = L.map(container, { zoomControl:true, attributionControl:false, dragging:true, scrollWheelZoom:true, doubleClickZoom:true });
+        printLiveMap = L.map(container, { zoomControl:true, attributionControl:false, dragging:true, scrollWheelZoom:true, doubleClickZoom:true });
         L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0','mt1','mt2','mt3'], crossOrigin:true }).addTo(printLiveMap);
         printLiveMap.setView(map.getCenter(), map.getZoom());
-
-    // Clone layers to print map
-
-        drawnItems.eachLayer(layer => {
-
-          const lClone = L.geoJSON(layer.toGeoJSON(), {
-
-            style: { color: '#FFFF00', fillColor: '#c5a059', fillOpacity: 0.5, weight: 2.5 }
-
-          });
-
-          lClone.addTo(printLiveMap);
-
-        });
-    lClone.bindTooltip(tooltipContent, { permanent: true, direction: 'center', className: 'dimension-tooltip' });
-  } else if (layer.feature && layer.feature.properties && layer.feature.properties.tooltip) {
-    lClone.bindTooltip(layer.feature.properties.tooltip, { permanent: true, direction: 'center', className: 'dimension-tooltip' });
-  }
-  
-  lClone.addTo(printLiveMap);
-});
-    const tooltipContent = layer.getTooltip().getContent();
-    lClone.bindTooltip(tooltipContent, { permanent: true, direction: 'center', className: 'dimension-tooltip' });
-  } else if (layer.feature && layer.feature.properties && layer.feature.properties.tooltip) {
-    lClone.bindTooltip(layer.feature.properties.tooltip, { permanent: true, direction: 'center', className: 'dimension-tooltip' });
-  }
-  
-  lClone.addTo(printLiveMap);
-});
-            lClone.bindTooltip(tooltipContent, { permanent: true, direction: 'center', className: 'dimension-tooltip' });
-          }
-          
-          lClone.addTo(printLiveMap);
-        });
+        populatePrintClones();
       }, 150);
     } else {
       printLiveMap.setView(map.getCenter(), map.getZoom());
       printLiveMap.invalidateSize();
+      populatePrintClones();
     }
   }
 
@@ -1446,7 +1475,7 @@
   function exportMapImage() {
     showExportOverlay('Generating PNG image...');
     setTimeout(() => {
-      html2canvas(document.getElementById('print-preview-box'), { useCORS: true, scale: 2 }).then(canvas => {
+      html2canvas(document.getElementById('print-preview-box'), { useCORS: true, allowTaint: false, scale: 2 }).then(canvas => {
         hideExportOverlay();
         const a = document.createElement('a');
         a.href = canvas.toDataURL('image/png');
