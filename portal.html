@@ -1365,8 +1365,7 @@
   }
 
   /* ============================================================
-     PRINT / EXPORT MAP  (fixed: no more broken duplicate block,
-     and dimension labels are now cloned onto the print map too)
+     PRINT / EXPORT MAP
      ============================================================ */
   let printLiveMap = null;
   let printCloneGroup = null;
@@ -1456,26 +1455,65 @@
       setTimeout(() => {
         const container = document.getElementById('print-map-live');
         if (!container || printLiveMap) return;
-        printLiveMap = L.map(container, { zoomControl:true, attributionControl:false, dragging:true, scrollWheelZoom:true, doubleClickZoom:true });
+        printLiveMap = L.map(container, { zoomControl:true, attributionControl:false, dragging:true, scrollWheelZoom:true, doubleClickZoom:true, preferCanvas:true, renderer: L.canvas({ padding: 0.5 }) });
         L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0','mt1','mt2','mt3'], crossOrigin:true }).addTo(printLiveMap);
         printLiveMap.setView(map.getCenter(), map.getZoom());
-        populatePrintClones();
+        setTimeout(() => { printLiveMap.invalidateSize(); populatePrintClones(); }, 200);
       }, 150);
     } else {
-      printLiveMap.setView(map.getCenter(), map.getZoom());
       printLiveMap.invalidateSize();
+      printLiveMap.setView(map.getCenter(), map.getZoom());
       populatePrintClones();
     }
   }
 
   function exportMapPDF() {
-    window.print();
+    if (!printLiveMap) { updatePrintPreview(); }
+    showExportOverlay('PDF layout taiyar ho raha hai, please wait...');
+    // Give the live map a moment to settle at full print size before the browser print dialog opens
+    document.body.classList.add('printing');
+    setTimeout(() => {
+      if (printLiveMap) {
+        printLiveMap.invalidateSize();
+        printLiveMap.setView(map.getCenter(), map.getZoom());
+      }
+      setTimeout(() => {
+        hideExportOverlay();
+        window.print();
+      }, 400);
+    }, 150);
   }
 
+  window.addEventListener('afterprint', function() {
+    document.body.classList.remove('printing');
+    if (printLiveMap) {
+      setTimeout(() => {
+        printLiveMap.invalidateSize();
+        printLiveMap.setView(map.getCenter(), map.getZoom());
+        populatePrintClones();
+      }, 200);
+    }
+  });
+
   function exportMapImage() {
-    showExportOverlay('Generating PNG image...');
+    showExportOverlay('Basemap tiles load ho rahi hain, please wait...');
+    // Make sure the print preview + live map + cloned lines/polygons exist and are fully painted first
+    if (!printLiveMap) {
+      updatePrintPreview();
+    } else {
+      printLiveMap.invalidateSize();
+      populatePrintClones();
+    }
     setTimeout(() => {
-      html2canvas(document.getElementById('print-preview-box'), { useCORS: true, allowTaint: false, scale: 2 }).then(canvas => {
+      html2canvas(document.getElementById('print-preview-box'), {
+        useCORS: true,
+        allowTaint: false,
+        scale: 2,
+        logging: false,
+        imageTimeout: 15000,
+        scrollX: 0,
+        scrollY: 0
+      }).then(canvas => {
         hideExportOverlay();
         const a = document.createElement('a');
         a.href = canvas.toDataURL('image/png');
@@ -1486,7 +1524,7 @@
         hideExportOverlay();
         alert('Export failed: ' + err.message);
       });
-    }, 400);
+    }, 1200);
   }
 
   function resetPrintElementPositions() {
