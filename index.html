@@ -12,7 +12,7 @@
       --accent: #2ecc8f; --accent2: #1a9e6b; --text: #e8f0fe;
       --muted: #8899b0; --input-bg: #0d1929; --error: #ff6b6b; --radius: 12px;
     }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+    body { font-family: 'Inter', sans-serif; background: linear-gradient(rgba(11,17,32,0.78), rgba(11,17,32,0.78)), url('map-bg.jpg') center/cover no-repeat; color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
     body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(46,204,143,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(46,204,143,0.04) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; }
     body::after { content: ''; position: fixed; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, rgba(46,204,143,0.08) 0%, transparent 70%); top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; }
     .container { position: relative; z-index: 1; width: 100%; max-width: 440px; padding: 20px; }
