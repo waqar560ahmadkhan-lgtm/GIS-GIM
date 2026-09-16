@@ -6,556 +6,342 @@
 
 <title>Waqar GIS Portal – Login</title>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
-
 /* =========================================================
-   RESET
+   GLOBAL
 ========================================================= */
 
-*,
-*::before,
-*::after {
+* {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
-:root {
+html,
+body {
+    width: 100%;
+    height: 100%;
+}
 
-    --gold: #c9a24a;
-    --gold-soft: #f0d27a;
-    --gold-light: #f6df9b;
-    --gold-deep: #8b6825;
+body {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    overflow: hidden;
 
-    --silver: #d7d9d8;
-    --silver-dark: #777b7d;
+    /* Main background color */
+    background: #d8c6a5;
 
-    --taupe: #9a8970;
-    --taupe-light: #b9a991;
-
-    --brown: #5c4c39;
-
-    --charcoal: #121212;
-    --charcoal-2: #181715;
-    --charcoal-3: #211f1a;
-
-    --error: #e08a80;
+    color: #3e3830;
 }
 
 
 /* =========================================================
-   HTML / BODY
+   FULL SCREEN MAP BACKGROUND
 ========================================================= */
 
-html,
-body {
+.page {
+    position: relative;
 
-    width: 100%;
-    height: 100%;
-    min-height: 100%;
-
-}
-
-body {
-
-    font-family: 'Inter', sans-serif;
-
-    color: #ece7dc;
-
-    min-height: 100vh;
+    width: 100vw;
+    height: 100vh;
 
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
-    position: relative;
 
     overflow: hidden;
 
-    /*
-    ========================================================
-    IMPORTANT:
-    WORLD MAP IMAGE MUST BE:
-    
-    index.html
-    map-bg.jpg
+    background-color: #d8c6a5;
 
-    Same folder.
-    ========================================================
+    /*
+      IMPORTANT:
+      Put your uploaded image in the same folder as this HTML
+      and name it:
+
+      global-luxury-map.png
     */
 
-    background-image: url("./map-bg.jpg");
-
-    background-position: center center;
+    background-image:
+        linear-gradient(
+            rgba(218, 202, 169, 0.42),
+            rgba(218, 202, 169, 0.42)
+        ),
+        url("global-luxury-map.png");
 
     background-size: cover;
-
+    background-position: center center;
     background-repeat: no-repeat;
-
-    background-attachment: fixed;
-
-    background-color: #101010;
-
 }
 
 
 /* =========================================================
-   MAP DARK OVERLAY
-   ========================================================= */
-
-body::before {
-
-    content: "";
-
-    position: fixed;
-
-    inset: 0;
-
-    z-index: 0;
-
-    pointer-events: none;
-
-    background:
-
-        linear-gradient(
-            rgba(5,5,5,0.48),
-            rgba(5,5,5,0.48)
-        );
-
-}
-
-
-/* =========================================================
-   CINEMATIC GOLD ATMOSPHERE
+   MAP SOFT OVERLAY
 ========================================================= */
 
-body::after {
-
+.page::before {
     content: "";
 
-    position: fixed;
-
+    position: absolute;
     inset: 0;
 
-    z-index: 0;
-
-    pointer-events: none;
-
     background:
-
         radial-gradient(
-            circle at 50% 50%,
-            rgba(201,162,74,0.06) 0%,
-            rgba(0,0,0,0.10) 40%,
-            rgba(0,0,0,0.35) 100%
+            circle at center,
+            rgba(255,255,255,0.12) 0%,
+            rgba(111,91,64,0.10) 45%,
+            rgba(48,43,37,0.22) 100%
         );
 
+    pointer-events: none;
 }
 
 
 /* =========================================================
-   MAIN FRAME
+   LUXURY VIGNETTE
 ========================================================= */
 
-.outer-frame {
+.page::after {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(49,43,36,0.20),
+            transparent 25%,
+            transparent 75%,
+            rgba(49,43,36,0.20)
+        );
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   LOGIN PANEL
+========================================================= */
+
+.login-panel {
 
     position: relative;
-
     z-index: 5;
 
-    width: 100%;
-
-    max-width: 430px;
-
-    margin: 24px;
+    width: min(430px, 90vw);
 
     padding: 5px;
 
-    background:
-
-        linear-gradient(
-            145deg,
-
-            #f1e3bd 0%,
-
-            #d8d9d7 10%,
-
-            #9c9d9d 27%,
-
-            #e7d7aa 43%,
-
-            #a9aaab 58%,
-
-            #676a6b 76%,
-
-            #d2c28e 90%,
-
-            #f0dfae 100%
-        );
-
-    border-radius: 6px;
-
-    box-shadow:
-
-        0 35px 90px rgba(0,0,0,0.85),
-
-        0 12px 30px rgba(0,0,0,0.65),
-
-        0 0 0 1px rgba(255,255,255,0.40) inset,
-
-        0 0 30px rgba(201,162,74,0.25);
-
-}
-
-
-/* =========================================================
-   INNER GOLD FRAME
-========================================================= */
-
-.inner-frame {
-
-    padding: 3px;
-
-    border-radius: 4px;
+    /*
+      Outer metallic frame
+      White / Silver / Dark Gray
+    */
 
     background:
-
         linear-gradient(
             135deg,
-
-            #f5df9f 0%,
-
-            #d3ae55 18%,
-
-            #8d6c2b 38%,
-
-            #c49b42 55%,
-
-            #765a25 76%,
-
-            #e5c873 100%
+            #ffffff 0%,
+            #c5c5c2 16%,
+            #5b5954 32%,
+            #eeeeeb 48%,
+            #9d9c97 66%,
+            #ffffff 82%,
+            #55534f 100%
         );
 
+    border-radius: 7px;
+
     box-shadow:
-
-        0 0 0 1px
-        rgba(255,239,180,0.45) inset,
-
-        0 0 14px
-        rgba(201,162,74,0.22);
+        0 35px 80px rgba(35,30,25,0.45),
+        0 12px 30px rgba(35,30,25,0.25),
+        inset 0 0 0 1px rgba(255,255,255,0.75);
 
 }
 
 
 /* =========================================================
-   DARK INTERIOR
+   CHAMPAGNE GOLD INNER FRAME
 ========================================================= */
 
-.container {
+.login-frame {
 
     position: relative;
 
-    padding: 34px 32px 30px;
-
-    border-radius: 3px;
+    padding: 4px;
 
     background:
-
         linear-gradient(
-            180deg,
-
-            rgba(31,29,24,0.985) 0%,
-
-            rgba(17,17,16,0.99) 55%,
-
-            rgba(12,12,11,0.995) 100%
+            135deg,
+            #fffdf2 0%,
+            #d9bf7b 18%,
+            #a9873e 35%,
+            #fff8dc 50%,
+            #c8a95e 68%,
+            #fff9df 84%,
+            #927638 100%
         );
 
-    box-shadow:
-
-        0 0 0 1px
-        rgba(255,255,255,0.04) inset,
-
-        0 0 35px
-        rgba(0,0,0,0.40);
-
+    border-radius: 3px;
 }
 
 
 /* =========================================================
-   INNER BORDER
+   MAIN CARD
 ========================================================= */
 
-.container::before {
+.login-card {
 
-    content: "";
+    position: relative;
 
-    position: absolute;
-
-    inset: 8px;
-
-    border:
-
-        1px solid
-        rgba(201,162,74,0.30);
+    padding: 38px 32px 30px;
 
     border-radius: 2px;
 
-    pointer-events: none;
+    /*
+      Sand Beige / Warm Taupe interior
+    */
 
-}
+    background:
+        linear-gradient(
+            145deg,
+            rgba(244,235,216,0.97),
+            rgba(211,196,167,0.97)
+        );
 
+    border: 1px solid rgba(255,255,255,0.85);
 
-.container::after {
-
-    content: "";
-
-    position: absolute;
-
-    inset: 12px;
-
-    border:
-
-        1px solid
-        rgba(154,137,112,0.08);
-
-    border-radius: 1px;
-
-    pointer-events: none;
-
+    box-shadow:
+        inset 0 0 35px rgba(89,73,50,0.15),
+        inset 0 0 0 1px rgba(130,106,67,0.25);
 }
 
 
 /* =========================================================
-   HEADER
+   TOP EMBLEM
 ========================================================= */
 
-.crest {
+.logo-ring {
 
-    position: relative;
+    width: 58px;
+    height: 58px;
 
-    z-index: 2;
+    margin: 0 auto 13px;
 
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    margin-bottom: 28px;
+    border-radius: 50%;
 
+    background:
+        linear-gradient(
+            145deg,
+            #fff9df,
+            #b28e43,
+            #f9e8ae,
+            #907137
+        );
+
+    box-shadow:
+        0 4px 12px rgba(71,57,35,0.30),
+        inset 0 0 0 2px rgba(255,255,255,0.8);
 }
 
 
-.crest-mark {
+.logo-inner {
 
-    width: 48px;
-
-    height: 48px;
-
-    margin: 0 auto 14px;
-
-    border:
-
-        1.5px solid
-        var(--gold);
+    width: 43px;
+    height: 43px;
 
     border-radius: 50%;
 
     display: flex;
-
     align-items: center;
-
     justify-content: center;
 
-    position: relative;
+    background: #51483d;
 
-    background:
+    border: 1px solid #f4dc99;
 
-        radial-gradient(
-            circle,
-            rgba(201,162,74,0.15),
-            rgba(201,162,74,0.025)
-        );
+    color: #f4dc99;
 
-    box-shadow:
-
-        0 0 15px
-        rgba(201,162,74,0.12),
-
-        0 0 0 1px
-        rgba(255,255,255,0.04) inset;
-
+    font-size: 20px;
 }
 
 
-.crest-mark::before {
+/* =========================================================
+   TITLE
+========================================================= */
 
-    content: "";
+.title {
 
-    position: absolute;
+    text-align: center;
 
-    inset: 5px;
+    font-family: "Cormorant Garamond", serif;
 
-    border:
-
-        1px solid
-        rgba(240,210,122,0.40);
-
-    border-radius: 50%;
-
-}
-
-
-.crest-mark::after {
-
-    content: "";
-
-    position: absolute;
-
-    inset: -4px;
-
-    border:
-
-        1px solid
-        rgba(215,217,216,0.12);
-
-    border-radius: 50%;
-
-}
-
-
-.crest-mark svg {
-
-    width: 19px;
-
-    height: 19px;
-
-    fill: var(--gold-light);
-
-    position: relative;
-
-    z-index: 2;
-
-    filter:
-
-        drop-shadow(
-            0 0 4px
-            rgba(240,210,122,0.35)
-        );
-
-}
-
-
-.crest h1 {
-
-    font-family:
-        'Cormorant Garamond',
-        serif;
+    font-size: 30px;
 
     font-weight: 700;
 
-    font-size: 1.7rem;
-
     letter-spacing: 2px;
 
-    color: var(--gold-light);
+    color: #40382f;
 
     text-transform: uppercase;
 
     text-shadow:
-
-        0 1px 10px
-        rgba(201,162,74,0.18);
-
+        0 1px 0 rgba(255,255,255,0.8);
 }
 
 
-.crest .hair {
+/* =========================================================
+   SUBTITLE
+========================================================= */
 
-    width: 34px;
+.subtitle {
+
+    margin-top: 8px;
+
+    text-align: center;
+
+    font-size: 8px;
+
+    font-weight: 700;
+
+    letter-spacing: 3px;
+
+    color: #685b4c;
+
+    text-transform: uppercase;
+}
+
+
+/* =========================================================
+   GOLD DIVIDER
+========================================================= */
+
+.divider {
+
+    width: 100%;
 
     height: 1px;
 
-    margin: 12px auto;
+    margin: 23px 0 20px;
 
     background:
-
         linear-gradient(
             90deg,
             transparent,
-            var(--gold),
+            #a8894c,
+            #f4dfa4,
+            #a8894c,
             transparent
         );
-
-}
-
-
-.crest p {
-
-    font-size: 0.64rem;
-
-    color: var(--taupe-light);
-
-    letter-spacing: 2px;
-
-    text-transform: uppercase;
-
-}
-
-
-/* =========================================================
-   STATUS DOT
-========================================================= */
-
-.status-dot {
-
-    display: inline-block;
-
-    width: 5px;
-
-    height: 5px;
-
-    margin-right: 7px;
-
-    border-radius: 50%;
-
-    background: var(--gold);
-
-    box-shadow:
-
-        0 0 6px
-        rgba(201,162,74,0.75);
-
-    animation: pulse 2s infinite;
-
-}
-
-
-@keyframes pulse {
-
-    0%,
-    100% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0.4;
-    }
-
-}
-
-
-/* =========================================================
-   CARD
-========================================================= */
-
-.card {
-
-    position: relative;
-
-    z-index: 2;
-
 }
 
 
@@ -569,69 +355,51 @@ body::after {
 
     gap: 24px;
 
-    margin-bottom: 26px;
+    margin-bottom: 24px;
 
-    border-bottom:
-
-        1px solid
-        rgba(154,137,112,0.28);
-
+    border-bottom: 1px solid rgba(89,76,60,0.22);
 }
 
 
-.tab-btn {
-
-    padding: 0 0 11px;
-
-    border: none;
-
-    background: transparent;
-
-    color: #8e8573;
-
-    font-family: 'Inter', sans-serif;
-
-    font-size: 0.68rem;
-
-    font-weight: 700;
-
-    letter-spacing: 2px;
-
-    text-transform: uppercase;
-
-    cursor: pointer;
+.tab {
 
     position: relative;
 
-    transition:
+    padding-bottom: 10px;
 
-        color 0.2s ease;
+    background: none;
 
+    border: none;
+
+    cursor: pointer;
+
+    font-family: "Plus Jakarta Sans", sans-serif;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    letter-spacing: 1.5px;
+
+    color: #756a5b;
+
+    text-transform: uppercase;
 }
 
 
-.tab-btn:hover {
+.tab.active {
 
-    color: #cbb98f;
-
+    color: #4a4035;
 }
 
 
-.tab-btn.active {
-
-    color: var(--gold-light);
-
-}
-
-
-.tab-btn.active::after {
+.tab.active::after {
 
     content: "";
 
     position: absolute;
 
     left: 0;
-
     right: 0;
 
     bottom: -1px;
@@ -639,19 +407,12 @@ body::after {
     height: 2px;
 
     background:
-
         linear-gradient(
             90deg,
-            var(--gold-deep),
-            var(--gold-soft),
-            var(--gold-deep)
+            #987a39,
+            #f4d989,
+            #987a39
         );
-
-    box-shadow:
-
-        0 0 7px
-        rgba(201,162,74,0.35);
-
 }
 
 
@@ -662,357 +423,208 @@ body::after {
 .form-group {
 
     margin-bottom: 18px;
-
 }
 
 
-label {
+.form-label {
 
     display: block;
 
-    font-size: 0.6rem;
+    margin-bottom: 7px;
 
-    font-weight: 600;
+    font-size: 8px;
 
-    color: var(--taupe-light);
-
-    margin-bottom: 8px;
-
-    text-transform: uppercase;
+    font-weight: 700;
 
     letter-spacing: 1.5px;
 
+    color: #665a4b;
+
+    text-transform: uppercase;
 }
 
 
-input {
+.form-input {
 
     width: 100%;
 
-    padding: 11px 12px;
+    height: 42px;
+
+    padding: 0 13px;
+
+    border-radius: 3px;
+
+    border: 1px solid #a99b85;
 
     background:
-
         linear-gradient(
             180deg,
-            rgba(36,34,29,0.96),
-            rgba(18,18,17,0.99)
+            rgba(255,255,255,0.95),
+            rgba(238,230,215,0.95)
         );
 
-    border:
+    color: #3e3830;
 
-        1px solid
-        rgba(154,137,112,0.32);
+    font-family: "Plus Jakarta Sans", sans-serif;
 
-    border-radius: 4px;
-
-    color: #f0e8d4;
-
-    font-family: 'Inter', sans-serif;
-
-    font-size: 0.86rem;
+    font-size: 12px;
 
     outline: none;
 
-    transition:
-
-        border-color 0.25s,
-
-        box-shadow 0.25s,
-
-        background 0.25s;
-
-}
-
-
-input:hover {
-
-    border-color:
-
-        rgba(201,162,74,0.48);
-
-}
-
-
-input:focus {
-
-    border-color:
-
-        var(--gold);
-
-    background:
-
-        linear-gradient(
-            180deg,
-            rgba(43,39,31,0.98),
-            rgba(20,19,17,0.99)
-        );
+    transition: 0.25s ease;
 
     box-shadow:
-
-        0 0 0 2px
-        rgba(201,162,74,0.08),
-
-        0 0 14px
-        rgba(201,162,74,0.07);
-
+        inset 0 1px 3px rgba(60,50,40,0.10);
 }
 
 
-input::placeholder {
+.form-input:focus {
 
-    color: #706754;
+    border-color: #b3924b;
 
+    box-shadow:
+        0 0 0 2px rgba(179,146,75,0.16),
+        inset 0 1px 3px rgba(60,50,40,0.10);
+}
+
+
+.form-input::placeholder {
+
+    color: #9b9081;
 }
 
 
 /* =========================================================
-   BUTTON
+   ENTER BUTTON
 ========================================================= */
 
-.btn {
+.enter-btn {
 
     width: 100%;
 
-    padding: 13px;
+    height: 46px;
 
-    margin-top: 10px;
+    margin-top: 5px;
 
     border: none;
 
-    border-radius: 4px;
-
-    background:
-
-        linear-gradient(
-            135deg,
-
-            #f0d27a 0%,
-
-            #d5b35b 25%,
-
-            #b38b35 55%,
-
-            #d0aa4f 78%,
-
-            #8d6c2b 100%
-        );
-
-    color: #1b160b;
-
-    font-family: 'Inter', sans-serif;
-
-    font-size: 0.7rem;
-
-    font-weight: 800;
-
-    letter-spacing: 2.2px;
-
-    text-transform: uppercase;
+    border-radius: 3px;
 
     cursor: pointer;
 
+    font-family: "Plus Jakarta Sans", sans-serif;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: 2px;
+
+    color: #40382e;
+
+    text-transform: uppercase;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f9e5a5 0%,
+            #d2b66b 30%,
+            #fff1b9 52%,
+            #c4a254 72%,
+            #f2d98f 100%
+        );
+
     box-shadow:
-
-        0 8px 20px
-        rgba(201,162,74,0.28),
-
-        0 1px 0
-        rgba(255,244,199,0.55) inset,
-
-        0 -1px 0
-        rgba(94,69,22,0.35) inset;
+        0 7px 16px rgba(82,63,32,0.25),
+        inset 0 1px 0 rgba(255,255,255,0.9),
+        inset 0 -1px 0 rgba(93,70,28,0.25);
 
     transition:
-
-        opacity 0.2s,
-
-        transform 0.15s,
-
-        box-shadow 0.2s;
-
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 
-.btn:hover {
-
-    opacity: 0.94;
+.enter-btn:hover {
 
     transform: translateY(-1px);
 
     box-shadow:
-
-        0 11px 25px
-        rgba(201,162,74,0.34),
-
-        0 1px 0
-        rgba(255,244,199,0.6) inset;
-
+        0 10px 22px rgba(82,63,32,0.30),
+        inset 0 1px 0 rgba(255,255,255,0.95);
 }
 
 
-.btn:active {
+.enter-btn:active {
 
     transform: translateY(0);
-
 }
 
 
 /* =========================================================
-   MESSAGES
+   FOOTER
 ========================================================= */
 
-.msg {
+.secured {
 
-    font-size: 0.74rem;
-
-    padding: 9px 12px;
-
-    border-radius: 4px;
-
-    margin-bottom: 14px;
-
-    display: none;
-
-    letter-spacing: 0.3px;
-
-}
-
-
-.msg.error {
-
-    background:
-
-        rgba(224,138,128,0.12);
-
-    color: var(--error);
-
-    border:
-
-        1px solid
-        rgba(224,138,128,0.30);
-
-    display: block;
-
-}
-
-
-.msg.success {
-
-    background:
-
-        rgba(201,162,74,0.12);
-
-    color: var(--gold-soft);
-
-    border:
-
-        1px solid
-        rgba(201,162,74,0.35);
-
-    display: block;
-
-}
-
-
-/* =========================================================
-   DIVIDER
-========================================================= */
-
-.divider {
+    margin-top: 17px;
 
     text-align: center;
 
-    color: #8f846e;
+    font-size: 7px;
 
-    font-size: 0.6rem;
+    font-weight: 700;
 
     letter-spacing: 2px;
 
+    color: #756957;
+
     text-transform: uppercase;
-
-    margin: 22px 0 4px;
-
-    position: relative;
-
 }
 
 
-.divider::before,
-.divider::after {
+.secured::before {
 
     content: "";
 
-    position: absolute;
+    display: inline-block;
 
-    top: 50%;
-
-    width: 26%;
+    width: 22px;
 
     height: 1px;
 
+    margin-right: 9px;
+
+    vertical-align: middle;
+
+    background: #aa8b4b;
 }
 
 
-.divider::before {
+.secured::after {
 
-    left: 0;
+    content: "";
 
-    background:
+    display: inline-block;
 
-        linear-gradient(
-            90deg,
-            transparent,
-            rgba(154,137,112,0.32)
-        );
+    width: 22px;
 
-}
+    height: 1px;
 
+    margin-left: 9px;
 
-.divider::after {
+    vertical-align: middle;
 
-    right: 0;
-
-    background:
-
-        linear-gradient(
-            90deg,
-            rgba(154,137,112,0.32),
-            transparent
-        );
-
+    background: #aa8b4b;
 }
 
 
 /* =========================================================
-   COORDINATES
+   REGISTER FORM
 ========================================================= */
 
-.coords {
-
-    position: fixed;
-
-    bottom: 16px;
-
-    right: 20px;
-
-    z-index: 6;
-
-    font-size: 0.62rem;
-
-    color:
-
-        rgba(255,255,255,0.65);
-
-    font-family: 'Inter', sans-serif;
-
-    letter-spacing: 1px;
-
-    text-shadow:
-
-        0 1px 5px
-        rgba(0,0,0,0.9);
-
+.register-form {
+    display: none;
 }
 
 
@@ -1020,121 +632,44 @@ input::placeholder {
    RESPONSIVE
 ========================================================= */
 
-@media (max-width:600px) {
+@media (max-width: 600px) {
 
-    body {
+    .login-panel {
 
-        padding: 16px;
-
-        background-position:
-            center center;
+        width: 92vw;
 
     }
 
-    .outer-frame {
+    .login-card {
 
-        max-width: 430px;
-
-        margin: 12px auto;
-
-        padding: 4px;
+        padding: 30px 24px 25px;
 
     }
 
-    .container {
+    .title {
 
-        padding:
-            30px 24px 26px;
-
-    }
-
-    .crest {
-
-        margin-bottom: 24px;
-
-    }
-
-    .crest h1 {
-
-        font-size: 1.55rem;
-
-    }
-
-    .coords {
-
-        bottom: 8px;
-
-        right: 10px;
-
-        font-size: 0.52rem;
+        font-size: 25px;
 
     }
 
 }
 
 
-@media (max-width:380px) {
+/* =========================================================
+   LARGE SCREEN
+========================================================= */
 
-    body {
+@media (min-width: 1400px) {
 
-        padding: 10px;
+    .login-panel {
 
-    }
-
-    .outer-frame {
-
-        margin: 6px auto;
+        width: 445px;
 
     }
 
-    .container {
+    .login-card {
 
-        padding:
-            26px 19px 23px;
-
-    }
-
-    .crest-mark {
-
-        width: 44px;
-
-        height: 44px;
-
-    }
-
-    .crest h1 {
-
-        font-size: 1.4rem;
-
-        letter-spacing: 1.6px;
-
-    }
-
-    .tabs {
-
-        gap: 18px;
-
-    }
-
-}
-
-
-@media (max-height:700px) {
-
-    .outer-frame {
-
-        transform: scale(0.92);
-
-    }
-
-}
-
-
-@media (max-height:600px) {
-
-    .outer-frame {
-
-        transform: scale(0.82);
+        padding: 42px 36px 32px;
 
     }
 
@@ -1147,113 +682,90 @@ input::placeholder {
 <body>
 
 
-<!-- =========================================================
-     LOGIN FRAME
-========================================================= -->
-
-<div class="outer-frame">
-
-    <div class="inner-frame">
-
-        <div class="container">
+<div class="page">
 
 
-            <!-- =================================================
-                 HEADER
-            ================================================= -->
+    <!-- =====================================================
+         LOGIN PANEL
+    ====================================================== -->
 
-            <div class="crest">
+    <div class="login-panel">
 
-                <div class="crest-mark">
+        <div class="login-frame">
 
-                    <svg
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                    >
+            <div class="login-card">
 
-                        <path
-                            d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
-                        />
 
-                    </svg>
+                <!-- LOGO -->
+                <div class="logo-ring">
+
+                    <div class="logo-inner">
+                        ◉
+                    </div>
 
                 </div>
 
 
-                <h1>
-                    Waqar GIS
+                <!-- TITLE -->
+                <h1 class="title">
+                    WAQAR GIS
                 </h1>
 
 
-                <div class="hair"></div>
-
-
-                <p>
-
-                    <span class="status-dot"></span>
-
+                <!-- SUBTITLE -->
+                <div class="subtitle">
                     Spatial Intelligence · Peshawar
-
-                </p>
-
-            </div>
+                </div>
 
 
-            <!-- =================================================
-                 CARD
-            ================================================= -->
-
-            <div class="card">
+                <!-- DIVIDER -->
+                <div class="divider"></div>
 
 
                 <!-- TABS -->
-
                 <div class="tabs">
 
                     <button
-                        class="tab-btn active"
-                        onclick="switchTab('login')"
+                        class="tab active"
+                        id="loginTab"
+                        onclick="showLogin()"
                     >
-
                         Login
-
                     </button>
 
-
                     <button
-                        class="tab-btn"
-                        onclick="switchTab('register')"
+                        class="tab"
+                        id="registerTab"
+                        onclick="showRegister()"
                     >
-
                         Register
-
                     </button>
 
                 </div>
 
 
                 <!-- =================================================
-                     LOGIN
-                ================================================= -->
+                     LOGIN FORM
+                ================================================== -->
 
-                <div id="loginForm">
-
-                    <div
-                        id="loginMsg"
-                        class="msg"
-                    ></div>
-
+                <form
+                    id="loginForm"
+                    onsubmit="enterPortal(event)"
+                >
 
                     <div class="form-group">
 
-                        <label>
+                        <label class="form-label">
                             Email Address
                         </label>
 
                         <input
-                            type="email"
+                            class="form-input"
                             id="loginEmail"
-                            placeholder="you@example.com"
+                            type="email"
+                            value="admin@waqargis.com"
+                            placeholder="Enter email address"
+                            required
                         >
 
                     </div>
@@ -1261,56 +773,54 @@ input::placeholder {
 
                     <div class="form-group">
 
-                        <label>
+                        <label class="form-label">
                             Password
                         </label>
 
                         <input
+                            class="form-input"
+                            id="loginPassword"
                             type="password"
-                            id="loginPass"
-                            placeholder="••••••••"
+                            value="admin123"
+                            placeholder="Enter password"
+                            required
                         >
 
                     </div>
 
 
                     <button
-                        class="btn"
-                        onclick="doLogin()"
+                        type="submit"
+                        class="enter-btn"
                     >
-
                         Enter Portal →
-
                     </button>
 
-                </div>
+                </form>
+
 
 
                 <!-- =================================================
-                     REGISTER
-                ================================================= -->
+                     REGISTER FORM
+                ================================================== -->
 
-                <div
+                <form
                     id="registerForm"
-                    style="display:none;"
+                    class="register-form"
+                    onsubmit="registerUser(event)"
                 >
-
-                    <div
-                        id="regMsg"
-                        class="msg"
-                    ></div>
-
 
                     <div class="form-group">
 
-                        <label>
+                        <label class="form-label">
                             Full Name
                         </label>
 
                         <input
+                            class="form-input"
                             type="text"
-                            id="regName"
-                            placeholder="Your name"
+                            placeholder="Enter full name"
+                            required
                         >
 
                     </div>
@@ -1318,14 +828,15 @@ input::placeholder {
 
                     <div class="form-group">
 
-                        <label>
+                        <label class="form-label">
                             Email Address
                         </label>
 
                         <input
+                            class="form-input"
                             type="email"
-                            id="regEmail"
-                            placeholder="you@example.com"
+                            placeholder="Enter email address"
+                            required
                         >
 
                     </div>
@@ -1333,51 +844,35 @@ input::placeholder {
 
                     <div class="form-group">
 
-                        <label>
+                        <label class="form-label">
                             Password
                         </label>
 
                         <input
+                            class="form-input"
                             type="password"
-                            id="regPass"
-                            placeholder="Min 6 characters"
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            Confirm Password
-                        </label>
-
-                        <input
-                            type="password"
-                            id="regPass2"
-                            placeholder="Repeat password"
+                            placeholder="Create password"
+                            required
                         >
 
                     </div>
 
 
                     <button
-                        class="btn"
-                        onclick="doRegister()"
+                        type="submit"
+                        class="enter-btn"
                     >
-
-                        Create Account
-
+                        Create Account →
                     </button>
 
-                </div>
+                </form>
 
 
-                <div class="divider">
-
+                <!-- FOOTER -->
+                <div class="secured">
                     Secured Access
-
                 </div>
+
 
             </div>
 
@@ -1385,141 +880,38 @@ input::placeholder {
 
     </div>
 
-</div>
-
-
-<!-- =========================================================
-     COORDINATES
-========================================================= -->
-
-<div class="coords">
-
-    34.0151° N, 71.5249° E · KP, Pakistan
 
 </div>
 
 
-<!-- =========================================================
-     JAVASCRIPT
-========================================================= -->
 
 <script>
 
-
 /* =========================================================
-   USERS
+   LOGIN / REGISTER SWITCH
 ========================================================= */
 
-function getUsers() {
+function showLogin() {
 
-    return JSON.parse(
-        localStorage.getItem('waqar_gis_users') || '[]'
-    );
+    document.getElementById("loginForm").style.display = "block";
 
+    document.getElementById("registerForm").style.display = "none";
+
+    document.getElementById("loginTab").classList.add("active");
+
+    document.getElementById("registerTab").classList.remove("active");
 }
 
 
-function saveUsers(users) {
+function showRegister() {
 
-    localStorage.setItem(
-        'waqar_gis_users',
-        JSON.stringify(users)
-    );
+    document.getElementById("loginForm").style.display = "none";
 
-}
+    document.getElementById("registerForm").style.display = "block";
 
+    document.getElementById("loginTab").classList.remove("active");
 
-/* =========================================================
-   ADMIN
-========================================================= */
-
-(function initAdmin() {
-
-    const users = getUsers();
-
-    if (
-        !users.find(
-            u =>
-                u.email ===
-                'admin@waqargis.com'
-        )
-    ) {
-
-        users.push({
-
-            name: 'Waqar (Admin)',
-
-            email: 'admin@waqargis.com',
-
-            password:
-                'waqar!!admin125714TaKhT@BhAi',
-
-            role: 'admin'
-
-        });
-
-        saveUsers(users);
-
-    }
-
-})();
-
-
-/* =========================================================
-   SWITCH LOGIN / REGISTER
-========================================================= */
-
-function switchTab(tab) {
-
-    document.getElementById('loginForm').style.display =
-        tab === 'login'
-            ? 'block'
-            : 'none';
-
-
-    document.getElementById('registerForm').style.display =
-        tab === 'register'
-            ? 'block'
-            : 'none';
-
-
-    document
-        .querySelectorAll('.tab-btn')
-        .forEach((button, index) => {
-
-            button.classList.toggle(
-
-                'active',
-
-                (index === 0 &&
-                    tab === 'login')
-
-                ||
-
-                (index === 1 &&
-                    tab === 'register')
-
-            );
-
-        });
-
-}
-
-
-/* =========================================================
-   MESSAGE
-========================================================= */
-
-function showMsg(id, text, type) {
-
-    const element =
-        document.getElementById(id);
-
-    element.textContent = text;
-
-    element.className =
-        'msg ' + type;
-
+    document.getElementById("registerTab").classList.add("active");
 }
 
 
@@ -1527,101 +919,40 @@ function showMsg(id, text, type) {
    LOGIN
 ========================================================= */
 
-function doLogin() {
+function enterPortal(event) {
+
+    event.preventDefault();
 
     const email =
-        document
-            .getElementById('loginEmail')
-            .value
-            .trim();
-
+        document.getElementById("loginEmail").value.trim();
 
     const password =
-        document
-            .getElementById('loginPass')
-            .value;
+        document.getElementById("loginPassword").value;
 
+    /*
+       Demo login
+       Replace this section with your existing
+       Firebase / authentication code.
+    */
 
-    if (!email || !password) {
+    if (
+        email === "admin@waqargis.com" &&
+        password === "admin123"
+    ) {
 
-        showMsg(
+        /*
+          CHANGE THIS URL to your actual GIS portal page.
+        */
 
-            'loginMsg',
+        window.location.href = "portal.html";
 
-            'Please fill all fields.',
+    } else {
 
-            'error'
-
+        alert(
+            "Invalid email or password."
         );
-
-        return;
 
     }
-
-
-    const user =
-        getUsers().find(
-
-            u =>
-
-                u.email === email &&
-
-                u.password === password
-
-        );
-
-
-    if (!user) {
-
-        showMsg(
-
-            'loginMsg',
-
-            'Invalid email or password.',
-
-            'error'
-
-        );
-
-        return;
-
-    }
-
-
-    showMsg(
-
-        'loginMsg',
-
-        '✓ Login successful! Opening portal...',
-
-        'success'
-
-    );
-
-
-    sessionStorage.setItem(
-
-        'waqar_gis_session',
-
-        JSON.stringify({
-
-            name: user.name,
-
-            email: user.email,
-
-            role: user.role || 'user'
-
-        })
-
-    );
-
-
-    setTimeout(() => {
-
-        window.location.href =
-            'portal.html';
-
-    }, 900);
 
 }
 
@@ -1630,190 +961,18 @@ function doLogin() {
    REGISTER
 ========================================================= */
 
-function doRegister() {
+function registerUser(event) {
 
-    const name =
-        document
-            .getElementById('regName')
-            .value
-            .trim();
+    event.preventDefault();
 
-
-    const email =
-        document
-            .getElementById('regEmail')
-            .value
-            .trim();
-
-
-    const password =
-        document
-            .getElementById('regPass')
-            .value;
-
-
-    const password2 =
-        document
-            .getElementById('regPass2')
-            .value;
-
-
-    if (
-        !name ||
-        !email ||
-        !password ||
-        !password2
-    ) {
-
-        showMsg(
-
-            'regMsg',
-
-            'Please fill all fields.',
-
-            'error'
-
-        );
-
-        return;
-
-    }
-
-
-    if (password.length < 6) {
-
-        showMsg(
-
-            'regMsg',
-
-            'Password must be at least 6 characters.',
-
-            'error'
-
-        );
-
-        return;
-
-    }
-
-
-    if (password !== password2) {
-
-        showMsg(
-
-            'regMsg',
-
-            'Passwords do not match.',
-
-            'error'
-
-        );
-
-        return;
-
-    }
-
-
-    const users = getUsers();
-
-
-    if (
-        users.find(
-            u =>
-                u.email === email
-        )
-    ) {
-
-        showMsg(
-
-            'regMsg',
-
-            'This email is already registered.',
-
-            'error'
-
-        );
-
-        return;
-
-    }
-
-
-    users.push({
-
-        name: name,
-
-        email: email,
-
-        password: password,
-
-        role: 'user'
-
-    });
-
-
-    saveUsers(users);
-
-
-    showMsg(
-
-        'regMsg',
-
-        '✓ Account created! You can now login.',
-
-        'success'
-
-    );
-
-
-    setTimeout(
-
-        () => switchTab('login'),
-
-        1200
-
+    alert(
+        "Registration form submitted."
     );
 
 }
 
-
-/* =========================================================
-   ENTER KEY
-========================================================= */
-
-document.addEventListener(
-
-    'keydown',
-
-    function(event) {
-
-        if (event.key === 'Enter') {
-
-            const loginVisible =
-
-                document
-                    .getElementById('loginForm')
-                    .style
-                    .display !== 'none';
-
-
-            if (loginVisible) {
-
-                doLogin();
-
-            } else {
-
-                doRegister();
-
-            }
-
-        }
-
-    }
-
-);
-
 </script>
+
 
 </body>
 </html>
