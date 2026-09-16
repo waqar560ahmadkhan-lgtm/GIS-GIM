@@ -1,1343 +1,1819 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Waqar GIS Portal – Login</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+<title>Waqar GIS Portal – Login</title>
 
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+<style>
 
-    :root {
-      /* Premium Metallic Palette */
-      --gold: #c9a24a;
-      --gold-soft: #f0d27a;
-      --gold-light: #f6df9b;
-      --gold-deep: #8b6825;
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
-      --silver: #d7d9d8;
-      --silver-dark: #777b7d;
+/* =========================================================
+   RESET
+========================================================= */
 
-      --taupe: #9a8970;
-      --taupe-light: #b9a991;
-      --brown: #5c4c39;
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-      --charcoal: #121212;
-      --charcoal-2: #181715;
-      --charcoal-3: #211f1a;
+:root {
 
-      --field-line: #514936;
-      --error: #e08a80;
-    }
+    --gold: #c9a24a;
+    --gold-soft: #f0d27a;
+    --gold-light: #f6df9b;
+    --gold-deep: #8b6825;
 
-    /* =========================================================
-       FULL-SCREEN WORLD MAP BACKGROUND
-       ========================================================= */
+    --silver: #d7d9d8;
+    --silver-dark: #777b7d;
 
-    html,
-    body {
-      width: 100%;
-      min-height: 100%;
-    }
+    --taupe: #9a8970;
+    --taupe-light: #b9a991;
 
-    body {
-      font-family: 'Inter', sans-serif;
-      color: #ece7dc;
-      min-height: 100vh;
+    --brown: #5c4c39;
 
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    --charcoal: #121212;
+    --charcoal-2: #181715;
+    --charcoal-3: #211f1a;
 
-      position: relative;
-      overflow: hidden;
+    --error: #e08a80;
+}
 
-      /* Upload the supplied world map image as map-bg.jpg */
-      background:
-        url('map-bg.jpg')
-        center center /
-        cover
-        no-repeat
-        fixed;
 
-      background-color: #161616;
-    }
+/* =========================================================
+   HTML / BODY
+========================================================= */
+
+html,
+body {
+
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+
+}
+
+body {
+
+    font-family: 'Inter', sans-serif;
+
+    color: #ece7dc;
+
+    min-height: 100vh;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    position: relative;
+
+    overflow: hidden;
 
     /*
-      Dark cinematic overlay.
-      Keeps the gold world map visible while allowing
-      the login panel to remain readable.
-    */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
+    ========================================================
+    IMPORTANT:
+    WORLD MAP IMAGE MUST BE:
+    
+    index.html
+    map-bg.jpg
 
-      background:
+    Same folder.
+    ========================================================
+    */
+
+    background-image: url("./map-bg.jpg");
+
+    background-position: center center;
+
+    background-size: cover;
+
+    background-repeat: no-repeat;
+
+    background-attachment: fixed;
+
+    background-color: #101010;
+
+}
+
+
+/* =========================================================
+   MAP DARK OVERLAY
+   ========================================================= */
+
+body::before {
+
+    content: "";
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 0;
+
+    pointer-events: none;
+
+    background:
+
+        linear-gradient(
+            rgba(5,5,5,0.48),
+            rgba(5,5,5,0.48)
+        );
+
+}
+
+
+/* =========================================================
+   CINEMATIC GOLD ATMOSPHERE
+========================================================= */
+
+body::after {
+
+    content: "";
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 0;
+
+    pointer-events: none;
+
+    background:
+
         radial-gradient(
-          circle at 50% 45%,
-          rgba(20, 20, 18, 0.12) 0%,
-          rgba(10, 10, 9, 0.42) 48%,
-          rgba(5, 5, 5, 0.72) 100%
+            circle at 50% 50%,
+            rgba(201,162,74,0.06) 0%,
+            rgba(0,0,0,0.10) 40%,
+            rgba(0,0,0,0.35) 100%
         );
-    }
 
-    /*
-      Very subtle warm metallic atmosphere over the map.
-    */
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
+}
 
-      background:
+
+/* =========================================================
+   MAIN FRAME
+========================================================= */
+
+.outer-frame {
+
+    position: relative;
+
+    z-index: 5;
+
+    width: 100%;
+
+    max-width: 430px;
+
+    margin: 24px;
+
+    padding: 5px;
+
+    background:
+
         linear-gradient(
-          115deg,
-          rgba(201, 162, 74, 0.05),
-          transparent 35%,
-          rgba(255, 255, 255, 0.025) 65%,
-          rgba(0, 0, 0, 0.12)
+            145deg,
+
+            #f1e3bd 0%,
+
+            #d8d9d7 10%,
+
+            #9c9d9d 27%,
+
+            #e7d7aa 43%,
+
+            #a9aaab 58%,
+
+            #676a6b 76%,
+
+            #d2c28e 90%,
+
+            #f0dfae 100%
         );
-    }
 
-    /* =========================================================
-       OUTER SILVER / CHAMPAGNE METALLIC FRAME
-       ========================================================= */
+    border-radius: 6px;
 
-    .outer-frame {
-      position: relative;
-      z-index: 1;
+    box-shadow:
 
-      width: 100%;
-      max-width: 430px;
+        0 35px 90px rgba(0,0,0,0.85),
 
-      margin: 24px;
-      padding: 5px;
+        0 12px 30px rgba(0,0,0,0.65),
 
-      /*
-        Metallic silver / champagne gradient
-      */
-      background:
+        0 0 0 1px rgba(255,255,255,0.40) inset,
+
+        0 0 30px rgba(201,162,74,0.25);
+
+}
+
+
+/* =========================================================
+   INNER GOLD FRAME
+========================================================= */
+
+.inner-frame {
+
+    padding: 3px;
+
+    border-radius: 4px;
+
+    background:
+
         linear-gradient(
-          145deg,
-          #f1e3bd 0%,
-          #d8d9d7 10%,
-          #9c9d9d 27%,
-          #e7d7aa 43%,
-          #a9aaab 58%,
-          #676a6b 76%,
-          #d2c28e 90%,
-          #f0dfae 100%
+            135deg,
+
+            #f5df9f 0%,
+
+            #d3ae55 18%,
+
+            #8d6c2b 38%,
+
+            #c49b42 55%,
+
+            #765a25 76%,
+
+            #e5c873 100%
         );
 
-      border-radius: 6px;
+    box-shadow:
 
-      box-shadow:
-        0 35px 90px rgba(0, 0, 0, 0.72),
-        0 12px 30px rgba(0, 0, 0, 0.48),
-        0 0 0 1px rgba(255, 255, 255, 0.35) inset,
-        0 0 22px rgba(201, 162, 74, 0.16);
+        0 0 0 1px
+        rgba(255,239,180,0.45) inset,
 
-      /*
-        Thin metallic highlight
-      */
-      outline: 1px solid rgba(255, 255, 255, 0.08);
-    }
+        0 0 14px
+        rgba(201,162,74,0.22);
 
-    /* =========================================================
-       INNER CHAMPAGNE / GOLD FRAME
-       ========================================================= */
+}
 
-    .inner-frame {
-      background:
+
+/* =========================================================
+   DARK INTERIOR
+========================================================= */
+
+.container {
+
+    position: relative;
+
+    padding: 34px 32px 30px;
+
+    border-radius: 3px;
+
+    background:
+
         linear-gradient(
-          135deg,
-          #f5df9f 0%,
-          #d3ae55 18%,
-          #8d6c2b 38%,
-          #c49b42 55%,
-          #765a25 76%,
-          #e5c873 100%
+            180deg,
+
+            rgba(31,29,24,0.985) 0%,
+
+            rgba(17,17,16,0.99) 55%,
+
+            rgba(12,12,11,0.995) 100%
         );
 
-      padding: 3px;
-      border-radius: 4px;
+    box-shadow:
 
-      box-shadow:
-        0 0 0 1px rgba(255, 239, 180, 0.38) inset,
-        0 0 10px rgba(201, 162, 74, 0.16);
-    }
+        0 0 0 1px
+        rgba(255,255,255,0.04) inset,
 
-    /* =========================================================
-       DARK CHARCOAL INTERIOR
-       ========================================================= */
+        0 0 35px
+        rgba(0,0,0,0.40);
 
-    .container {
-      background:
-        linear-gradient(
-          180deg,
-          rgba(31, 29, 24, 0.985) 0%,
-          rgba(17, 17, 16, 0.99) 55%,
-          rgba(12, 12, 11, 0.995) 100%
-        );
+}
 
-      border-radius: 3px;
 
-      padding: 34px 32px 30px;
+/* =========================================================
+   INNER BORDER
+========================================================= */
 
-      position: relative;
+.container::before {
 
-      box-shadow:
-        0 0 0 1px rgba(255, 255, 255, 0.035) inset,
-        0 0 30px rgba(0, 0, 0, 0.35);
-    }
+    content: "";
 
-    /*
-      Inner institutional border
-    */
-    .container::before {
-      content: '';
-      position: absolute;
+    position: absolute;
 
-      inset: 8px;
+    inset: 8px;
 
-      border:
+    border:
+
         1px solid
-        rgba(201, 162, 74, 0.30);
+        rgba(201,162,74,0.30);
 
-      border-radius: 2px;
+    border-radius: 2px;
 
-      pointer-events: none;
+    pointer-events: none;
 
-      box-shadow:
-        0 0 0 1px rgba(255, 255, 255, 0.018) inset;
-    }
+}
 
-    /*
-      Secondary subtle border
-    */
-    .container::after {
-      content: '';
 
-      position: absolute;
+.container::after {
 
-      inset: 12px;
+    content: "";
 
-      border:
+    position: absolute;
+
+    inset: 12px;
+
+    border:
+
         1px solid
-        rgba(154, 137, 112, 0.08);
+        rgba(154,137,112,0.08);
 
-      border-radius: 1px;
+    border-radius: 1px;
 
-      pointer-events: none;
-    }
+    pointer-events: none;
 
-    /* =========================================================
-       CREST / HEADER
-       ========================================================= */
+}
 
-    .crest {
-      text-align: center;
 
-      margin-bottom: 28px;
+/* =========================================================
+   HEADER
+========================================================= */
 
-      position: relative;
-      z-index: 1;
-    }
+.crest {
 
-    .crest-mark {
-      width: 48px;
-      height: 48px;
+    position: relative;
 
-      margin: 0 auto 14px;
+    z-index: 2;
 
-      border:
+    text-align: center;
+
+    margin-bottom: 28px;
+
+}
+
+
+.crest-mark {
+
+    width: 48px;
+
+    height: 48px;
+
+    margin: 0 auto 14px;
+
+    border:
+
         1.5px solid
         var(--gold);
 
-      border-radius: 50%;
+    border-radius: 50%;
 
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    display: flex;
 
-      position: relative;
+    align-items: center;
 
-      background:
+    justify-content: center;
+
+    position: relative;
+
+    background:
+
         radial-gradient(
-          circle,
-          rgba(201, 162, 74, 0.13),
-          rgba(201, 162, 74, 0.025)
+            circle,
+            rgba(201,162,74,0.15),
+            rgba(201,162,74,0.025)
         );
 
-      box-shadow:
-        0 0 15px rgba(201, 162, 74, 0.08),
-        0 0 0 1px rgba(255, 255, 255, 0.035) inset;
-    }
+    box-shadow:
 
-    .crest-mark::before {
-      content: '';
+        0 0 15px
+        rgba(201,162,74,0.12),
 
-      position: absolute;
+        0 0 0 1px
+        rgba(255,255,255,0.04) inset;
 
-      inset: 5px;
+}
 
-      border:
+
+.crest-mark::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 5px;
+
+    border:
+
         1px solid
-        rgba(240, 210, 122, 0.40);
+        rgba(240,210,122,0.40);
 
-      border-radius: 50%;
-    }
+    border-radius: 50%;
 
-    .crest-mark::after {
-      content: '';
+}
 
-      position: absolute;
 
-      inset: -4px;
+.crest-mark::after {
 
-      border:
+    content: "";
+
+    position: absolute;
+
+    inset: -4px;
+
+    border:
+
         1px solid
-        rgba(215, 217, 216, 0.12);
+        rgba(215,217,216,0.12);
 
-      border-radius: 50%;
-    }
+    border-radius: 50%;
 
-    .crest-mark svg {
-      width: 19px;
-      height: 19px;
+}
 
-      fill: var(--gold-light);
 
-      position: relative;
-      z-index: 1;
+.crest-mark svg {
 
-      filter:
+    width: 19px;
+
+    height: 19px;
+
+    fill: var(--gold-light);
+
+    position: relative;
+
+    z-index: 2;
+
+    filter:
+
         drop-shadow(
-          0 0 4px
-          rgba(240, 210, 122, 0.35)
+            0 0 4px
+            rgba(240,210,122,0.35)
         );
-    }
 
-    .crest h1 {
-      font-family: 'Cormorant Garamond', serif;
+}
 
-      font-weight: 700;
 
-      font-size: 1.7rem;
+.crest h1 {
 
-      letter-spacing: 2px;
+    font-family:
+        'Cormorant Garamond',
+        serif;
 
-      color: var(--gold-light);
+    font-weight: 700;
 
-      text-transform: uppercase;
+    font-size: 1.7rem;
 
-      text-shadow:
-        0 1px 10px rgba(201, 162, 74, 0.14);
-    }
+    letter-spacing: 2px;
 
-    .crest .hair {
-      width: 34px;
-      height: 1px;
+    color: var(--gold-light);
 
-      background:
+    text-transform: uppercase;
+
+    text-shadow:
+
+        0 1px 10px
+        rgba(201,162,74,0.18);
+
+}
+
+
+.crest .hair {
+
+    width: 34px;
+
+    height: 1px;
+
+    margin: 12px auto;
+
+    background:
+
         linear-gradient(
-          90deg,
-          transparent,
-          var(--gold),
-          transparent
+            90deg,
+            transparent,
+            var(--gold),
+            transparent
         );
 
-      margin: 12px auto;
-    }
+}
 
-    .crest p {
-      font-size: 0.64rem;
 
-      color: var(--taupe-light);
+.crest p {
 
-      letter-spacing: 2px;
+    font-size: 0.64rem;
 
-      text-transform: uppercase;
-    }
+    color: var(--taupe-light);
 
-    /* =========================================================
-       STATUS DOT
-       ========================================================= */
+    letter-spacing: 2px;
 
-    .status-dot {
-      display: inline-block;
+    text-transform: uppercase;
 
-      width: 5px;
-      height: 5px;
+}
 
-      background: var(--gold);
 
-      border-radius: 50%;
+/* =========================================================
+   STATUS DOT
+========================================================= */
 
-      margin-right: 7px;
+.status-dot {
 
-      box-shadow:
+    display: inline-block;
+
+    width: 5px;
+
+    height: 5px;
+
+    margin-right: 7px;
+
+    border-radius: 50%;
+
+    background: var(--gold);
+
+    box-shadow:
+
         0 0 6px
-        rgba(201, 162, 74, 0.75);
+        rgba(201,162,74,0.75);
 
-      animation: pulse 2s infinite;
-    }
+    animation: pulse 2s infinite;
 
-    @keyframes pulse {
-      0%,
-      100% {
+}
+
+
+@keyframes pulse {
+
+    0%,
+    100% {
         opacity: 1;
-      }
+    }
 
-      50% {
+    50% {
         opacity: 0.4;
-      }
     }
 
-    /* =========================================================
-       LOGIN / REGISTER CARD
-       ========================================================= */
+}
 
-    .card {
-      position: relative;
-      z-index: 1;
-    }
 
-    /* =========================================================
-       TABS
-       ========================================================= */
+/* =========================================================
+   CARD
+========================================================= */
 
-    .tabs {
-      display: flex;
+.card {
 
-      gap: 24px;
+    position: relative;
 
-      margin-bottom: 26px;
+    z-index: 2;
 
-      border-bottom:
+}
+
+
+/* =========================================================
+   TABS
+========================================================= */
+
+.tabs {
+
+    display: flex;
+
+    gap: 24px;
+
+    margin-bottom: 26px;
+
+    border-bottom:
+
         1px solid
-        rgba(154, 137, 112, 0.28);
-    }
+        rgba(154,137,112,0.28);
 
-    .tab-btn {
-      padding: 0 0 11px;
+}
 
-      border: none;
 
-      background: transparent;
+.tab-btn {
 
-      color: #8e8573;
+    padding: 0 0 11px;
 
-      font-family: 'Inter', sans-serif;
+    border: none;
 
-      font-size: 0.68rem;
+    background: transparent;
 
-      font-weight: 700;
+    color: #8e8573;
 
-      letter-spacing: 2px;
+    font-family: 'Inter', sans-serif;
 
-      text-transform: uppercase;
+    font-size: 0.68rem;
 
-      cursor: pointer;
+    font-weight: 700;
 
-      position: relative;
+    letter-spacing: 2px;
 
-      transition:
-        color 0.2s ease,
-        opacity 0.2s ease;
-    }
+    text-transform: uppercase;
 
-    .tab-btn:hover {
-      color: #cbb98f;
-    }
+    cursor: pointer;
 
-    .tab-btn.active {
-      color: var(--gold-light);
-    }
+    position: relative;
 
-    .tab-btn.active::after {
-      content: '';
+    transition:
 
-      position: absolute;
+        color 0.2s ease;
 
-      left: 0;
-      right: 0;
+}
 
-      bottom: -1px;
 
-      height: 2px;
+.tab-btn:hover {
 
-      background:
+    color: #cbb98f;
+
+}
+
+
+.tab-btn.active {
+
+    color: var(--gold-light);
+
+}
+
+
+.tab-btn.active::after {
+
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+
+    right: 0;
+
+    bottom: -1px;
+
+    height: 2px;
+
+    background:
+
         linear-gradient(
-          90deg,
-          var(--gold-deep),
-          var(--gold-soft),
-          var(--gold-deep)
+            90deg,
+            var(--gold-deep),
+            var(--gold-soft),
+            var(--gold-deep)
         );
 
-      box-shadow:
+    box-shadow:
+
         0 0 7px
-        rgba(201, 162, 74, 0.35);
-    }
+        rgba(201,162,74,0.35);
 
-    /* =========================================================
-       FORM
-       ========================================================= */
+}
 
-    .form-group {
-      margin-bottom: 18px;
-    }
 
-    label {
-      display: block;
+/* =========================================================
+   FORM
+========================================================= */
 
-      font-size: 0.6rem;
+.form-group {
 
-      font-weight: 600;
+    margin-bottom: 18px;
 
-      color: var(--taupe-light);
+}
 
-      margin-bottom: 8px;
 
-      text-transform: uppercase;
+label {
 
-      letter-spacing: 1.5px;
-    }
+    display: block;
 
-    input {
-      width: 100%;
+    font-size: 0.6rem;
 
-      padding: 10px 12px;
+    font-weight: 600;
 
-      /*
-        Dark charcoal field
-      */
-      background:
+    color: var(--taupe-light);
+
+    margin-bottom: 8px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1.5px;
+
+}
+
+
+input {
+
+    width: 100%;
+
+    padding: 11px 12px;
+
+    background:
+
         linear-gradient(
-          180deg,
-          rgba(36, 34, 29, 0.95),
-          rgba(18, 18, 17, 0.98)
+            180deg,
+            rgba(36,34,29,0.96),
+            rgba(18,18,17,0.99)
         );
 
-      border:
+    border:
+
         1px solid
-        rgba(154, 137, 112, 0.32);
+        rgba(154,137,112,0.32);
 
-      border-radius: 4px;
+    border-radius: 4px;
 
-      color: #f0e8d4;
+    color: #f0e8d4;
 
-      font-family: 'Inter', sans-serif;
+    font-family: 'Inter', sans-serif;
 
-      font-size: 0.86rem;
+    font-size: 0.86rem;
 
-      outline: none;
+    outline: none;
 
-      transition:
+    transition:
+
         border-color 0.25s,
+
         box-shadow 0.25s,
+
         background 0.25s;
-    }
 
-    input:hover {
-      border-color:
-        rgba(201, 162, 74, 0.48);
-    }
+}
 
-    input:focus {
-      border-color: var(--gold);
 
-      background:
+input:hover {
+
+    border-color:
+
+        rgba(201,162,74,0.48);
+
+}
+
+
+input:focus {
+
+    border-color:
+
+        var(--gold);
+
+    background:
+
         linear-gradient(
-          180deg,
-          rgba(43, 39, 31, 0.98),
-          rgba(20, 19, 17, 0.99)
+            180deg,
+            rgba(43,39,31,0.98),
+            rgba(20,19,17,0.99)
         );
 
-      box-shadow:
+    box-shadow:
+
         0 0 0 2px
-        rgba(201, 162, 74, 0.08),
+        rgba(201,162,74,0.08),
+
         0 0 14px
-        rgba(201, 162, 74, 0.07);
-    }
+        rgba(201,162,74,0.07);
 
-    input::placeholder {
-      color: #706754;
-    }
+}
 
-    /* =========================================================
-       BUTTON
-       ========================================================= */
 
-    .btn {
-      width: 100%;
+input::placeholder {
 
-      padding: 13px;
+    color: #706754;
 
-      background:
+}
+
+
+/* =========================================================
+   BUTTON
+========================================================= */
+
+.btn {
+
+    width: 100%;
+
+    padding: 13px;
+
+    margin-top: 10px;
+
+    border: none;
+
+    border-radius: 4px;
+
+    background:
+
         linear-gradient(
-          135deg,
-          #f0d27a 0%,
-          #d5b35b 25%,
-          #b38b35 55%,
-          #d0aa4f 78%,
-          #8d6c2b 100%
+            135deg,
+
+            #f0d27a 0%,
+
+            #d5b35b 25%,
+
+            #b38b35 55%,
+
+            #d0aa4f 78%,
+
+            #8d6c2b 100%
         );
 
-      color: #1b160b;
+    color: #1b160b;
 
-      border: none;
+    font-family: 'Inter', sans-serif;
 
-      border-radius: 4px;
+    font-size: 0.7rem;
 
-      font-family: 'Inter', sans-serif;
+    font-weight: 800;
 
-      font-size: 0.7rem;
+    letter-spacing: 2.2px;
 
-      font-weight: 800;
+    text-transform: uppercase;
 
-      letter-spacing: 2.2px;
+    cursor: pointer;
 
-      text-transform: uppercase;
+    box-shadow:
 
-      cursor: pointer;
-
-      margin-top: 10px;
-
-      box-shadow:
         0 8px 20px
-        rgba(201, 162, 74, 0.28),
+        rgba(201,162,74,0.28),
 
         0 1px 0
-        rgba(255, 244, 199, 0.55) inset,
+        rgba(255,244,199,0.55) inset,
 
         0 -1px 0
-        rgba(94, 69, 22, 0.35) inset;
+        rgba(94,69,22,0.35) inset;
 
-      transition:
+    transition:
+
         opacity 0.2s,
+
         transform 0.15s,
+
         box-shadow 0.2s;
-    }
 
-    .btn:hover {
-      opacity: 0.94;
+}
 
-      transform: translateY(-1px);
 
-      box-shadow:
+.btn:hover {
+
+    opacity: 0.94;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+
         0 11px 25px
-        rgba(201, 162, 74, 0.34),
+        rgba(201,162,74,0.34),
 
         0 1px 0
-        rgba(255, 244, 199, 0.6) inset;
-    }
+        rgba(255,244,199,0.6) inset;
 
-    .btn:active {
-      transform: translateY(0);
-    }
+}
 
-    /* =========================================================
-       MESSAGES
-       ========================================================= */
 
-    .msg {
-      font-size: 0.74rem;
+.btn:active {
 
-      padding: 9px 12px;
+    transform: translateY(0);
 
-      border-radius: 4px;
+}
 
-      margin-bottom: 14px;
 
-      display: none;
+/* =========================================================
+   MESSAGES
+========================================================= */
 
-      letter-spacing: 0.3px;
-    }
+.msg {
 
-    .msg.error {
-      background:
-        rgba(224, 138, 128, 0.12);
+    font-size: 0.74rem;
 
-      color: var(--error);
+    padding: 9px 12px;
 
-      border:
+    border-radius: 4px;
+
+    margin-bottom: 14px;
+
+    display: none;
+
+    letter-spacing: 0.3px;
+
+}
+
+
+.msg.error {
+
+    background:
+
+        rgba(224,138,128,0.12);
+
+    color: var(--error);
+
+    border:
+
         1px solid
-        rgba(224, 138, 128, 0.30);
+        rgba(224,138,128,0.30);
 
-      display: block;
-    }
+    display: block;
 
-    .msg.success {
-      background:
-        rgba(201, 162, 74, 0.12);
+}
 
-      color: var(--gold-soft);
 
-      border:
+.msg.success {
+
+    background:
+
+        rgba(201,162,74,0.12);
+
+    color: var(--gold-soft);
+
+    border:
+
         1px solid
-        rgba(201, 162, 74, 0.35);
+        rgba(201,162,74,0.35);
 
-      display: block;
-    }
+    display: block;
 
-    /* =========================================================
-       DIVIDER
-       ========================================================= */
+}
 
-    .divider {
-      text-align: center;
 
-      color: #8f846e;
+/* =========================================================
+   DIVIDER
+========================================================= */
 
-      font-size: 0.6rem;
+.divider {
 
-      letter-spacing: 2px;
+    text-align: center;
 
-      text-transform: uppercase;
+    color: #8f846e;
 
-      margin: 22px 0 4px;
+    font-size: 0.6rem;
 
-      position: relative;
-    }
+    letter-spacing: 2px;
 
-    .divider::before,
-    .divider::after {
-      content: '';
+    text-transform: uppercase;
 
-      position: absolute;
+    margin: 22px 0 4px;
 
-      top: 50%;
+    position: relative;
 
-      width: 26%;
+}
 
-      height: 1px;
 
-      background:
+.divider::before,
+.divider::after {
+
+    content: "";
+
+    position: absolute;
+
+    top: 50%;
+
+    width: 26%;
+
+    height: 1px;
+
+}
+
+
+.divider::before {
+
+    left: 0;
+
+    background:
+
         linear-gradient(
-          90deg,
-          transparent,
-          rgba(154, 137, 112, 0.32)
+            90deg,
+            transparent,
+            rgba(154,137,112,0.32)
         );
-    }
 
-    .divider::before {
-      left: 0;
-    }
+}
 
-    .divider::after {
-      right: 0;
 
-      background:
+.divider::after {
+
+    right: 0;
+
+    background:
+
         linear-gradient(
-          90deg,
-          rgba(154, 137, 112, 0.32),
-          transparent
+            90deg,
+            rgba(154,137,112,0.32),
+            transparent
         );
-    }
 
-    /* =========================================================
-       COORDINATES
-       ========================================================= */
+}
 
-    .coords {
-      position: fixed;
 
-      bottom: 16px;
-      right: 20px;
+/* =========================================================
+   COORDINATES
+========================================================= */
 
-      font-size: 0.62rem;
+.coords {
 
-      color:
-        rgba(255, 255, 255, 0.48);
+    position: fixed;
 
-      font-family: 'Inter', sans-serif;
+    bottom: 16px;
 
-      letter-spacing: 1px;
+    right: 20px;
 
-      z-index: 1;
+    z-index: 6;
 
-      text-shadow:
-        0 1px 4px rgba(0, 0, 0, 0.8);
-    }
+    font-size: 0.62rem;
 
-    /* =========================================================
-       RESPONSIVE DESIGN
-       ========================================================= */
+    color:
 
-    @media (max-width: 600px) {
+        rgba(255,255,255,0.65);
 
-      body {
+    font-family: 'Inter', sans-serif;
+
+    letter-spacing: 1px;
+
+    text-shadow:
+
+        0 1px 5px
+        rgba(0,0,0,0.9);
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width:600px) {
+
+    body {
+
         padding: 16px;
 
         background-position:
-          center center;
-      }
+            center center;
 
-      .outer-frame {
+    }
+
+    .outer-frame {
+
         max-width: 430px;
 
         margin: 12px auto;
 
         padding: 4px;
-      }
 
-      .container {
+    }
+
+    .container {
+
         padding:
-          30px 24px 26px;
-      }
+            30px 24px 26px;
 
-      .crest {
+    }
+
+    .crest {
+
         margin-bottom: 24px;
-      }
 
-      .crest h1 {
+    }
+
+    .crest h1 {
+
         font-size: 1.55rem;
-      }
 
-      .coords {
+    }
+
+    .coords {
+
         bottom: 8px;
+
         right: 10px;
 
         font-size: 0.52rem;
-      }
+
     }
 
-    @media (max-width: 380px) {
+}
 
-      body {
+
+@media (max-width:380px) {
+
+    body {
+
         padding: 10px;
-      }
 
-      .outer-frame {
+    }
+
+    .outer-frame {
+
         margin: 6px auto;
-      }
 
-      .container {
+    }
+
+    .container {
+
         padding:
-          26px 19px 23px;
-      }
+            26px 19px 23px;
 
-      .crest-mark {
+    }
+
+    .crest-mark {
+
         width: 44px;
+
         height: 44px;
-      }
 
-      .crest h1 {
+    }
+
+    .crest h1 {
+
         font-size: 1.4rem;
+
         letter-spacing: 1.6px;
-      }
 
-      .tabs {
+    }
+
+    .tabs {
+
         gap: 18px;
-      }
+
     }
 
-    /* =========================================================
-       SHORT SCREEN / LAPTOP
-       ========================================================= */
+}
 
-    @media (max-height: 700px) {
 
-      .outer-frame {
+@media (max-height:700px) {
+
+    .outer-frame {
+
         transform: scale(0.92);
-      }
+
     }
 
-    @media (max-height: 600px) {
+}
 
-      .outer-frame {
+
+@media (max-height:600px) {
+
+    .outer-frame {
+
         transform: scale(0.82);
-      }
+
     }
-  </style>
+
+}
+
+</style>
 </head>
+
 
 <body>
 
-  <div class="outer-frame">
+
+<!-- =========================================================
+     LOGIN FRAME
+========================================================= -->
+
+<div class="outer-frame">
 
     <div class="inner-frame">
 
-      <div class="container">
+        <div class="container">
 
-        <div class="crest">
 
-          <div class="crest-mark">
+            <!-- =================================================
+                 HEADER
+            ================================================= -->
 
-            <svg
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
-              />
-            </svg>
+            <div class="crest">
 
-          </div>
+                <div class="crest-mark">
 
-          <h1>Waqar GIS</h1>
+                    <svg
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
 
-          <div class="hair"></div>
+                        <path
+                            d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
+                        />
 
-          <p>
-            <span class="status-dot"></span>
-            Spatial Intelligence · Peshawar
-          </p>
+                    </svg>
+
+                </div>
+
+
+                <h1>
+                    Waqar GIS
+                </h1>
+
+
+                <div class="hair"></div>
+
+
+                <p>
+
+                    <span class="status-dot"></span>
+
+                    Spatial Intelligence · Peshawar
+
+                </p>
+
+            </div>
+
+
+            <!-- =================================================
+                 CARD
+            ================================================= -->
+
+            <div class="card">
+
+
+                <!-- TABS -->
+
+                <div class="tabs">
+
+                    <button
+                        class="tab-btn active"
+                        onclick="switchTab('login')"
+                    >
+
+                        Login
+
+                    </button>
+
+
+                    <button
+                        class="tab-btn"
+                        onclick="switchTab('register')"
+                    >
+
+                        Register
+
+                    </button>
+
+                </div>
+
+
+                <!-- =================================================
+                     LOGIN
+                ================================================= -->
+
+                <div id="loginForm">
+
+                    <div
+                        id="loginMsg"
+                        class="msg"
+                    ></div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Email Address
+                        </label>
+
+                        <input
+                            type="email"
+                            id="loginEmail"
+                            placeholder="you@example.com"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="loginPass"
+                            placeholder="••••••••"
+                        >
+
+                    </div>
+
+
+                    <button
+                        class="btn"
+                        onclick="doLogin()"
+                    >
+
+                        Enter Portal →
+
+                    </button>
+
+                </div>
+
+
+                <!-- =================================================
+                     REGISTER
+                ================================================= -->
+
+                <div
+                    id="registerForm"
+                    style="display:none;"
+                >
+
+                    <div
+                        id="regMsg"
+                        class="msg"
+                    ></div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Full Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="regName"
+                            placeholder="Your name"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Email Address
+                        </label>
+
+                        <input
+                            type="email"
+                            id="regEmail"
+                            placeholder="you@example.com"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="regPass"
+                            placeholder="Min 6 characters"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Confirm Password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="regPass2"
+                            placeholder="Repeat password"
+                        >
+
+                    </div>
+
+
+                    <button
+                        class="btn"
+                        onclick="doRegister()"
+                    >
+
+                        Create Account
+
+                    </button>
+
+                </div>
+
+
+                <div class="divider">
+
+                    Secured Access
+
+                </div>
+
+            </div>
 
         </div>
-
-        <div class="card">
-
-          <div class="tabs">
-
-            <button
-              class="tab-btn active"
-              onclick="switchTab('login')"
-            >
-              Login
-            </button>
-
-            <button
-              class="tab-btn"
-              onclick="switchTab('register')"
-            >
-              Register
-            </button>
-
-          </div>
-
-
-          <!-- =================================================
-               LOGIN FORM
-               ================================================= -->
-
-          <div id="loginForm">
-
-            <div
-              id="loginMsg"
-              class="msg"
-            ></div>
-
-            <div class="form-group">
-
-              <label>
-                Email Address
-              </label>
-
-              <input
-                type="email"
-                id="loginEmail"
-                placeholder="you@example.com"
-              />
-
-            </div>
-
-
-            <div class="form-group">
-
-              <label>
-                Password
-              </label>
-
-              <input
-                type="password"
-                id="loginPass"
-                placeholder="••••••••"
-              />
-
-            </div>
-
-
-            <button
-              class="btn"
-              onclick="doLogin()"
-            >
-              Enter Portal →
-            </button>
-
-          </div>
-
-
-          <!-- =================================================
-               REGISTER FORM
-               ================================================= -->
-
-          <div
-            id="registerForm"
-            style="display:none;"
-          >
-
-            <div
-              id="regMsg"
-              class="msg"
-            ></div>
-
-
-            <div class="form-group">
-
-              <label>
-                Full Name
-              </label>
-
-              <input
-                type="text"
-                id="regName"
-                placeholder="Your name"
-              />
-
-            </div>
-
-
-            <div class="form-group">
-
-              <label>
-                Email Address
-              </label>
-
-              <input
-                type="email"
-                id="regEmail"
-                placeholder="you@example.com"
-              />
-
-            </div>
-
-
-            <div class="form-group">
-
-              <label>
-                Password
-              </label>
-
-              <input
-                type="password"
-                id="regPass"
-                placeholder="Min 6 characters"
-              />
-
-            </div>
-
-
-            <div class="form-group">
-
-              <label>
-                Confirm Password
-              </label>
-
-              <input
-                type="password"
-                id="regPass2"
-                placeholder="Repeat password"
-              />
-
-            </div>
-
-
-            <button
-              class="btn"
-              onclick="doRegister()"
-            >
-              Create Account
-            </button>
-
-          </div>
-
-
-          <div class="divider">
-            Secured Access
-          </div>
-
-        </div>
-
-      </div>
 
     </div>
 
-  </div>
+</div>
 
 
-  <div class="coords">
+<!-- =========================================================
+     COORDINATES
+========================================================= -->
+
+<div class="coords">
+
     34.0151° N, 71.5249° E · KP, Pakistan
-  </div>
+
+</div>
 
 
-  <!-- =========================================================
-       EXISTING JAVASCRIPT — PRESERVED
-       ========================================================= -->
+<!-- =========================================================
+     JAVASCRIPT
+========================================================= -->
 
-  <script>
+<script>
 
-    function getUsers() {
-      return JSON.parse(
+
+/* =========================================================
+   USERS
+========================================================= */
+
+function getUsers() {
+
+    return JSON.parse(
         localStorage.getItem('waqar_gis_users') || '[]'
-      );
-    }
+    );
 
-    function saveUsers(u) {
-      localStorage.setItem(
+}
+
+
+function saveUsers(users) {
+
+    localStorage.setItem(
         'waqar_gis_users',
-        JSON.stringify(u)
-      );
-    }
+        JSON.stringify(users)
+    );
 
-    (function initAdmin() {
+}
 
-      const users = getUsers();
 
-      if (
+/* =========================================================
+   ADMIN
+========================================================= */
+
+(function initAdmin() {
+
+    const users = getUsers();
+
+    if (
         !users.find(
-          u => u.email === 'admin@waqargis.com'
+            u =>
+                u.email ===
+                'admin@waqargis.com'
         )
-      ) {
+    ) {
 
         users.push({
-          name: 'Waqar (Admin)',
-          email: 'admin@waqargis.com',
-          password: 'waqar!!admin125714TaKhT@BhAi',
-          role: 'admin'
+
+            name: 'Waqar (Admin)',
+
+            email: 'admin@waqargis.com',
+
+            password:
+                'waqar!!admin125714TaKhT@BhAi',
+
+            role: 'admin'
+
         });
 
         saveUsers(users);
-      }
-
-    })();
-
-
-    function switchTab(tab) {
-
-      document.getElementById('loginForm').style.display =
-        tab === 'login' ? 'block' : 'none';
-
-      document.getElementById('registerForm').style.display =
-        tab === 'register' ? 'block' : 'none';
-
-      document
-        .querySelectorAll('.tab-btn')
-        .forEach((b, i) =>
-
-          b.classList.toggle(
-            'active',
-            (i === 0 && tab === 'login') ||
-            (i === 1 && tab === 'register')
-          )
-
-        );
 
     }
 
+})();
 
-    function showMsg(id, text, type) {
 
-      const el =
+/* =========================================================
+   SWITCH LOGIN / REGISTER
+========================================================= */
+
+function switchTab(tab) {
+
+    document.getElementById('loginForm').style.display =
+        tab === 'login'
+            ? 'block'
+            : 'none';
+
+
+    document.getElementById('registerForm').style.display =
+        tab === 'register'
+            ? 'block'
+            : 'none';
+
+
+    document
+        .querySelectorAll('.tab-btn')
+        .forEach((button, index) => {
+
+            button.classList.toggle(
+
+                'active',
+
+                (index === 0 &&
+                    tab === 'login')
+
+                ||
+
+                (index === 1 &&
+                    tab === 'register')
+
+            );
+
+        });
+
+}
+
+
+/* =========================================================
+   MESSAGE
+========================================================= */
+
+function showMsg(id, text, type) {
+
+    const element =
         document.getElementById(id);
 
-      el.textContent = text;
+    element.textContent = text;
 
-      el.className =
+    element.className =
         'msg ' + type;
 
+}
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+function doLogin() {
+
+    const email =
+        document
+            .getElementById('loginEmail')
+            .value
+            .trim();
+
+
+    const password =
+        document
+            .getElementById('loginPass')
+            .value;
+
+
+    if (!email || !password) {
+
+        showMsg(
+
+            'loginMsg',
+
+            'Please fill all fields.',
+
+            'error'
+
+        );
+
+        return;
+
     }
 
 
-    function doLogin() {
-
-      const email =
-        document
-          .getElementById('loginEmail')
-          .value
-          .trim();
-
-      const pass =
-        document
-          .getElementById('loginPass')
-          .value;
-
-      if (!email || !pass) {
-
-        showMsg(
-          'loginMsg',
-          'Please fill all fields.',
-          'error'
-        );
-
-        return;
-      }
-
-      const user =
+    const user =
         getUsers().find(
-          u =>
-            u.email === email &&
-            u.password === pass
+
+            u =>
+
+                u.email === email &&
+
+                u.password === password
+
         );
 
-      if (!user) {
+
+    if (!user) {
 
         showMsg(
-          'loginMsg',
-          'Invalid email or password.',
-          'error'
+
+            'loginMsg',
+
+            'Invalid email or password.',
+
+            'error'
+
         );
 
         return;
-      }
 
-      showMsg(
+    }
+
+
+    showMsg(
+
         'loginMsg',
+
         '✓ Login successful! Opening portal...',
+
         'success'
-      );
 
-      sessionStorage.setItem(
+    );
+
+
+    sessionStorage.setItem(
+
         'waqar_gis_session',
-        JSON.stringify({
-          name: user.name,
-          email: user.email,
-          role: user.role || 'user'
-        })
-      );
 
-      setTimeout(() => {
+        JSON.stringify({
+
+            name: user.name,
+
+            email: user.email,
+
+            role: user.role || 'user'
+
+        })
+
+    );
+
+
+    setTimeout(() => {
 
         window.location.href =
-          'portal.html';
+            'portal.html';
 
-      }, 900);
+    }, 900);
 
-    }
+}
 
 
-    function doRegister() {
+/* =========================================================
+   REGISTER
+========================================================= */
 
-      const name =
+function doRegister() {
+
+    const name =
         document
-          .getElementById('regName')
-          .value
-          .trim();
+            .getElementById('regName')
+            .value
+            .trim();
 
-      const email =
+
+    const email =
         document
-          .getElementById('regEmail')
-          .value
-          .trim();
+            .getElementById('regEmail')
+            .value
+            .trim();
 
-      const pass =
+
+    const password =
         document
-          .getElementById('regPass')
-          .value;
+            .getElementById('regPass')
+            .value;
 
-      const pass2 =
+
+    const password2 =
         document
-          .getElementById('regPass2')
-          .value;
+            .getElementById('regPass2')
+            .value;
 
-      if (
+
+    if (
         !name ||
         !email ||
-        !pass ||
-        !pass2
-      ) {
+        !password ||
+        !password2
+    ) {
 
         showMsg(
-          'regMsg',
-          'Please fill all fields.',
-          'error'
+
+            'regMsg',
+
+            'Please fill all fields.',
+
+            'error'
+
         );
 
         return;
-      }
-
-      if (pass.length < 6) {
-
-        showMsg(
-          'regMsg',
-          'Password must be at least 6 characters.',
-          'error'
-        );
-
-        return;
-      }
-
-      if (pass !== pass2) {
-
-        showMsg(
-          'regMsg',
-          'Passwords do not match.',
-          'error'
-        );
-
-        return;
-      }
-
-      const users = getUsers();
-
-      if (
-        users.find(
-          u => u.email === email
-        )
-      ) {
-
-        showMsg(
-          'regMsg',
-          'This email is already registered.',
-          'error'
-        );
-
-        return;
-      }
-
-      users.push({
-        name,
-        email,
-        password: pass,
-        role: 'user'
-      });
-
-      saveUsers(users);
-
-      showMsg(
-        'regMsg',
-        '✓ Account created! You can now login.',
-        'success'
-      );
-
-      setTimeout(
-        () => switchTab('login'),
-        1200
-      );
 
     }
 
 
-    document.addEventListener(
-      'keydown',
-      e => {
+    if (password.length < 6) {
 
-        if (e.key === 'Enter') {
+        showMsg(
 
-          document.getElementById('loginForm').style.display !== 'none'
-            ? doLogin()
-            : doRegister();
+            'regMsg',
+
+            'Password must be at least 6 characters.',
+
+            'error'
+
+        );
+
+        return;
+
+    }
+
+
+    if (password !== password2) {
+
+        showMsg(
+
+            'regMsg',
+
+            'Passwords do not match.',
+
+            'error'
+
+        );
+
+        return;
+
+    }
+
+
+    const users = getUsers();
+
+
+    if (
+        users.find(
+            u =>
+                u.email === email
+        )
+    ) {
+
+        showMsg(
+
+            'regMsg',
+
+            'This email is already registered.',
+
+            'error'
+
+        );
+
+        return;
+
+    }
+
+
+    users.push({
+
+        name: name,
+
+        email: email,
+
+        password: password,
+
+        role: 'user'
+
+    });
+
+
+    saveUsers(users);
+
+
+    showMsg(
+
+        'regMsg',
+
+        '✓ Account created! You can now login.',
+
+        'success'
+
+    );
+
+
+    setTimeout(
+
+        () => switchTab('login'),
+
+        1200
+
+    );
+
+}
+
+
+/* =========================================================
+   ENTER KEY
+========================================================= */
+
+document.addEventListener(
+
+    'keydown',
+
+    function(event) {
+
+        if (event.key === 'Enter') {
+
+            const loginVisible =
+
+                document
+                    .getElementById('loginForm')
+                    .style
+                    .display !== 'none';
+
+
+            if (loginVisible) {
+
+                doLogin();
+
+            } else {
+
+                doRegister();
+
+            }
 
         }
 
-      }
-    );
+    }
 
-  </script>
+);
+
+</script>
 
 </body>
 </html>
