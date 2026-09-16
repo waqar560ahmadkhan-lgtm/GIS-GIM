@@ -1,978 +1,259 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Waqar GIS Portal – Login</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-<style>
-
-/* =========================================================
-   GLOBAL
-========================================================= */
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-html,
-body {
-    width: 100%;
-    height: 100%;
-}
-
-body {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    overflow: hidden;
-
-    /* Main background color */
-    background: #d8c6a5;
-
-    color: #3e3830;
-}
-
-
-/* =========================================================
-   FULL SCREEN MAP BACKGROUND
-========================================================= */
-
-.page {
-    position: relative;
-
-    width: 100vw;
-    height: 100vh;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    overflow: hidden;
-
-    background-color: #d8c6a5;
-
-    /*
-      IMPORTANT:
-      Put your uploaded image in the same folder as this HTML
-      and name it:
-
-      global-luxury-map.png
-    */
-
-    background-image:
-        linear-gradient(
-            rgba(218, 202, 169, 0.42),
-            rgba(218, 202, 169, 0.42)
-        ),
-        url("global-luxury-map.png");
-
-    background-size: cover;
-    background-position: center center;
-    background-repeat: no-repeat;
-}
-
-
-/* =========================================================
-   MAP SOFT OVERLAY
-========================================================= */
-
-.page::before {
-    content: "";
-
-    position: absolute;
-    inset: 0;
-
-    background:
-        radial-gradient(
-            circle at center,
-            rgba(255,255,255,0.12) 0%,
-            rgba(111,91,64,0.10) 45%,
-            rgba(48,43,37,0.22) 100%
-        );
-
-    pointer-events: none;
-}
-
-
-/* =========================================================
-   LUXURY VIGNETTE
-========================================================= */
-
-.page::after {
-    content: "";
-
-    position: absolute;
-    inset: 0;
-
-    background:
-        linear-gradient(
-            90deg,
-            rgba(49,43,36,0.20),
-            transparent 25%,
-            transparent 75%,
-            rgba(49,43,36,0.20)
-        );
-
-    pointer-events: none;
-}
-
-
-/* =========================================================
-   LOGIN PANEL
-========================================================= */
-
-.login-panel {
-
-    position: relative;
-    z-index: 5;
-
-    width: min(430px, 90vw);
-
-    padding: 5px;
-
-    /*
-      Outer metallic frame
-      White / Silver / Dark Gray
-    */
-
-    background:
-        linear-gradient(
-            135deg,
-            #ffffff 0%,
-            #c5c5c2 16%,
-            #5b5954 32%,
-            #eeeeeb 48%,
-            #9d9c97 66%,
-            #ffffff 82%,
-            #55534f 100%
-        );
-
-    border-radius: 7px;
-
-    box-shadow:
-        0 35px 80px rgba(35,30,25,0.45),
-        0 12px 30px rgba(35,30,25,0.25),
-        inset 0 0 0 1px rgba(255,255,255,0.75);
-
-}
-
-
-/* =========================================================
-   CHAMPAGNE GOLD INNER FRAME
-========================================================= */
-
-.login-frame {
-
-    position: relative;
-
-    padding: 4px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #fffdf2 0%,
-            #d9bf7b 18%,
-            #a9873e 35%,
-            #fff8dc 50%,
-            #c8a95e 68%,
-            #fff9df 84%,
-            #927638 100%
-        );
-
-    border-radius: 3px;
-}
-
-
-/* =========================================================
-   MAIN CARD
-========================================================= */
-
-.login-card {
-
-    position: relative;
-
-    padding: 38px 32px 30px;
-
-    border-radius: 2px;
-
-    /*
-      Sand Beige / Warm Taupe interior
-    */
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(244,235,216,0.97),
-            rgba(211,196,167,0.97)
-        );
-
-    border: 1px solid rgba(255,255,255,0.85);
-
-    box-shadow:
-        inset 0 0 35px rgba(89,73,50,0.15),
-        inset 0 0 0 1px rgba(130,106,67,0.25);
-}
-
-
-/* =========================================================
-   TOP EMBLEM
-========================================================= */
-
-.logo-ring {
-
-    width: 58px;
-    height: 58px;
-
-    margin: 0 auto 13px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 50%;
-
-    background:
-        linear-gradient(
-            145deg,
-            #fff9df,
-            #b28e43,
-            #f9e8ae,
-            #907137
-        );
-
-    box-shadow:
-        0 4px 12px rgba(71,57,35,0.30),
-        inset 0 0 0 2px rgba(255,255,255,0.8);
-}
-
-
-.logo-inner {
-
-    width: 43px;
-    height: 43px;
-
-    border-radius: 50%;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: #51483d;
-
-    border: 1px solid #f4dc99;
-
-    color: #f4dc99;
-
-    font-size: 20px;
-}
-
-
-/* =========================================================
-   TITLE
-========================================================= */
-
-.title {
-
-    text-align: center;
-
-    font-family: "Cormorant Garamond", serif;
-
-    font-size: 30px;
-
-    font-weight: 700;
-
-    letter-spacing: 2px;
-
-    color: #40382f;
-
-    text-transform: uppercase;
-
-    text-shadow:
-        0 1px 0 rgba(255,255,255,0.8);
-}
-
-
-/* =========================================================
-   SUBTITLE
-========================================================= */
-
-.subtitle {
-
-    margin-top: 8px;
-
-    text-align: center;
-
-    font-size: 8px;
-
-    font-weight: 700;
-
-    letter-spacing: 3px;
-
-    color: #685b4c;
-
-    text-transform: uppercase;
-}
-
-
-/* =========================================================
-   GOLD DIVIDER
-========================================================= */
-
-.divider {
-
-    width: 100%;
-
-    height: 1px;
-
-    margin: 23px 0 20px;
-
-    background:
-        linear-gradient(
-            90deg,
-            transparent,
-            #a8894c,
-            #f4dfa4,
-            #a8894c,
-            transparent
-        );
-}
-
-
-/* =========================================================
-   TABS
-========================================================= */
-
-.tabs {
-
-    display: flex;
-
-    gap: 24px;
-
-    margin-bottom: 24px;
-
-    border-bottom: 1px solid rgba(89,76,60,0.22);
-}
-
-
-.tab {
-
-    position: relative;
-
-    padding-bottom: 10px;
-
-    background: none;
-
-    border: none;
-
-    cursor: pointer;
-
-    font-family: "Plus Jakarta Sans", sans-serif;
-
-    font-size: 10px;
-
-    font-weight: 700;
-
-    letter-spacing: 1.5px;
-
-    color: #756a5b;
-
-    text-transform: uppercase;
-}
-
-
-.tab.active {
-
-    color: #4a4035;
-}
-
-
-.tab.active::after {
-
-    content: "";
-
-    position: absolute;
-
-    left: 0;
-    right: 0;
-
-    bottom: -1px;
-
-    height: 2px;
-
-    background:
-        linear-gradient(
-            90deg,
-            #987a39,
-            #f4d989,
-            #987a39
-        );
-}
-
-
-/* =========================================================
-   FORM
-========================================================= */
-
-.form-group {
-
-    margin-bottom: 18px;
-}
-
-
-.form-label {
-
-    display: block;
-
-    margin-bottom: 7px;
-
-    font-size: 8px;
-
-    font-weight: 700;
-
-    letter-spacing: 1.5px;
-
-    color: #665a4b;
-
-    text-transform: uppercase;
-}
-
-
-.form-input {
-
-    width: 100%;
-
-    height: 42px;
-
-    padding: 0 13px;
-
-    border-radius: 3px;
-
-    border: 1px solid #a99b85;
-
-    background:
-        linear-gradient(
-            180deg,
-            rgba(255,255,255,0.95),
-            rgba(238,230,215,0.95)
-        );
-
-    color: #3e3830;
-
-    font-family: "Plus Jakarta Sans", sans-serif;
-
-    font-size: 12px;
-
-    outline: none;
-
-    transition: 0.25s ease;
-
-    box-shadow:
-        inset 0 1px 3px rgba(60,50,40,0.10);
-}
-
-
-.form-input:focus {
-
-    border-color: #b3924b;
-
-    box-shadow:
-        0 0 0 2px rgba(179,146,75,0.16),
-        inset 0 1px 3px rgba(60,50,40,0.10);
-}
-
-
-.form-input::placeholder {
-
-    color: #9b9081;
-}
-
-
-/* =========================================================
-   ENTER BUTTON
-========================================================= */
-
-.enter-btn {
-
-    width: 100%;
-
-    height: 46px;
-
-    margin-top: 5px;
-
-    border: none;
-
-    border-radius: 3px;
-
-    cursor: pointer;
-
-    font-family: "Plus Jakarta Sans", sans-serif;
-
-    font-size: 10px;
-
-    font-weight: 800;
-
-    letter-spacing: 2px;
-
-    color: #40382e;
-
-    text-transform: uppercase;
-
-    background:
-        linear-gradient(
-            135deg,
-            #f9e5a5 0%,
-            #d2b66b 30%,
-            #fff1b9 52%,
-            #c4a254 72%,
-            #f2d98f 100%
-        );
-
-    box-shadow:
-        0 7px 16px rgba(82,63,32,0.25),
-        inset 0 1px 0 rgba(255,255,255,0.9),
-        inset 0 -1px 0 rgba(93,70,28,0.25);
-
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
-}
-
-
-.enter-btn:hover {
-
-    transform: translateY(-1px);
-
-    box-shadow:
-        0 10px 22px rgba(82,63,32,0.30),
-        inset 0 1px 0 rgba(255,255,255,0.95);
-}
-
-
-.enter-btn:active {
-
-    transform: translateY(0);
-}
-
-
-/* =========================================================
-   FOOTER
-========================================================= */
-
-.secured {
-
-    margin-top: 17px;
-
-    text-align: center;
-
-    font-size: 7px;
-
-    font-weight: 700;
-
-    letter-spacing: 2px;
-
-    color: #756957;
-
-    text-transform: uppercase;
-}
-
-
-.secured::before {
-
-    content: "";
-
-    display: inline-block;
-
-    width: 22px;
-
-    height: 1px;
-
-    margin-right: 9px;
-
-    vertical-align: middle;
-
-    background: #aa8b4b;
-}
-
-
-.secured::after {
-
-    content: "";
-
-    display: inline-block;
-
-    width: 22px;
-
-    height: 1px;
-
-    margin-left: 9px;
-
-    vertical-align: middle;
-
-    background: #aa8b4b;
-}
-
-
-/* =========================================================
-   REGISTER FORM
-========================================================= */
-
-.register-form {
-    display: none;
-}
-
-
-/* =========================================================
-   RESPONSIVE
-========================================================= */
-
-@media (max-width: 600px) {
-
-    .login-panel {
-
-        width: 92vw;
-
-    }
-
-    .login-card {
-
-        padding: 30px 24px 25px;
-
-    }
-
-    .title {
-
-        font-size: 25px;
-
-    }
-
-}
-
-
-/* =========================================================
-   LARGE SCREEN
-========================================================= */
-
-@media (min-width: 1400px) {
-
-    .login-panel {
-
-        width: 445px;
-
-    }
-
-    .login-card {
-
-        padding: 42px 36px 32px;
-
-    }
-
-}
-
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Waqar GIS Portal</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #0f0e0c;
+            --panel: #16140f;
+            --panel-border: #2a251c;
+            --gold: #d4af37;
+            --gold-soft: #f3e5ab;
+            --sand: #e6e2dd;
+            --taupe: #9e9689;
+            --error: #e74c3c;
+            --success: #2ecc71;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--sand);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background-image: radial-gradient(circle at 50% 50%, #1f1b13 0%, #0f0e0c 100%);
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            background-color: var(--panel);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            padding: 40px 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+
+        .portal-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .portal-header .logo-icon {
+            font-size: 36px;
+            color: var(--gold);
+            margin-bottom: 12px;
+        }
+
+        .portal-header h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 28px;
+            color: var(--gold-soft);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .portal-header p {
+            font-size: 13px;
+            color: var(--taupe);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--taupe);
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            top: 50%;
+            left: 14px;
+            transform: translateY(-50%);
+            color: var(--taupe);
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 14px 12px 42px;
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--panel-border);
+            border-radius: 6px;
+            color: var(--sand);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--gold);
+            background-color: rgba(212, 175, 55, 0.02);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%);
+            border: none;
+            border-radius: 6px;
+            color: #0f0e0c;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: opacity 0.3s ease, transform 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .alert-message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            text-align: center;
+            display: none;
+        }
+
+        .alert-message.error {
+            background-color: rgba(231, 76, 60, 0.1);
+            border: 1px solid var(--error);
+            color: #ec7063;
+            display: block;
+        }
+
+        .alert-message.success {
+            background-color: rgba(46, 204, 113, 0.1);
+            border: 1px solid var(--success);
+            color: #2ecc71;
+            display: block;
+        }
+
+        .portal-footer {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 11px;
+            color: var(--taupe);
+            border-top: 1px solid var(--panel-border);
+            padding-top: 15px;
+        }
+    </style>
 </head>
-
-
 <body>
 
-
-<div class="page">
-
-
-    <!-- =====================================================
-         LOGIN PANEL
-    ====================================================== -->
-
-    <div class="login-panel">
-
-        <div class="login-frame">
-
-            <div class="login-card">
-
-
-                <!-- LOGO -->
-                <div class="logo-ring">
-
-                    <div class="logo-inner">
-                        ◉
-                    </div>
-
-                </div>
-
-
-                <!-- TITLE -->
-                <h1 class="title">
-                    WAQAR GIS
-                </h1>
-
-
-                <!-- SUBTITLE -->
-                <div class="subtitle">
-                    Spatial Intelligence · Peshawar
-                </div>
-
-
-                <!-- DIVIDER -->
-                <div class="divider"></div>
-
-
-                <!-- TABS -->
-                <div class="tabs">
-
-                    <button
-                        class="tab active"
-                        id="loginTab"
-                        onclick="showLogin()"
-                    >
-                        Login
-                    </button>
-
-                    <button
-                        class="tab"
-                        id="registerTab"
-                        onclick="showRegister()"
-                    >
-                        Register
-                    </button>
-
-                </div>
-
-
-                <!-- =================================================
-                     LOGIN FORM
-                ================================================== -->
-
-                <form
-                    id="loginForm"
-                    onsubmit="enterPortal(event)"
-                >
-
-                    <div class="form-group">
-
-                        <label class="form-label">
-                            Email Address
-                        </label>
-
-                        <input
-                            class="form-input"
-                            id="loginEmail"
-                            type="email"
-                            value="admin@waqargis.com"
-                            placeholder="Enter email address"
-                            required
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label class="form-label">
-                            Password
-                        </label>
-
-                        <input
-                            class="form-input"
-                            id="loginPassword"
-                            type="password"
-                            value="admin123"
-                            placeholder="Enter password"
-                            required
-                        >
-
-                    </div>
-
-
-                    <button
-                        type="submit"
-                        class="enter-btn"
-                    >
-                        Enter Portal →
-                    </button>
-
-                </form>
-
-
-
-                <!-- =================================================
-                     REGISTER FORM
-                ================================================== -->
-
-                <form
-                    id="registerForm"
-                    class="register-form"
-                    onsubmit="registerUser(event)"
-                >
-
-                    <div class="form-group">
-
-                        <label class="form-label">
-                            Full Name
-                        </label>
-
-                        <input
-                            class="form-input"
-                            type="text"
-                            placeholder="Enter full name"
-                            required
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label class="form-label">
-                            Email Address
-                        </label>
-
-                        <input
-                            class="form-input"
-                            type="email"
-                            placeholder="Enter email address"
-                            required
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label class="form-label">
-                            Password
-                        </label>
-
-                        <input
-                            class="form-input"
-                            type="password"
-                            placeholder="Create password"
-                            required
-                        >
-
-                    </div>
-
-
-                    <button
-                        type="submit"
-                        class="enter-btn"
-                    >
-                        Create Account →
-                    </button>
-
-                </form>
-
-
-                <!-- FOOTER -->
-                <div class="secured">
-                    Secured Access
-                </div>
-
-
+    <div class="login-container">
+        <div class="portal-header">
+            <div class="logo-icon">
+                <i class="fa-solid fa-earth-asia"></i>
             </div>
-
+            <h1>Waqar GIS Portal</h1>
+            <p>Secure Spatial Workspace</p>
         </div>
 
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label for="username">Username / Email</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-user"></i>
+                    <input type="text" id="username" class="form-control" placeholder="Enter your username" required autocomplete="username">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="password" class="form-control" placeholder="Enter your password" required autocomplete="current-password">
+                </div>
+            </div>
+
+            <button type="submit" class="btn-login">
+                <i class="fa-solid fa-right-to-bracket"></i> Access Portal
+            </button>
+
+            <div id="alertBox" class="alert-message"></div>
+        </form>
+
+        <div class="portal-footer">
+            &copy; 2026 Waqar Ahmad Khan &bull; Independent GIS Professional
+        </div>
     </div>
 
+    <script>
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value.trim();
+            const alertBox = document.getElementById('alertBox');
 
-</div>
-
-
-
-<script>
-
-/* =========================================================
-   LOGIN / REGISTER SWITCH
-========================================================= */
-
-function showLogin() {
-
-    document.getElementById("loginForm").style.display = "block";
-
-    document.getElementById("registerForm").style.display = "none";
-
-    document.getElementById("loginTab").classList.add("active");
-
-    document.getElementById("registerTab").classList.remove("active");
-}
-
-
-function showRegister() {
-
-    document.getElementById("loginForm").style.display = "none";
-
-    document.getElementById("registerForm").style.display = "block";
-
-    document.getElementById("loginTab").classList.remove("active");
-
-    document.getElementById("registerTab").classList.add("active");
-}
-
-
-/* =========================================================
-   LOGIN
-========================================================= */
-
-function enterPortal(event) {
-
-    event.preventDefault();
-
-    const email =
-        document.getElementById("loginEmail").value.trim();
-
-    const password =
-        document.getElementById("loginPassword").value;
-
-    /*
-       Demo login
-       Replace this section with your existing
-       Firebase / authentication code.
-    */
-
-    if (
-        email === "admin@waqargis.com" &&
-        password === "admin123"
-    ) {
-
-        /*
-          CHANGE THIS URL to your actual GIS portal page.
-        */
-
-        window.location.href = "portal.html";
-
-    } else {
-
-        alert(
-            "Invalid email or password."
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   REGISTER
-========================================================= */
-
-function registerUser(event) {
-
-    event.preventDefault();
-
-    alert(
-        "Registration form submitted."
-    );
-
-}
-
-</script>
-
-
+            // Simple client-side demo validation (Replace with your secure backend check or GitHub Pages token logic)
+            // Default credential hint: admin / waqar_gis
+            if (user === "admin" && pass === "waqar_gis") {
+                alertBox.className = "alert-message success";
+                alertBox.innerHTML = "<i class='fa-solid fa-circle-check'></i> Authentication successful! Redirecting...";
+                
+                setTimeout(() => {
+                    // Redirect to your main map dashboard file (e.g., index.html or map.html)
+                    window.location.href = "index.html"; 
+                }, 1000);
+            } else {
+                alertBox.className = "alert-message error";
+                alertBox.innerHTML = "<i class='fa-solid fa-triangle-exclamation'></i> Invalid username or password.";
+            }
+        }
+    </script>
 </body>
 </html>
