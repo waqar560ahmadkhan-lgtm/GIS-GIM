@@ -837,6 +837,7 @@
     else     delete dimStore[featureId].manualValues[segIndex];
     closeDimEdit();
     refreshDimensionLabels(featureId);
+    saveDigitizedDataToStorage();
     showToast(val ? '✓ Manual dimension saved! (green label)' : '↺ Reset to auto');
   }
 
@@ -846,6 +847,7 @@
     if (dimStore[featureId]) delete dimStore[featureId].manualValues[segIndex];
     closeDimEdit();
     refreshDimensionLabels(featureId);
+    saveDigitizedDataToStorage();
     showToast('↺ Reset to auto dimension');
   }
 
@@ -871,6 +873,7 @@
     });
     updateAttributeTable();
     showToast('✓ Feature geometry updated');
+    saveDigitizedDataToStorage();
   });
 
   function switchBasemap(key) {
@@ -1138,6 +1141,69 @@
     reader.readAsText(file);
   }
 
+  /* ============================================================
+     DIGITIZED DATA PERSISTENCE (localStorage)
+     ============================================================ */
+  const DIGITIZE_STORAGE_KEY = 'waqar_gis_digitized_data';
+
+  function saveDigitizedDataToStorage() {
+    try {
+      const data = {
+        features: drawnItems.toGeoJSON(),
+        records: featureRecords,
+        manualDims: {}
+      };
+      Object.keys(dimStore).forEach(fid => {
+        if (dimStore[fid].manualValues && Object.keys(dimStore[fid].manualValues).length) {
+          data.manualDims[fid] = dimStore[fid].manualValues;
+        }
+      });
+      localStorage.setItem(DIGITIZE_STORAGE_KEY, JSON.stringify(data));
+    } catch (e) { console.error('Save failed:', e); }
+  }
+
+  function loadDigitizedDataFromStorage() {
+    try {
+      const raw = localStorage.getItem(DIGITIZE_STORAGE_KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      if (!data.features || !data.features.features || !data.features.features.length) return;
+
+      const geoLayer = L.geoJSON(data.features, {
+        style: f => {
+          const fc = document.getElementById('fill-color').value;
+          const sc = document.getElementById('stroke-color').value;
+          return { color: sc, fillColor: fc, fillOpacity: 0.5, weight: 2.5 };
+        },
+        pointToLayer: (feature, latlng) => L.marker(latlng)
+      });
+
+      let idx = 0;
+      geoLayer.eachLayer(layer => {
+        const rec = data.records[idx];
+        if (!rec) { idx++; return; }
+        layer._custom_id = rec.id;
+        drawnItems.addLayer(layer);
+        featureCounter = Math.max(featureCounter, rec.id);
+
+        const gType = layer.feature.geometry.type;
+        let layerType = gType === 'Polygon' ? 'polygon' : (gType === 'LineString' ? 'polyline' : 'marker');
+
+        if (layerType === 'polygon' || layerType === 'polyline') {
+          if (data.manualDims && data.manualDims[rec.id]) {
+            dimStore[rec.id] = { manualValues: data.manualDims[rec.id] };
+          }
+          addDimensionLabels(layer, rec.id, layerType);
+        }
+        idx++;
+      });
+
+      featureRecords = data.records;
+      updateAttributeTable();
+      showToast('✓ Pichla digitized data restore ho gaya');
+    } catch (e) { console.error('Load failed:', e); }
+  }
+
   const drawnItems = new L.FeatureGroup();
   map.addLayer(drawnItems);
   
@@ -1261,6 +1327,7 @@
       a.records.forEach(r => featureRecords.push(r));
     }
     updateAttributeTable(); redoStack.push(a);
+    saveDigitizedDataToStorage();
   }
   function redoLastAction() {
     if (!redoStack.length) { alert('Koi redo nahi!'); return; }
@@ -1274,6 +1341,7 @@
       featureRecords = featureRecords.filter(f => !ids.includes(f.id));
     }
     updateAttributeTable(); actionHistory.push(a);
+    saveDigitizedDataToStorage();
   }
 
   map.on(L.Draw.Event.DELETED, function(e) {
@@ -1284,6 +1352,7 @@
       dl.push(layer); removeFeature(layer);
     });
     pushHistory({ type:'delete', layers:dl, records:dr });
+    saveDigitizedDataToStorage();
   });
 
   map.on(L.Draw.Event.CREATED, function(e) {
@@ -1345,6 +1414,7 @@
     if (type === 'polygon' || type === 'polyline') {
       addDimensionLabels(layer, featureCounter, type);
     }
+    saveDigitizedDataToStorage();
   });
 
   function createBuffer() {
@@ -1651,6 +1721,7 @@
     });
   }
 
+  loadDigitizedDataFromStorage();
   showToast('Waqar GIS Portal Loaded Successfully! ✓');
 </script>
 </body>
