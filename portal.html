@@ -1080,15 +1080,25 @@
     if (!file) return alert('Select a file!');
     const reader = new FileReader();
     uploadedLayerGroup.clearLayers();
+    const isKML = file.name.toLowerCase().endsWith('.kml');
     reader.onload = function(e) {
       try {
         const fc = document.getElementById('fill-color').value;
         const sc = document.getElementById('stroke-color').value;
-        const layer = L.geoJSON(JSON.parse(e.target.result), { style: { color:sc, fillColor:fc, fillOpacity:0.5 } });
+        const styleOpts = { color: sc, fillColor: fc, fillOpacity: 0.5 };
+        let layer;
+
+        if (isKML) {
+          layer = omnivore.kml.parse(e.target.result);
+          layer.eachLayer(l => { if (l.setStyle) l.setStyle(styleOpts); });
+        } else {
+          layer = L.geoJSON(JSON.parse(e.target.result), { style: styleOpts });
+        }
+
         uploadedLayerGroup.addLayer(layer);
         map.fitBounds(layer.getBounds());
         showToast('File uploaded! ✓');
-      } catch(err) { alert('Invalid file format!'); }
+      } catch(err) { alert('Invalid file format! ' + err.message); }
     };
     reader.readAsText(file);
   }
@@ -1381,7 +1391,6 @@
     if (printLiveMap) { printLiveMap.remove(); printLiveMap = null; printCloneGroup = null; }
   }
 
-  // Clones current drawn features + their dimension labels onto the print map
   function populatePrintClones() {
     if (!printLiveMap) return;
 
@@ -1391,7 +1400,6 @@
       printCloneGroup = L.layerGroup().addTo(printLiveMap);
     }
 
-    // Clone every drawn polygon/line/marker
     drawnItems.eachLayer(layer => {
       const lClone = L.geoJSON(layer.toGeoJSON(), {
         style: { color: '#FFFF00', fillColor: '#c5a059', fillOpacity: 0.5, weight: 2.5 }
@@ -1399,7 +1407,6 @@
       lClone.addTo(printCloneGroup);
     });
 
-    // Clone dimension labels, respecting the "Dimension Labels" checkbox
     const showDims = document.getElementById('chk-dims') ? document.getElementById('chk-dims').checked : dimensionsEnabled;
     if (showDims) {
       Object.keys(dimStore).forEach(fid => {
@@ -1470,7 +1477,6 @@
   function exportMapPDF() {
     if (!printLiveMap) { updatePrintPreview(); }
     showExportOverlay('PDF layout taiyar ho raha hai, please wait...');
-    // Give the live map a moment to settle at full print size before the browser print dialog opens
     document.body.classList.add('printing');
     setTimeout(() => {
       if (printLiveMap) {
@@ -1497,7 +1503,6 @@
 
   function exportMapImage() {
     showExportOverlay('Basemap tiles load ho rahi hain, please wait...');
-    // Make sure the print preview + live map + cloned lines/polygons exist and are fully painted first
     if (!printLiveMap) {
       updatePrintPreview();
     } else {
@@ -1537,7 +1542,6 @@
     showToast('Elements position reset');
   }
 
-  // Draggable print overlay items
   document.querySelectorAll('.print-overlay-item').forEach(el => {
     let isDragging = false, startX, startY, initX, initY;
     el.addEventListener('pointerdown', e => {
