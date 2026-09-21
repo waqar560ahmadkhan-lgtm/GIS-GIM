@@ -15,6 +15,7 @@
   <script src="https://cdn.jsdelivr.net/npm/leaflet-side-by-side@2.4.0/leaflet-side-by-side.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-omnivore/0.3.4/leaflet-omnivore.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/proj4@2.9.0/dist/proj4.js"></script>
@@ -349,7 +350,7 @@
 
     <div class="panel-box">
       <h3>Import GeoJSON / KML</h3>
-      <input type="file" id="file-input" accept=".geojson,.json,.kml" />
+      <input type="file" id="file-input" accept=".geojson,.json,.kml,.kmz" />
       <button class="btn btn-gold" onclick="loadSpatialFile()">UPLOAD & VIEW</button>
     </div>
 
@@ -1075,29 +1076,63 @@
     toggleNoteMode();
   });
 
+  function styleAndAddKmlLayer(kmlLayer, styleOpts) {
+    kmlLayer.eachLayer(l => { if (l.setStyle) l.setStyle(styleOpts); });
+    uploadedLayerGroup.addLayer(kmlLayer);
+    const b = kmlLayer.getBounds();
+    if (b && b.isValid && b.isValid()) {
+      map.fitBounds(b);
+      showToast('File uploaded! ✓ Boundary loaded at real coordinates');
+    } else {
+      showToast('File loaded but no valid geometry found');
+    }
+  }
+
   function loadSpatialFile() {
     const file = document.getElementById('file-input').files[0];
     if (!file) return alert('Select a file!');
-    const reader = new FileReader();
+    const nameLower = file.name.toLowerCase();
+    const isKML = nameLower.endsWith('.kml');
+    const isKMZ = nameLower.endsWith('.kmz');
+
     uploadedLayerGroup.clearLayers();
-    const isKML = file.name.toLowerCase().endsWith('.kml');
+    const fc = document.getElementById('fill-color').value;
+    const sc = document.getElementById('stroke-color').value;
+    const styleOpts = { color: sc, fillColor: fc, fillOpacity: 0.5, weight: 2.5 };
+
+    if (isKMZ) {
+      // KMZ is a zip file — unzip it first, then find the .kml inside and parse it
+      if (typeof JSZip === 'undefined') {
+        alert('JSZip library load nahi hui. Page ko Ctrl+F5 se refresh karein.');
+        return;
+      }
+      file.arrayBuffer().then(buffer => JSZip.loadAsync(buffer)).then(zip => {
+        const kmlFileName = Object.keys(zip.files).find(n => n.toLowerCase().endsWith('.kml'));
+        if (!kmlFileName) { alert('KMZ ke andar koi .kml file nahi mili!'); return; }
+        return zip.files[kmlFileName].async('string');
+      }).then(kmlText => {
+        if (!kmlText) return;
+        const layer = omnivore.kml.parse(kmlText);
+        styleAndAddKmlLayer(layer, styleOpts);
+      }).catch(err => {
+        alert('KMZ file parse nahi ho saki! ' + err.message);
+      });
+      return;
+    }
+
+    const reader = new FileReader();
     reader.onload = function(e) {
       try {
-        const fc = document.getElementById('fill-color').value;
-        const sc = document.getElementById('stroke-color').value;
-        const styleOpts = { color: sc, fillColor: fc, fillOpacity: 0.5 };
-        let layer;
-
         if (isKML) {
-          layer = omnivore.kml.parse(e.target.result);
-          layer.eachLayer(l => { if (l.setStyle) l.setStyle(styleOpts); });
+          const layer = omnivore.kml.parse(e.target.result);
+          styleAndAddKmlLayer(layer, styleOpts);
         } else {
-          layer = L.geoJSON(JSON.parse(e.target.result), { style: styleOpts });
+          const layer = L.geoJSON(JSON.parse(e.target.result), { style: styleOpts });
+          uploadedLayerGroup.addLayer(layer);
+          const b = layer.getBounds();
+          if (b && b.isValid && b.isValid()) map.fitBounds(b);
+          showToast('File uploaded! ✓');
         }
-
-        uploadedLayerGroup.addLayer(layer);
-        map.fitBounds(layer.getBounds());
-        showToast('File uploaded! ✓');
       } catch(err) { alert('Invalid file format! ' + err.message); }
     };
     reader.readAsText(file);
@@ -1391,6 +1426,7 @@
     if (printLiveMap) { printLiveMap.remove(); printLiveMap = null; printCloneGroup = null; }
   }
 
+  // Clones current drawn features + their dimension labels onto the print map
   function populatePrintClones() {
     if (!printLiveMap) return;
 
@@ -1400,6 +1436,7 @@
       printCloneGroup = L.layerGroup().addTo(printLiveMap);
     }
 
+    // Clone every drawn polygon/line/marker
     drawnItems.eachLayer(layer => {
       const lClone = L.geoJSON(layer.toGeoJSON(), {
         style: { color: '#FFFF00', fillColor: '#c5a059', fillOpacity: 0.5, weight: 2.5 }
@@ -1407,6 +1444,7 @@
       lClone.addTo(printCloneGroup);
     });
 
+    // Clone dimension labels, respecting the "Dimension Labels" checkbox
     const showDims = document.getElementById('chk-dims') ? document.getElementById('chk-dims').checked : dimensionsEnabled;
     if (showDims) {
       Object.keys(dimStore).forEach(fid => {
@@ -1477,6 +1515,7 @@
   function exportMapPDF() {
     if (!printLiveMap) { updatePrintPreview(); }
     showExportOverlay('PDF layout taiyar ho raha hai, please wait...');
+    // Give the live map a moment to settle at full print size before the browser print dialog opens
     document.body.classList.add('printing');
     setTimeout(() => {
       if (printLiveMap) {
@@ -1503,6 +1542,7 @@
 
   function exportMapImage() {
     showExportOverlay('Basemap tiles load ho rahi hain, please wait...');
+    // Make sure the print preview + live map + cloned lines/polygons exist and are fully painted first
     if (!printLiveMap) {
       updatePrintPreview();
     } else {
@@ -1542,6 +1582,7 @@
     showToast('Elements position reset');
   }
 
+  // Draggable print overlay items
   document.querySelectorAll('.print-overlay-item').forEach(el => {
     let isDragging = false, startX, startY, initX, initY;
     el.addEventListener('pointerdown', e => {
