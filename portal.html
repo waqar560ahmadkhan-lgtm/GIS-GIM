@@ -1104,7 +1104,6 @@
     const styleOpts = { color: sc, fillColor: fc, fillOpacity: 0.5, weight: 2.5 };
 
     if (isKMZ) {
-      // KMZ is a zip file — unzip it first, then find the .kml inside and parse it
       if (typeof JSZip === 'undefined') {
         alert('JSZip library load nahi hui. Page ko Ctrl+F5 se refresh karein.');
         return;
@@ -1141,9 +1140,6 @@
     reader.readAsText(file);
   }
 
-  /* ============================================================
-     DIGITIZED DATA PERSISTENCE (localStorage)
-     ============================================================ */
   const DIGITIZE_STORAGE_KEY = 'waqar_gis_digitized_data';
 
   function saveDigitizedDataToStorage() {
@@ -1479,9 +1475,6 @@
     document.getElementById('export-overlay').style.display = 'none';
   }
 
-  /* ============================================================
-     PRINT / EXPORT MAP
-     ============================================================ */
   let printLiveMap = null;
   let printCloneGroup = null;
 
@@ -1496,7 +1489,6 @@
     if (printLiveMap) { printLiveMap.remove(); printLiveMap = null; printCloneGroup = null; }
   }
 
-  // Clones current drawn features + their dimension labels onto the print map
   function populatePrintClones() {
     if (!printLiveMap) return;
 
@@ -1506,7 +1498,6 @@
       printCloneGroup = L.layerGroup().addTo(printLiveMap);
     }
 
-    // Clone every drawn polygon/line/marker
     drawnItems.eachLayer(layer => {
       const lClone = L.geoJSON(layer.toGeoJSON(), {
         style: { color: '#FFFF00', fillColor: '#c5a059', fillOpacity: 0.5, weight: 2.5 }
@@ -1514,215 +1505,223 @@
       lClone.addTo(printCloneGroup);
     });
 
-    // Clone dimension labels, respecting the "Dimension Labels" checkbox
-    const showDims = document.getElementById('chk-dims') ? document.getElementById('chk-dims').checked : dimensionsEnabled;
-    if (showDims) {
+    const showDims = document.getElementById('chk-dims').checked;
+    if (showDims && dimensionsEnabled) {
       Object.keys(dimStore).forEach(fid => {
-        const entry = dimStore[fid];
-        if (!entry || !entry.layer) return;
-        const layer = entry.layer;
-        const layerType = entry.layerType;
+        const item = dimStore[fid];
+        if (!item || !item.layer) return;
         let coords = [];
-        if (layerType === 'polygon') {
-          coords = layer.getLatLngs()[0].map(ll => [ll.lat, ll.lng]);
-          coords.push(coords[0]);
-        } else if (layerType === 'polyline') {
-          const lls = layer.getLatLngs();
-          coords = (Array.isArray(lls[0]) ? lls[0] : lls).map(ll => [ll.lat, ll.lng]);
-        } else {
-          return;
+        if (item.layerType === 'polygon') {
+          try { coords = item.layer.getLatLngs()[0].map(ll => [ll.lat, ll.lng]); coords.push(coords[0]); } catch(e){}
+        } else if (item.layerType === 'polyline') {
+          try {
+            const lls = item.layer.getLatLngs();
+            coords = (Array.isArray(lls[0]) ? lls[0] : lls).map(ll => [ll.lat, ll.lng]);
+          } catch(e){}
         }
-        const manualValues = entry.manualValues || {};
+        const manualValues = item.manualValues || {};
         for (let i = 0; i < coords.length - 1; i++) {
-          const a = coords[i], b = coords[i + 1];
+          const a = coords[i], b = coords[i+1];
           const dist = haversineDist(a, b);
           const autoVal = formatDimDist(dist);
           const displayVal = manualValues[i] || autoVal;
           const isManual = !!manualValues[i];
           const mid = midPt(a, b);
+
           const icon = L.divIcon({
             className: '',
-            html: `<div class="dim-label${isManual ? ' manual' : ''}">${displayVal}</div>`,
+            html: `<div class="dim-label${isManual ? ' manual' : ''}" style="font-size:10px;padding:1px 6px;">${displayVal}</div>`,
             iconSize: null, iconAnchor: null
           });
-          L.marker(mid, { icon, interactive: false, zIndexOffset: 600 }).addTo(printCloneGroup);
+          L.marker(mid, { icon, interactive: false }).addTo(printCloneGroup);
         }
+      });
+    }
+
+    if (mouzaGeoLayer) {
+      mouzaGeoLayer.eachLayer(l => {
+        const c = L.geoJSON(l.toGeoJSON(), {
+          style: { color: '#FFFF00', weight: 1.5, fillOpacity: 0 }
+        });
+        c.addTo(printCloneGroup);
       });
     }
   }
 
   function updatePrintPreview() {
-    const title = document.getElementById('print-title-inp').value || 'Waqar GIS Portal — Map';
+    const title = document.getElementById('print-title-inp').value;
     document.getElementById('print-title-disp').textContent = title;
 
-    document.getElementById('print-north-arrow').style.display = document.getElementById('chk-north').checked ? 'flex' : 'none';
-    document.getElementById('print-scale-bar').style.display = document.getElementById('chk-scale').checked ? 'block' : 'none';
+    const showNorth = document.getElementById('chk-north').checked;
+    const showScale = document.getElementById('chk-scale').checked;
+    const showLegend = document.getElementById('chk-legend').checked;
+    const showDims = document.getElementById('chk-dims').checked;
 
-    const legendBox = document.getElementById('print-legend-box');
-    if (document.getElementById('chk-legend').checked) {
-      legendBox.style.display = 'block';
-      legendBox.innerHTML = buildLegendHTML();
-    } else {
-      legendBox.style.display = 'none';
-    }
+    document.getElementById('print-north-arrow').style.display = showNorth ? 'flex' : 'none';
+    document.getElementById('print-scale-bar').style.display = showScale ? 'block' : 'none';
+    document.getElementById('print-legend-box').style.display = showLegend ? 'block' : 'none';
+
+    document.getElementById('print-legend-box').innerHTML = buildLegendHTML();
 
     if (!printLiveMap) {
-      setTimeout(() => {
-        const container = document.getElementById('print-map-live');
-        if (!container || printLiveMap) return;
-        printLiveMap = L.map(container, { zoomControl:true, attributionControl:false, dragging:true, scrollWheelZoom:true, doubleClickZoom:true, preferCanvas:true, renderer: L.canvas({ padding: 0.5 }) });
-        L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0','mt1','mt2','mt3'], crossOrigin:true }).addTo(printLiveMap);
-        printLiveMap.setView(map.getCenter(), map.getZoom());
-        setTimeout(() => { printLiveMap.invalidateSize(); populatePrintClones(); }, 200);
-      }, 150);
-    } else {
-      printLiveMap.invalidateSize();
-      printLiveMap.setView(map.getCenter(), map.getZoom());
-      populatePrintClones();
-    }
-  }
+      const center = map.getCenter();
+      const zoom = map.getZoom();
+      printLiveMap = L.map('print-map-live', {
+        zoomControl: false,
+        attributionControl: false,
+        dragging: true,
+        scrollWheelZoom: true,
+        doubleClickZoom: true
+      }).setView(center, zoom);
 
-  function exportMapPDF() {
-    if (!printLiveMap) { updatePrintPreview(); }
-    showExportOverlay('PDF layout taiyar ho raha hai, please wait...');
-    // Give the live map a moment to settle at full print size before the browser print dialog opens
-    document.body.classList.add('printing');
+      L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['mt0','mt1','mt2','mt3'],
+        crossOrigin: true
+      }).addTo(printLiveMap);
+
+      printLiveMap.on('moveend', populatePrintClones);
+    } else {
+      printLiveMap.setView(map.getCenter(), map.getZoom(), { animate: false });
+    }
+
     setTimeout(() => {
-      if (printLiveMap) {
-        printLiveMap.invalidateSize();
-        printLiveMap.setView(map.getCenter(), map.getZoom());
-      }
-      setTimeout(() => {
-        hideExportOverlay();
-        window.print();
-      }, 400);
+      printLiveMap.invalidateSize();
+      populatePrintClones();
     }, 150);
-  }
-
-  window.addEventListener('afterprint', function() {
-    document.body.classList.remove('printing');
-    if (printLiveMap) {
-      setTimeout(() => {
-        printLiveMap.invalidateSize();
-        printLiveMap.setView(map.getCenter(), map.getZoom());
-        populatePrintClones();
-      }, 200);
-    }
-  });
-
-  function exportMapImage() {
-    showExportOverlay('Basemap tiles load ho rahi hain, please wait...');
-    // Make sure the print preview + live map + cloned lines/polygons exist and are fully painted first
-    if (!printLiveMap) {
-      updatePrintPreview();
-    } else {
-      printLiveMap.invalidateSize();
-      populatePrintClones();
-    }
-    setTimeout(() => {
-      html2canvas(document.getElementById('print-preview-box'), {
-        useCORS: true,
-        allowTaint: false,
-        scale: 2,
-        logging: false,
-        imageTimeout: 15000,
-        scrollX: 0,
-        scrollY: 0
-      }).then(canvas => {
-        hideExportOverlay();
-        const a = document.createElement('a');
-        a.href = canvas.toDataURL('image/png');
-        a.download = 'waqar_gis_map_export.png';
-        a.click();
-        showToast('PNG Exported Successfully! ✓');
-      }).catch(err => {
-        hideExportOverlay();
-        alert('Export failed: ' + err.message);
-      });
-    }, 1200);
   }
 
   function resetPrintElementPositions() {
     const na = document.getElementById('print-north-arrow');
     const sb = document.getElementById('print-scale-bar');
-    const lb = document.getElementById('print-legend-box');
+    const lg = document.getElementById('print-legend-box');
     na.style.top = '12px'; na.style.right = '14px'; na.style.left = ''; na.style.bottom = '';
     sb.style.bottom = '12px'; sb.style.left = '14px'; sb.style.right = ''; sb.style.top = '';
-    lb.style.bottom = '12px'; lb.style.right = '14px'; lb.style.left = ''; lb.style.top = '';
-    showToast('Elements position reset');
+    lg.style.bottom = '12px'; lg.style.right = '14px'; lg.style.left = ''; lg.style.top = '';
+    showToast('Print elements reset');
   }
 
-  // Draggable print overlay items
-  document.querySelectorAll('.print-overlay-item').forEach(el => {
-    let isDragging = false, startX, startY, initX, initY;
-    el.addEventListener('pointerdown', e => {
-      isDragging = true; el.classList.add('editing');
-      startX = e.clientX; startY = e.clientY;
-      const rect = el.getBoundingClientRect();
-      const parentRect = el.parentElement.getBoundingClientRect();
-      initX = rect.left - parentRect.left;
-      initY = rect.top - parentRect.top;
-      el.setPointerCapture(e.pointerId);
-      e.stopPropagation();
-    });
-    el.addEventListener('pointermove', e => {
-      if (!isDragging) return;
-      const dx = e.clientX - startX;
-      const dy = e.clientY - startY;
-      el.style.left = (initX + dx) + 'px';
-      el.style.top = (initY + dy) + 'px';
-      el.style.right = 'auto'; el.style.bottom = 'auto';
-    });
-    el.addEventListener('pointerup', e => {
-      isDragging = false; el.classList.remove('editing');
-      el.releasePointerCapture(e.pointerId);
-    });
-  });
+  function makeDraggable(elm) {
+    let x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+    elm.onmousedown = dragMouseDown;
+    elm.ontouchstart = dragMouseDown;
 
-  // Load Mouza Data on startup
+    function dragMouseDown(e) {
+      e = e || window.event;
+      if (e.type === 'touchstart') {
+        x1 = e.touches[0].clientX; y1 = e.touches[0].clientY;
+      } else {
+        x1 = e.clientX; y1 = e.clientY;
+      }
+      document.onmouseup = closeDragElement;
+      document.ontouchend = closeDragElement;
+      document.onmousemove = elementDrag;
+      document.ontouchmove = elementDrag;
+      elm.classList.add('editing');
+      e.stopPropagation();
+    }
+
+    function elementDrag(e) {
+      e = e || window.event;
+      let cx, cy;
+      if (e.type === 'touchmove') {
+        cx = e.touches[0].clientX; cy = e.touches[0].clientY;
+      } else {
+        cx = e.clientX; cy = e.clientY;
+      }
+      x2 = x1 - cx; y2 = y1 - cy;
+      x1 = cx; y1 = cy;
+      elm.style.top = (elm.offsetTop - y2) + 'px';
+      elm.style.left = (elm.offsetLeft - x2) + 'px';
+      elm.style.right = 'auto';
+      elm.style.bottom = 'auto';
+    }
+
+    function closeDragElement() {
+      document.onmouseup = null; document.ontouchend = null;
+      document.onmousemove = null; document.ontouchmove = null;
+      elm.classList.remove('editing');
+    }
+  }
+
+  makeDraggable(document.getElementById('print-north-arrow'));
+  makeDraggable(document.getElementById('print-scale-bar'));
+  makeDraggable(document.getElementById('print-legend-box'));
+
+  function exportMapPDF() {
+    window.print();
+  }
+
+  function exportMapImage() {
+    showExportOverlay('Generating PNG image...');
+    setTimeout(() => {
+      const box = document.getElementById('print-preview-box');
+      html2canvas(box, { useCORS: true, allowTaint: false, scale: 2 }).then(canvas => {
+        hideExportOverlay();
+        const a = document.createElement('a');
+        a.href = canvas.toDataURL('image/png');
+        a.download = 'waqar_gis_map_export.png';
+        a.click();
+        showToast('✓ PNG Exported successfully');
+      }).catch(err => {
+        hideExportOverlay();
+        alert('PNG Export failed: ' + err.message);
+      });
+    }, 400);
+  }
+
   fetch('Jammat_Polygon.json')
     .then(r => r.json())
-    .then(data => {
-      mouzaGeoLayer = L.geoJSON(data, {
-        style: { color: '#FFFF00', fillColor: 'rgba(197,160,89,0.3)', weight: 1.5, fillOpacity: 0.3 },
+    .then(geojson => {
+      mouzaGeoLayer = L.geoJSON(geojson, {
+        style: { color: '#FFFF00', fillColor: '#c5a059', fillOpacity: 0.15, weight: 1.5 },
         onEachFeature: (feature, layer) => {
-          const props = feature.properties || {};
-          let html = '<strong>Mouza Details</strong><br>';
-          for (let k in props) { html += `${k}: ${props[k]}<br>`; }
+          let props = feature.properties || {};
+          let title = props.NAME || props.Mouza || props.mouza || props.Name || 'Mouza Area';
+          let html = `<strong>🏛️ ${title}</strong><br>`;
+          Object.keys(props).forEach(k => { html += `<small>${k}: ${props[k]}</small><br>`; });
           layer.bindPopup(html);
-          layer.on('dblclick', () => {
-            if (layer.getBounds && layer.getBounds().isValid()) map.fitBounds(layer.getBounds());
+          layer.on('dblclick', e => {
+            if (layer.getBounds && layer.getBounds().isValid()) {
+              map.fitBounds(layer.getBounds());
+            }
           });
         }
       }).addTo(map);
 
-      mouzaItemsData = data.features || [];
-      mouzaCount = mouzaItemsData.length;
-      const listEl = document.getElementById('mouza-container-list');
-      listEl.innerHTML = mouzaItemsData.map((f, i) => {
-        const name = (f.properties && (f.properties.Name || f.properties.NAME || f.properties.mouza || f.properties.Mouza)) || `Mouza #${i+1}`;
-        return `<div style="font-size:11px; padding:3px 6px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.05); color:#e2e8f0;" onclick="zoomToMouza(${i})">📍 ${name}</div>`;
-      }).join('');
+      let listHTML = '';
+      mouzaGeoLayer.eachLayer(layer => {
+        const props = layer.feature.properties || {};
+        const name = props.NAME || props.Mouza || props.mouza || props.Name || `Mouza #${mouzaCount+1}`;
+        mouzaItemsData.push({ name, layer });
+        mouzaCount++;
+        listHTML += `<div style="font-size:11px; color:#e2e8f0; padding:4px 6px; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer;" onmouseover="this.style.background='#252a34'" onmouseout="this.style.background='transparent'" onclick="zoomToMouza(${mouzaCount-1})">📍 ${name}</div>`;
+      });
+      document.getElementById('mouza-container-list').innerHTML = listHTML || '<div style="font-size:10px; color:#788294; text-align:center;">No Mouza found in JSON</div>';
+      showToast('✓ Jammat_Polygon.json loaded successfully');
     })
     .catch(err => {
-      document.getElementById('mouza-container-list').innerHTML = '<div style="font-size:10px; color:#f87171; text-align:center; padding:4px;">Jammat_Polygon.json not found</div>';
+      document.getElementById('mouza-container-list').innerHTML = '<div style="font-size:10px; color:#f87171; text-align:center;">Failed to load Jammat_Polygon.json</div>';
+      console.warn('Jammat_Polygon.json load error:', err);
     });
 
   function zoomToMouza(idx) {
-    if (!mouzaGeoLayer) return;
-    let count = 0;
-    mouzaGeoLayer.eachLayer(layer => {
-      if (count === idx) {
-        if (layer.getBounds && layer.getBounds().isValid()) map.fitBounds(layer.getBounds());
-        else if (layer.getLatLng) map.setView(layer.getLatLng(), 18);
-        if (layer.openPopup) layer.openPopup();
-      }
-      count++;
-    });
+    const item = mouzaItemsData[idx];
+    if (!item) return;
+    const l = item.layer;
+    if (l.getBounds && l.getBounds().isValid()) {
+      map.fitBounds(l.getBounds());
+    } else if (l.getLatLng) {
+      map.setView(l.getLatLng(), 18);
+    }
+    if (l.openPopup) l.openPopup();
+    showToast('Zoomed to ' + item.name);
   }
 
-  loadDigitizedDataFromStorage();
-  showToast('Waqar GIS Portal Loaded Successfully! ✓');
+  window.addEventListener('DOMContentLoaded', () => {
+    loadDigitizedDataFromStorage();
+  });
 </script>
 </body>
 </html>
+```[cite: 1]
