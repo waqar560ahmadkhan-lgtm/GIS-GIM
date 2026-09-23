@@ -15,10 +15,10 @@
   <script src="https://cdn.jsdelivr.net/npm/leaflet-side-by-side@2.4.0/leaflet-side-by-side.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-omnivore/0.3.4/leaflet-omnivore.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/proj4@2.9.0/dist/proj4.js"></script>
-  <script src="auth-guard.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
     html, body { height: 100%; width: 100%; overflow: hidden; background: #15181e; display: flex; flex-direction: column; }
@@ -31,6 +31,7 @@
     .header-btn:hover { background: #c5a059; color: #15181e; }
     .header-btn.remove-point-btn { background: #3a2530; color: #f3a8a8; border-color: rgba(239,68,68,0.4); }
     .header-btn.remove-point-btn:hover { background: #ef4444; color: #fff; }
+    #snap-mode-btn.active { background: #059669 !important; color: #fff !important; border-color: #34d399 !important; }
 
     .app-body { display: flex; flex: 1; height: calc(100vh - 60px); width: 100%; position: relative; }
 
@@ -86,6 +87,70 @@
     td { padding: 6px 10px; border: 1px solid rgba(255,255,255,0.05); }
     tr:nth-child(even) { background: rgba(255,255,255,0.02); }
 
+    /* ===== LIVE ARC MAP SNAP INDICATOR ===== */
+    #live-snap-indicator {
+      position: absolute;
+      display: none;
+      z-index: 1600;
+      pointer-events: none;
+      transform: translate(12px, -34px);
+      background: rgba(15,18,23,0.96);
+      color: #fff;
+      border: 1px solid #d4af37;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 10px;
+      font-weight: 800;
+      line-height: 1.15;
+      white-space: nowrap;
+      box-shadow: 0 4px 14px rgba(0,0,0,.65), 0 0 8px rgba(212,175,55,.25);
+    }
+    #live-snap-indicator.vertex {
+      border-color: #34d399;
+      color: #ecfdf5;
+    }
+    #live-snap-indicator.edge {
+      border-color: #60a5fa;
+      color: #eff6ff;
+    }
+    #live-snap-indicator .snap-icon {
+      display:inline-block;
+      width:8px;
+      height:8px;
+      margin-right:5px;
+      vertical-align:middle;
+      border:2px solid currentColor;
+      box-sizing:border-box;
+    }
+    #live-snap-indicator.vertex .snap-icon { border-radius:50%; }
+    #live-snap-indicator.edge .snap-icon { border-radius:2px; transform:rotate(45deg); }
+    #live-snap-marker {
+      position:absolute;
+      display:none;
+      z-index:1599;
+      width:14px;
+      height:14px;
+      margin-left:-7px;
+      margin-top:-7px;
+      border-radius:50%;
+      pointer-events:none;
+      box-sizing:border-box;
+      box-shadow:0 0 0 2px rgba(255,255,255,.95), 0 0 12px rgba(212,175,55,.95);
+    }
+    #live-snap-marker.vertex {
+      background:#34d399;
+      border:2px solid #064e3b;
+    }
+    #live-snap-marker.edge {
+      width:12px;
+      height:12px;
+      margin-left:-6px;
+      margin-top:-6px;
+      border-radius:2px;
+      background:#60a5fa;
+      border:2px solid #1e3a8a;
+      transform:rotate(45deg);
+    }
     #cursor-hud { position: absolute; bottom: 190px; right: 20px; background: rgba(21,24,30,0.85); color: #c5a059; padding: 6px 12px; border-radius: 6px; font-size: 11px; border: 1px solid rgba(197,160,89,0.3); z-index: 500; pointer-events: none; font-family: monospace; line-height: 1.5; }
 
     #top-right-controls { position: absolute; top: 15px; right: 15px; z-index: 1000; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
@@ -117,10 +182,6 @@
     @keyframes locate-shake { 0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)} }
     #locate-tooltip { background: #1a1f29; color: #e2e8f0; border: 1px solid rgba(197,160,89,0.35); font-size: 11px; font-weight: 600; padding: 6px 10px; border-radius: 6px; white-space: nowrap; opacity: 0; transform: translateX(6px); pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
     #locate-control:hover #locate-tooltip { opacity: 1; transform: translateX(0); }
-    .user-location-marker { width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle at 35% 30%,#f3e5ab,#d4af37 55%,#967635 100%); border: 2.5px solid #ffffff; box-shadow: 0 0 8px rgba(212,175,55,0.9); }
-    .user-location-pulse-wrap { width: 16px; height: 16px; position: relative; }
-    .user-location-pulse-wrap::before { content:''; position:absolute; top:50%; left:50%; width:16px; height:16px; margin:-8px 0 0 -8px; border-radius:50%; background:rgba(212,175,55,0.5); animation:user-dot-pulse 1.8s ease-out infinite; }
-    @keyframes user-dot-pulse { 0%{transform:scale(1);opacity:0.7}100%{transform:scale(2.6);opacity:0} }
 
     /* ===== COORD COPY POPUP ===== */
     #coord-copy-popup { position: absolute; background: #1a1f29; border: 1.5px solid #c5a059; border-radius: 10px; padding: 10px 12px; z-index: 800; display: none; min-width: 230px; box-shadow: 0 8px 24px rgba(0,0,0,0.7); }
@@ -189,7 +250,7 @@
     #print-legend-box .legend-line { width:22px; height:0; border-top:3px solid #FFFF00; flex:0 0 22px; }
     #print-legend-box .legend-fill { width:18px; height:10px; border:2px solid #FFFF00; background:rgba(197,160,89,.45); flex:0 0 18px; }
     #print-legend-box .legend-point { width:10px; height:10px; border-radius:50%; background:#c5a059; border:2px solid #fff; flex:0 0 10px; }
-    /* ===== PRINT LEGEND EDITOR ===== */
+    
     #legend-editor { display:block; width:100%; margin:0 0 12px; padding:10px; background:#15181e; border:1px solid rgba(197,160,89,.35); border-radius:7px; box-sizing:border-box; }
     .legend-editor-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; }
     .legend-editor-title { color:#d4af37; font-size:11px; font-weight:800; letter-spacing:.4px; }
@@ -202,28 +263,9 @@
     .legend-editor-actions { display:flex; gap:7px; margin-top:8px; flex-wrap:wrap; }
     .legend-editor-actions button { border:1px solid rgba(197,160,89,.4); border-radius:5px; background:#252a34; color:#e2e8f0; padding:5px 9px; font-size:10px; font-weight:700; cursor:pointer; }
     .legend-editor-note { color:#788294; font-size:9px; margin-top:6px; }
-    @media (max-width:700px) {
-      .legend-edit-row { grid-template-columns:1fr 90px 60px 28px; }
-      #legend-editor-title { width:130px; }
-    }
     .edit-mode-btn { background:#252a34; color:#fbbf24; border:1px solid rgba(197,160,89,.45); }
     .edit-mode-btn.active { background:#059669 !important; color:#fff !important; border-color:#34d399 !important; }
 
-    @media print {
-      @page { size:A4 landscape; margin:0; }
-      html, body { width:297mm !important; height:210mm !important; overflow:visible !important; background:#fff !important; }
-      body.printing > *:not(#print-layout-modal) { display:none !important; }
-      body.printing #print-layout-modal { display:block !important; position:static !important; padding:0 !important; background:#fff !important; }
-      body.printing #print-layout-inner { width:297mm !important; height:210mm !important; max-height:none !important; max-width:none !important; border:0 !important; border-radius:0 !important; padding:10mm !important; overflow:hidden !important; background:#fff !important; color:#111 !important; box-shadow:none !important; }
-      body.printing #print-layout-inner h2, body.printing .print-controls, body.printing #legend-editor, body.printing .print-help, body.printing #print-preview-footer, body.printing #print-action-row { display:none !important; }
-      body.printing #print-preview-box { border:1px solid #333 !important; border-radius:0 !important; width:100% !important; height:190mm !important; background:#fff !important; }
-      body.printing #print-preview-header { height:15mm !important; padding:3mm 4mm !important; background:#fff !important; border-bottom:1px solid #333 !important; }
-      body.printing #print-map-canvas { height:175mm !important; min-height:0 !important; background:#fff !important; }
-      body.printing #print-map-live { display:block !important; }
-      body.printing .print-overlay-item { box-shadow:none !important; }
-    }
-
-    /* ===== GLOBAL TOAST ===== */
     #global-toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: #059669; color: #fff; border-radius: 8px; padding: 8px 18px; font-size: 12px; font-weight: 700; opacity: 0; pointer-events: none; z-index: 9999; transition: opacity 0.3s; white-space: nowrap; }
     #global-toast.show { opacity: 1; }
 
@@ -233,12 +275,6 @@
     #export-overlay-inner p { font-size:12px; color:#94a3b8; margin-bottom:16px; }
     #export-progress-bar { width:100%; height:6px; background:#252a34; border-radius:3px; overflow:hidden; }
     #export-progress-fill { height:100%; width:0%; background:linear-gradient(90deg,#c5a059,#d4af37); border-radius:3px; transition:width 0.4s ease; }
-
-    @media (max-width: 600px) {
-      #locate-control { bottom: 200px; right: 12px; }
-      #locate-btn { width: 48px; height: 48px; }
-      #locate-tooltip { display: none; }
-    }
   </style>
 </head>
 <body>
@@ -248,7 +284,7 @@
 <div id="export-overlay">
   <div id="export-overlay-inner">
     <h3>🗺️ Exporting Map...</h3>
-    <p id="export-overlay-msg">Basemap tiles load ho rahi hain, please wait...</p>
+    <p id="export-overlay-msg">Basemap tiles loading, please wait...</p>
     <div id="export-progress-bar"><div id="export-progress-fill"></div></div>
   </div>
 </div>
@@ -293,6 +329,7 @@
         <option value="km">KM</option>
       </select>
     </div>
+    <button class="header-btn" id="snap-mode-btn" onclick="toggleSnapMode()" title="Snap new points to nearby existing lines/boundaries">🧲 Snap OFF</button>
     <button class="header-btn" onclick="openPrintLayout()">🖨️ Print</button>
   </div>
   <div class="header-right" id="header-right-slot"></div>
@@ -348,8 +385,12 @@
     </div>
 
     <div class="panel-box">
-      <h3>Import GeoJSON / KML</h3>
-      <input type="file" id="file-input" accept=".geojson,.json,.kml" />
+      <h3>Import GeoJSON / KML / KMZ</h3>
+      <input type="file" id="file-input" accept=".geojson,.json,.kml,.kmz" />
+      <label style="font-size:10px; color:#c5a059; display:flex; align-items:center; gap:6px; margin-bottom:8px; cursor:pointer;">
+        <input type="checkbox" id="append-mode-toggle" style="width:auto; margin:0;" />
+        Append Mode (keep previous files loaded)
+      </label>
       <button class="btn btn-gold" onclick="loadSpatialFile()">UPLOAD & VIEW</button>
     </div>
 
@@ -364,6 +405,17 @@
       <div class="style-inputs">
         <input type="color" id="fill-color" value="#c5a059" title="Fill Color" style="height:35px; cursor:pointer;" />
         <input type="color" id="stroke-color" value="#FFFF00" title="Stroke Color" style="height:35px; cursor:pointer;" />
+      </div>
+      <label style="font-size:10px; color:#c5a059; display:flex; align-items:center; gap:6px; margin-top:8px; cursor:pointer;">
+        <input type="checkbox" id="color-by-area-toggle" onchange="toggleColorByArea(this.checked)" style="width:auto; margin:0;" />
+        Auto-color by Area Size
+      </label>
+      <div id="area-band-legend" style="display:none; margin-top:8px; font-size:9px; color:#94a3b8; line-height:1.7;">
+        <div><span style="color:#f87171;">●</span> &lt; 2 Marla</div>
+        <div><span style="color:#fb923c;">●</span> 2 Marla – 1 Kanal</div>
+        <div><span style="color:#d4af37;">●</span> 1 – 5 Kanal</div>
+        <div><span style="color:#34d399;">●</span> 5 – 20 Kanal</div>
+        <div><span style="color:#60a5fa;">●</span> &gt; 20 Kanal</div>
       </div>
     </div>
 
@@ -382,13 +434,9 @@
     </div>
 
     <div class="panel-box">
-      <h3>Topology Check</h3>
-      <button class="btn btn-dark" onclick="checkTopology()">Validate Topology</button>
-    </div>
-
-    <div class="panel-box">
       <h3>Export Options</h3>
       <button class="btn btn-emerald" onclick="exportGeoJSON()" style="margin-bottom:6px;">Download GeoJSON</button>
+      <button class="btn btn-emerald" onclick="exportKML()" style="margin-bottom:6px;">Download KML</button>
       <button class="btn btn-emerald" onclick="exportCSV()" style="margin-bottom:6px;">Download CSV</button>
       <button class="btn btn-dark" onclick="exportMapImage()" style="margin-bottom:6px;">Export PNG Image</button>
       <button class="btn btn-dark" onclick="openPrintLayout()">Export PDF Report</button>
@@ -403,24 +451,15 @@
     </div>
 
     <div class="panel-box">
-      <h3>Account & Settings</h3>
-      <button class="btn btn-dark" onclick="openModal('profileModal')" style="margin-bottom:6px;">👤 My Account</button>
-      <button class="btn btn-dark" onclick="openModal('settingsModal')" style="margin-bottom:6px;">⚙️ Settings</button>
-    </div>
-
-    <div class="panel-box">
       <h3>Support & Policy</h3>
       <button class="btn btn-dark" onclick="openModal('faqModal')" style="margin-bottom:6px;">❓ Help / FAQ</button>
       <button class="btn btn-dark" onclick="openModal('privacyModal')" style="margin-bottom:6px;">🔒 Privacy Policy</button>
     </div>
 
     <div class="panel-box" style="border-color:#d4af37;">
-      <h3>Mouza List</h3>
+      <h3>Mouza List & Vector Data</h3>
       <input type="text" id="mouza-search-input" placeholder="🔍 Mouza Name" />
       <button class="btn btn-gold" onclick="searchMouzaByName()" style="margin-bottom:6px;">SEARCH MOUZA</button>
-      <div id="mouza-container-list" style="max-height:120px; overflow-y:auto; margin-bottom:6px; border:1px solid rgba(197,160,89,0.3); border-radius:6px; padding:4px; background:#15181e;">
-        <div style="font-size:10px; color:#788294; text-align:center; padding:4px;">Loading Jammat_Polygon.json...</div>
-      </div>
       <button class="btn btn-emerald" onclick="saveMouzaVectorData()">💾 Save Vector Data</button>
     </div>
   </div>
@@ -450,6 +489,9 @@
       </div>
     </div>
 
+    <div id="live-snap-marker"></div>
+    <div id="live-snap-indicator"><span class="snap-icon"></span><span id="live-snap-text">Vertex</span></div>
+
     <div id="cursor-hud">Lat: 0.00000 | Lng: 0.00000<br>UTM: --</div>
 
     <div id="attribute-panel">
@@ -458,11 +500,11 @@
         <table id="attr-table">
           <thead>
             <tr>
-              <th>ID</th><th>Type</th><th>Area (Kanal-Marla-SqFt)</th><th>Length / Perimeter</th><th>Seg. Lengths</th><th>Coordinates</th>
+              <th>ID</th><th>Type</th><th>Area (Kanal-Marla-SqFt)</th><th>Length / Perimeter</th><th>Coordinates</th>
             </tr>
           </thead>
           <tbody>
-            <tr><td colspan="6" style="text-align:center; color:#788294;">No digitization features added yet.</td></tr>
+            <tr><td colspan="5" style="text-align:center; color:#788294;">No digitization features added yet.</td></tr>
           </tbody>
         </table>
       </div>
@@ -491,10 +533,10 @@
         <button type="button" onclick="addLegendItem()">＋ Add Legend Item</button>
         <button type="button" onclick="resetLegendItems()">↺ Reset Legend</button>
       </div>
-      <div class="legend-editor-note">Name, symbol aur color yahan change karein. Changes print preview mein foran show honge.</div>
+      <div class="legend-editor-note">Customize names, symbols, and colors here. Changes update instantly in the print preview.</div>
     </div>
 
-    <div class="print-help">💡 North Arrow, Scale Bar aur Legend ko mouse se drag karke manually position kar sakte hain.</div>
+    <div class="print-help">💡 Drag the North Arrow, Scale Bar, and Legend using your mouse to position them manually.</div>
     <div id="print-preview-box">
       <div id="print-preview-header">
         <div style="color:#d4af37; font-size:13px; font-weight:700;" id="print-title-disp">Waqar GIS Portal — Map</div>
@@ -527,9 +569,7 @@
 <div id="aboutModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('aboutModal')">×</button><h2>ℹ️ About Waqar GIS Portal</h2><p><strong>Waqar GIS Portal</strong> is a high-performance web-based spatial analysis and mapping application engineered in accordance with modern Geomatics standards.</p></div></div>
 <div id="servicesModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('servicesModal')">×</button><h2>🛠️ Services</h2><p>Advanced spatial digitization, Massavi land area conversion, buffer analysis, dimension labels, measurement tools, and multi-source basemap capabilities.</p></div></div>
 <div id="contactModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('contactModal')">×</button><h2>📞 Contact Us</h2><p><strong>Developer:</strong> Waqar Ahmad (Geomatics Specialist)</p><p><strong>Phone:</strong> 03201975800</p><p><strong>Email:</strong> waqar560ahmad@gmail.com</p></div></div>
-<div id="profileModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('profileModal')">×</button><h2>👤 User Profile</h2><p><strong>Username:</strong> Waqar Ahmad (Admin)</p><p><strong>Role:</strong> GIS Analyst / Spatial Developer</p><p><strong>Phone:</strong> 03201975800</p><p><strong>Workspace:</strong> Pakistan</p></div></div>
-<div id="settingsModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('settingsModal')">×</button><h2>⚙️ Settings</h2><p>Leaflet v1.9.4 Spatial Renderer & UTM Coordinate Mapping active.</p></div></div>
-<div id="faqModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('faqModal')">×</button><h2>❓ Help & FAQ</h2><p>Double-click kisi bhi Mouza par zoom karne ke liye.</p><p>Right-click on map to copy coordinates.</p><p>Click any dimension label to edit it manually.</p><p>Use <strong>Unit selector</strong> in header to switch between Auto / Meter / Feet / KM.</p><p>Press <strong>Backspace</strong> ya <strong>⌫ Point</strong> button while drawing to remove last point.</p><p>Press <strong>F2</strong> to finish drawing line/polygon quickly.</p></div></div>
+<div id="faqModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('faqModal')">×</button><h2>❓ Help & FAQ</h2><p>Right-click on map to copy coordinates.</p><p>Click any dimension label to edit it manually.</p><p>Use <strong>Unit selector</strong> in header to switch between Auto / Meter / Feet / KM.</p><p>Press <strong>Backspace</strong> or <strong>⌫ Point</strong> button while drawing to remove last point.</p></div></div>
 <div id="privacyModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('privacyModal')">×</button><h2>🔒 Privacy Policy</h2><p>All geometries and user settings remain local to your session.</p></div></div>
 
 <script>
@@ -602,13 +642,32 @@
   let bufferLayerGroup  = L.layerGroup().addTo(map);
   let notesLayerGroup   = L.layerGroup().addTo(map);
   let dimensionLayerGroup = L.layerGroup().addTo(map);
-  let mouzaGeoLayer = null, mouzaLineLayer = null;
+
+  let drawnItems = new L.FeatureGroup().addTo(map);
+  let drawControl = new L.Control.Draw({
+    edit: { featureGroup: drawnItems },
+    draw: {
+      polygon: { allowIntersection: false, showArea: true },
+      polyline: true,
+      rectangle: true,
+      circle: true,
+      marker: true,
+      circlemarker: false
+    }
+  });
+  map.addControl(drawControl);
 
   let featureCounter = 0, featureRecords = [];
+  const importedFeatureIds = new Set();
   let noteMode = false, noteCounter = 0;
-  let mouzaItemsData = [], mouzaCount = 0;
   let actionHistory = [], redoStack = [];
   function pushHistory(a) { actionHistory.push(a); redoStack = []; }
+  let editSnapshot = {};
+
+  function cloneLatLngs(ll) {
+    if (Array.isArray(ll)) return ll.map(cloneLatLngs);
+    return L.latLng(ll.lat, ll.lng);
+  }
 
   function toUTM(lat, lng) {
     const zone = Math.floor((lng + 180) / 6) + 1;
@@ -772,14 +831,7 @@
       markers.push(marker);
     }
 
-    dimStore[featureId] = {
-      markers,
-      manualValues: manualValues,
-      layer,
-      layerType,
-      segLengths
-    };
-
+    dimStore[featureId] = { markers, manualValues, layer, layerType, segLengths };
     updateSegmentLengthsInTable(featureId, segLengths);
   }
 
@@ -797,6 +849,16 @@
         try { dimensionLayerGroup.removeLayer(m); } catch(e) {}
       });
     }
+    dimensionLayerGroup.eachLayer(m => {
+      try {
+        const el = m.getElement && m.getElement();
+        const tag = el && el.querySelector && el.querySelector('.dim-label');
+        if (tag && tag.getAttribute('data-fid') == String(featureId)) {
+          dimensionLayerGroup.removeLayer(m);
+        }
+      } catch(e) {}
+    });
+    delete dimStore[featureId];
   }
 
   function refreshDimensionLabels(featureId) {
@@ -848,26 +910,47 @@
     showToast('↺ Reset to auto dimension');
   }
 
+  function recomputeFeatureAfterEdit(layer) {
+    const fid = layer._custom_id;
+    const rec = featureRecords.find(f => f.id === fid);
+    if (!fid || !rec) return;
+    const geojson = layer.toGeoJSON();
+    if (geojson.geometry.type === 'Polygon' || geojson.geometry.type === 'MultiPolygon') {
+      const area = calculateMassaviArea(turf.area(geojson));
+      rec.massaviArea = area.formattedText;
+      rec.areaSqFt = area.sqft;
+      rec.totalKanal = area.totalKanal;
+      rec.totalMarla = area.totalMarla;
+      rec.lengthMeters = turf.length(geojson, {units:'kilometers'}) * 1000;
+      rec.length = `${rec.lengthMeters.toFixed(2)} m`;
+      const pts = layer.getLatLngs()[0].map(ll => [ll.lat,ll.lng]);
+      pts.push(pts[0]);
+      rec.segLengths = getSegmentLengthsText(pts,true);
+      applyAreaBandStyle(layer, rec);
+    } else if (geojson.geometry.type === 'LineString' || geojson.geometry.type === 'MultiLineString') {
+      const km = turf.length(geojson,{units:'kilometers'});
+      rec.lengthMeters = km * 1000;
+      rec.length = km >= 1 ? `${km.toFixed(4)} km` : `${(km*1000).toFixed(2)} m`;
+      rec.areaSqFt = null; rec.totalKanal = null; rec.totalMarla = null;
+      const lls = layer.getLatLngs();
+      const pts = (Array.isArray(lls[0]) ? lls[0] : lls).map(ll => [ll.lat,ll.lng]);
+      rec.segLengths = getSegmentLengthsText(pts,false);
+    }
+    bindFeatureMeasurement(layer);
+    if (dimStore[fid]) { dimStore[fid].layer = layer; refreshDimensionLabels(fid); }
+    if (rec._imported) updateImportedRecord(layer);
+  }
+
   map.on(L.Draw.Event.EDITED, function(e) {
+    const changes = [];
     e.layers.eachLayer(layer => {
       const fid = layer._custom_id;
-      const rec = featureRecords.find(f => f.id === fid);
-      if (!fid || !rec) return;
-      const geojson = layer.toGeoJSON();
-      if (geojson.geometry.type === 'Polygon') {
-        rec.massaviArea = calculateMassaviArea(turf.area(geojson)).formattedText;
-        rec.length = `${(turf.length(geojson, {units:'kilometers'}) * 1000).toFixed(2)} m`;
-        const pts = layer.getLatLngs()[0].map(ll => [ll.lat,ll.lng]);
-        pts.push(pts[0]);
-        rec.segLengths = getSegmentLengthsText(pts,true);
-      } else if (geojson.geometry.type === 'LineString') {
-        const km = turf.length(geojson,{units:'kilometers'});
-        rec.length = km >= 1 ? `${km.toFixed(2)} km` : `${(km*1000).toFixed(2)} m`;
-        const pts = layer.getLatLngs().map(ll => [ll.lat,ll.lng]);
-        rec.segLengths = getSegmentLengthsText(pts,false);
+      if (fid && editSnapshot[fid]) {
+        changes.push({ id: fid, before: editSnapshot[fid], after: cloneLatLngs(layer.getLatLngs()) });
       }
-      if (dimStore[fid]) { dimStore[fid].layer = layer; refreshDimensionLabels(fid); }
+      recomputeFeatureAfterEdit(layer);
     });
+    if (changes.length) pushHistory({ type:'edit', changes });
     updateAttributeTable();
     showToast('✓ Feature geometry updated');
   });
@@ -889,15 +972,492 @@
     }
   }
 
+  let colorByAreaEnabled = false;
+  function toggleColorByArea(checked) {
+    colorByAreaEnabled = checked;
+    document.getElementById('area-band-legend').style.display = checked ? 'block' : 'none';
+    drawnItems.eachLayer(layer => {
+      const rec = featureRecords.find(f => f.id === layer._custom_id);
+      if (rec && rec.totalMarla != null && layer.setStyle) applyAreaBandStyle(layer, rec);
+    });
+    showToast(checked ? '✓ Auto-color by area ON' : 'Auto-color by area OFF');
+  }
+
+  function getAreaBandColor(totalMarla) {
+    if (totalMarla == null) return null;
+    if (totalMarla < 2)   return { color:'#f87171', fillColor:'#f87171' };
+    if (totalMarla < 20)  return { color:'#fb923c', fillColor:'#fb923c' };
+    if (totalMarla < 100) return { color:'#d4af37', fillColor:'#c5a059' };
+    if (totalMarla < 400) return { color:'#34d399', fillColor:'#059669' };
+    return { color:'#60a5fa', fillColor:'#3b82f6' };
+  }
+
+  function applyAreaBandStyle(layer, rec) {
+    if (!colorByAreaEnabled || !layer.setStyle || rec.totalMarla == null) return;
+    const band = getAreaBandColor(rec.totalMarla);
+    if (band) layer.setStyle({ color: band.color, fillColor: band.fillColor, fillOpacity:0.5, weight:2.5 });
+  }
+
   function calculateMassaviArea(sqm) {
-    let sqft = sqm * 10.7639;
+    const sqft = sqm * 10.7639;
+    const totalKanal = sqft / 5445;
+    const totalMarla = sqft / 272.25;
     let k = Math.floor(sqft / 5445);
-    let rem = sqft % 5445;
+    let rem = sqft - (k * 5445);
     let ml = Math.floor(rem / 272.25);
-    let sf = Math.round(rem % 272.25);
-    if (sf >= 270) { ml++; sf = 0; }
+    let sf = Math.round(rem - (ml * 272.25));
+    if (sf >= 272) { ml++; sf = 0; }
     if (ml >= 20)  { k++;  ml -= 20; }
-    return { formattedText: `${k} Kanal, ${ml} Marla, ${sf} SqFt` };
+    return {
+      formattedText: `${k} Kanal, ${ml} Marla, ${sf} SqFt`,
+      sqft: sqft,
+      totalKanal: totalKanal,
+      totalMarla: totalMarla,
+      kanal: k,
+      marla: ml,
+      remainingSqFt: sf
+    };
+  }
+
+  function areaDetailsHTML(areaObj) {
+    if (!areaObj) return '';
+    return `
+      <div style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(197,160,89,.35);">
+        <div><b>Total Area:</b> ${areaObj.sqft.toFixed(2)} sq ft</div>
+        <div><b>Kanal:</b> ${areaObj.totalKanal.toFixed(4)} Kanal</div>
+        <div><b>Marla:</b> ${areaObj.totalMarla.toFixed(2)} Marla</div>
+        <div><b>Massavi:</b> ${areaObj.formattedText}</div>
+      </div>`;
+  }
+
+  function bindFeatureMeasurement(layer) {
+    if (!layer || !layer.on || layer._measurementBound) return;
+    layer._measurementBound = true;
+    layer.on('click', function(ev) {
+      L.DomEvent.stopPropagation(ev);
+      const rec = featureRecords.find(f => f.id === layer._custom_id);
+      if (!rec) return;
+      let html = `<div style="min-width:220px;font-family:Inter,Arial,sans-serif;"><strong style="font-size:14px;color:#c5a059;">${rec.source || 'Feature'} — ${rec.type}</strong>`;
+      if (rec.areaSqFt != null) {
+        html += `<div style="margin-top:7px;line-height:1.65;"><b>Total Area:</b> ${rec.areaSqFt.toFixed(2)} sq ft<br><b>Total Kanal:</b> ${rec.totalKanal.toFixed(4)} Kanal<br><b>Total Marla:</b> ${rec.totalMarla.toFixed(2)} Marla<br><b>Massavi:</b> ${rec.massaviArea}</div>`;
+      }
+      if (rec.lengthMeters != null) {
+        html += `<div style="margin-top:6px;line-height:1.65;"><b>Length:</b> ${rec.lengthMeters.toFixed(2)} m<br><b>Length:</b> ${(rec.lengthMeters * 3.28084).toFixed(2)} ft`;
+        if (rec.lengthMeters >= 1000) html += `<br><b>Length:</b> ${(rec.lengthMeters / 1000).toFixed(4)} km`;
+        html += `</div>`;
+      }
+      html += `</div>`;
+      layer.bindPopup(html, {maxWidth:320, closeButton:true}).openPopup(ev.latlng);
+    });
+  }
+
+  function updateImportedRecord(layer) {
+    const rec = featureRecords.find(f => f.id === layer._custom_id);
+    if (!rec || !layer.toGeoJSON) return;
+    const gj = layer.toGeoJSON();
+    const type = gj.geometry && gj.geometry.type;
+    rec.type = (type || rec.type || '').toUpperCase();
+    if (type === 'Polygon' || type === 'MultiPolygon') {
+      const sqm = turf.area(gj);
+      const area = calculateMassaviArea(sqm);
+      rec.areaSqFt = area.sqft;
+      rec.totalKanal = area.totalKanal;
+      rec.totalMarla = area.totalMarla;
+      rec.massaviArea = area.formattedText;
+      rec.lengthMeters = turf.length(gj, {units:'kilometers'}) * 1000;
+      rec.length = `${rec.lengthMeters.toFixed(2)} m`;
+      if (layer.getLatLngs) {
+        const rings = layer.getLatLngs();
+        const pts = rings && rings[0] ? rings[0].map(ll => [ll.lat,ll.lng]) : [];
+        if (pts.length > 1) { pts.push(pts[0]); rec.segLengths = getSegmentLengthsText(pts, true); }
+      }
+    } else if (type === 'LineString' || type === 'MultiLineString') {
+      rec.lengthMeters = turf.length(gj, {units:'kilometers'}) * 1000;
+      rec.length = rec.lengthMeters >= 1000 ? `${(rec.lengthMeters/1000).toFixed(4)} km` : `${rec.lengthMeters.toFixed(2)} m`;
+      rec.massaviArea = 'N/A';
+      rec.areaSqFt = null; rec.totalKanal = null; rec.totalMarla = null;
+      if (layer.getLatLngs) {
+        const lls = layer.getLatLngs();
+        const pts = (Array.isArray(lls[0]) ? lls[0] : lls).map(ll => [ll.lat,ll.lng]);
+        rec.segLengths = getSegmentLengthsText(pts, false);
+      }
+    } else if (type === 'Point') {
+      rec.massaviArea = 'N/A';
+      rec.length = 'N/A';
+      rec.areaSqFt = null; rec.totalKanal = null; rec.totalMarla = null; rec.lengthMeters = null;
+      if (gj.geometry.coordinates) rec.coords = `${gj.geometry.coordinates[1].toFixed(5)}, ${gj.geometry.coordinates[0].toFixed(5)}`;
+    }
+    if (layer.getLatLngs) {
+      const bounds = layer.getBounds && layer.getBounds();
+      if (bounds && bounds.isValid && bounds.isValid()) rec.coords = `${bounds.getCenter().lat.toFixed(5)}, ${bounds.getCenter().lng.toFixed(5)}`;
+    }
+    bindFeatureMeasurement(layer);
+    if (rec.areaSqFt != null) {
+      rec._popupAreaHTML = areaDetailsHTML({sqft:rec.areaSqFt,totalKanal:rec.totalKanal,totalMarla:rec.totalMarla,formattedText:rec.massaviArea});
+      applyAreaBandStyle(layer, rec);
+    }
+  }
+
+  function registerImportedVectorLayer(layer, sourceName) {
+    if (!layer) return;
+    const addOne = (child) => {
+      if (!child) return;
+      if (child.eachLayer && !(child instanceof L.Path) && !(child instanceof L.Marker)) {
+        child.eachLayer(addOne);
+        return;
+      }
+      if (!child.toGeoJSON) return;
+      const gj = child.toGeoJSON();
+      if (!gj.geometry) return;
+      const geomType = gj.geometry.type;
+      if (!['Polygon','MultiPolygon','LineString','MultiLineString','Point','MultiPoint'].includes(geomType)) return;
+      if (child.setStyle) child.setStyle({ color: document.getElementById('stroke-color').value, fillColor: document.getElementById('fill-color').value, fillOpacity:0.5, weight:2.5 });
+      featureCounter++;
+      child._custom_id = featureCounter;
+      child._imported = true;
+      child._sourceName = sourceName;
+      importedFeatureIds.add(featureCounter);
+      drawnItems.addLayer(child);
+      const rec = { id:featureCounter, source:sourceName, type:geomType.toUpperCase(), massaviArea:'N/A', length:'N/A', lengthMeters:null, areaSqFt:null, totalKanal:null, totalMarla:null, segLengths:'N/A', coords:'' };
+      featureRecords.push(rec);
+      updateImportedRecord(child);
+      if (geomType === 'Polygon' || geomType === 'LineString') {
+        addDimensionLabels(child, featureCounter, geomType === 'Polygon' ? 'polygon' : 'polyline');
+      }
+    };
+    if (layer.eachLayer) layer.eachLayer(addOne); else addOne(layer);
+    updateAttributeTable();
+  }
+
+  function clearPreviousImportedFeatures() {
+    Array.from(importedFeatureIds).forEach(id => {
+      const layer = drawnItems.getLayers().find(l => l._custom_id === id);
+      if (layer) { removeDimensionLabels(id); drawnItems.removeLayer(layer); }
+      featureRecords = featureRecords.filter(r => r.id !== id);
+    });
+    importedFeatureIds.clear();
+    updateAttributeTable();
+  }
+
+  map.on(L.Draw.Event.CREATED, function(e) {
+    const layer = e.layer;
+    featureCounter++;
+    layer._custom_id = featureCounter;
+    drawnItems.addLayer(layer);
+
+    const fc = document.getElementById('fill-color').value;
+    const sc = document.getElementById('stroke-color').value;
+    if (layer.setStyle) layer.setStyle({ fillColor: fc, color: sc, fillOpacity: 0.5, weight: 2.5 });
+
+    const type = e.layerType.toUpperCase();
+    let areaText = 'N/A', lenText = 'N/A', sqftVal = null, kanalVal = null, marlaVal = null, lenMeters = null;
+    let segLengthsText = 'N/A';
+
+    if (e.layerType === 'polygon' || e.layerType === 'rectangle') {
+      const gj = layer.toGeoJSON();
+      const sqm = turf.area(gj);
+      const area = calculateMassaviArea(sqm);
+      areaText = area.formattedText;
+      sqftVal = area.sqft; kanalVal = area.totalKanal; marlaVal = area.totalMarla;
+      const km = turf.length(gj, { units: 'kilometers' });
+      lenMeters = km * 1000;
+      lenText = `${lenMeters.toFixed(2)} m`;
+      const pts = layer.getLatLngs()[0].map(ll => [ll.lat, ll.lng]);
+      pts.push(pts[0]);
+      segLengthsText = getSegmentLengthsText(pts, true);
+      addDimensionLabels(layer, featureCounter, 'polygon');
+      applyAreaBandStyle(layer, { totalMarla: marlaVal });
+    } else if (e.layerType === 'polyline') {
+      const gj = layer.toGeoJSON();
+      const km = turf.length(gj, { units: 'kilometers' });
+      lenMeters = km * 1000;
+      lenText = km >= 1 ? `${km.toFixed(4)} km` : `${lenMeters.toFixed(2)} m`;
+      const lls = layer.getLatLngs();
+      const pts = lls.map(ll => [ll.lat, ll.lng]);
+      segLengthsText = getSegmentLengthsText(pts, false);
+      addDimensionLabels(layer, featureCounter, 'polyline');
+    } else if (e.layerType === 'circle') {
+      const r = layer.getRadius();
+      const sqm = Math.PI * r * r;
+      const area = calculateMassaviArea(sqm);
+      areaText = area.formattedText;
+      sqftVal = area.sqft; kanalVal = area.totalKanal; marlaVal = area.totalMarla;
+      lenMeters = 2 * Math.PI * r;
+      lenText = `${lenMeters.toFixed(2)} m (Circumference)`;
+    } else if (e.layerType === 'marker') {
+      const ll = layer.getLatLng();
+      areaText = `Lat: ${ll.lat.toFixed(4)}, Lng: ${ll.lng.toFixed(4)}`;
+    }
+
+    const coordsStr = layer.getLatLng ? `${layer.getLatLng().lat.toFixed(4)}, ${layer.getLatLng().lng.toFixed(4)}` : 'Multi-point';
+    const rec = {
+      id: featureCounter, source: 'Drawn', type, massaviArea: areaText, length: lenText,
+      lengthMeters: lenMeters, areaSqFt: sqftVal, totalKanal: kanalVal, totalMarla: marlaVal,
+      segLengths: segLengthsText, coords: coordsStr
+    };
+    featureRecords.push(rec);
+    updateAttributeTable();
+    pushHistory({ type:'create', id:featureCounter, layer });
+    bindFeatureMeasurement(layer);
+    showToast(`✓ ${type} drawn successfully`);
+  });
+
+  map.on(L.Draw.Event.DELETED, function(e) {
+    const deletedLayers = [];
+    e.layers.eachLayer(layer => {
+      const fid = layer._custom_id;
+      if (fid) {
+        removeDimensionLabels(fid);
+        deletedLayers.push({ id: fid, layer, record: featureRecords.find(r => r.id === fid) });
+        featureRecords = featureRecords.filter(r => r.id !== fid);
+        importedFeatureIds.delete(fid);
+      }
+    });
+    if (deletedLayers.length) pushHistory({ type:'delete', items:deletedLayers });
+    updateAttributeTable();
+    showToast('Features deleted');
+  });
+
+  function undoLastAction() {
+    if (!actionHistory.length) { showToast('Nothing to undo'); return; }
+    const act = actionHistory.pop();
+    redoStack.push(act);
+    if (act.type === 'create') {
+      const layer = drawnItems.getLayers().find(l => l._custom_id === act.id);
+      if (layer) {
+        removeDimensionLabels(act.id);
+        drawnItems.removeLayer(layer);
+        featureRecords = featureRecords.filter(r => r.id !== act.id);
+        updateAttributeTable();
+        showToast('↺ Undo: Feature removed');
+      }
+    } else if (act.type === 'delete') {
+      act.items.forEach(item => {
+        drawnItems.addLayer(item.layer);
+        if (item.record) featureRecords.push(item.record);
+        if (item.layer.toGeoJSON) {
+          const gj = item.layer.toGeoJSON();
+          const gt = gj.geometry && gj.geometry.type;
+          if (gt === 'Polygon' || gt === 'LineString') addDimensionLabels(item.layer, item.layer._custom_id, gt === 'Polygon' ? 'polygon' : 'polyline');
+        }
+      });
+      updateAttributeTable();
+      showToast('↺ Undo: Features restored');
+    } else if (act.type === 'edit') {
+      act.changes.forEach(ch => {
+        const layer = findLayerById(ch.id);
+        if (layer && typeof layer.setLatLngs === 'function') {
+          layer.setLatLngs(ch.before);
+          recomputeFeatureAfterEdit(layer);
+        }
+      });
+      updateAttributeTable();
+      showToast('↺ Undo: Edit reverted');
+    }
+  }
+
+  function redoLastAction() {
+    if (!redoStack.length) { showToast('Nothing to redo'); return; }
+    const act = redoStack.pop();
+    actionHistory.push(act);
+    if (act.type === 'create') {
+      showToast('Redo not fully implemented for create');
+    } else if (act.type === 'delete') {
+      act.items.forEach(item => {
+        removeDimensionLabels(item.id);
+        drawnItems.removeLayer(item.layer);
+        featureRecords = featureRecords.filter(r => r.id !== item.id);
+      });
+      updateAttributeTable();
+      showToast('🔁 Redo: Delete applied');
+    } else if (act.type === 'edit') {
+      act.changes.forEach(ch => {
+        const layer = findLayerById(ch.id);
+        if (layer && typeof layer.setLatLngs === 'function') {
+          layer.setLatLngs(ch.after);
+          recomputeFeatureAfterEdit(layer);
+        }
+      });
+      updateAttributeTable();
+      showToast('🔁 Redo: Edit applied');
+    }
+  }
+
+  function removeLastPoint() {
+    const drawControlTool = map._toolbars && map._toolbars.draw && map._toolbars.draw._modes;
+    if (drawControlTool) {
+      Object.keys(drawControlTool).forEach(mode => {
+        const handler = drawControlTool[mode].handler;
+        if (handler && handler._markers && handler._markers.length > 0) {
+          if (typeof handler.deleteLastVertex === 'function') {
+            handler.deleteLastVertex();
+            showToast('⌫ Last vertex removed');
+          } else if (typeof handler.removeVertex === 'function') {
+            handler.removeVertex();
+            showToast('⌫ Vertex removed');
+          }
+        }
+      });
+    }
+  }
+
+  let editModeActive = false;
+  function toggleEditMode() {
+    editModeActive = !editModeActive;
+    const btn = document.getElementById('edit-mode-btn');
+    if (editModeActive) {
+      editSnapshot = {};
+      drawnItems.eachLayer(l => {
+        if (l._custom_id && l.getLatLngs) editSnapshot[l._custom_id] = cloneLatLngs(l.getLatLngs());
+      });
+      new L.EditToolbar.Edit(map, { featureGroup: drawnItems }).enable();
+      btn.classList.add('active');
+      showToast('✏️ Edit mode active — click features to modify vertices');
+    } else {
+      const editToolbar = map._toolbars && map._toolbars.edit;
+      if (editToolbar && editToolbar._modes && editToolbar._modes.edit) {
+        editToolbar._modes.edit.handler.save();
+        editToolbar._modes.edit.handler.disable();
+      }
+      btn.classList.remove('active');
+      showToast('✓ Edits saved');
+    }
+  }
+
+  // ===== LIVE ARC MAP SNAP ENGINE =====
+  let snapModeEnabled = false;
+  const SNAP_THRESHOLD_PX = 22;
+
+  function toggleSnapMode() {
+    snapModeEnabled = !snapModeEnabled;
+    const btn = document.getElementById('snap-mode-btn');
+    btn.classList.toggle('active', snapModeEnabled);
+    btn.textContent = snapModeEnabled ? '🧲 Snap ON' : '🧲 Snap OFF';
+    showToast(snapModeEnabled ? '🧲 Live Snapping enabled (snaps to vertices & edges)' : '🧲 Live Snapping disabled');
+    if (!snapModeEnabled) hideSnapIndicator();
+  }
+
+  function showSnapIndicator(type, text, containerPt) {
+    const ind = document.getElementById('live-snap-indicator');
+    const mark = document.getElementById('live-snap-marker');
+    const txt = document.getElementById('live-snap-text');
+    ind.className = type;
+    mark.className = type;
+    txt.textContent = text;
+    ind.style.display = 'block';
+    mark.style.display = 'block';
+    ind.style.left = containerPt.x + 'px';
+    ind.style.top = containerPt.y + 'px';
+    mark.style.left = containerPt.x + 'px';
+    mark.style.top = containerPt.y + 'px';
+  }
+
+  function hideSnapIndicator() {
+    document.getElementById('live-snap-indicator').style.display = 'none';
+    document.getElementById('live-snap-marker').style.display = 'none';
+  }
+
+  function findBestSnap(mouseLatLng) {
+    if (!snapModeEnabled) return null;
+    let best = null;
+    let minPx = SNAP_THRESHOLD_PX;
+    const mousePt = map.latLngToContainerPoint(mouseLatLng);
+
+    drawnItems.eachLayer(layer => {
+      if (!layer.toGeoJSON) return;
+      const gj = layer.toGeoJSON();
+      const coordsList = [];
+      const extractCoords = (geom) => {
+        if (!geom) return;
+        if (geom.type === 'Point') coordsList.push([geom.coordinates[1], geom.coordinates[0]]);
+        else if (geom.type === 'LineString' || geom.type === 'MultiPoint') geom.coordinates.forEach(c => coordsList.push([c[1], c[0]]));
+        else if (geom.type === 'Polygon' || geom.type === 'MultiLineString') geom.coordinates.forEach(ring => ring.forEach(c => coordsList.push([c[1], c[0]])));
+        else if (geom.type === 'MultiPolygon') geom.coordinates.forEach(poly => poly.forEach(ring => ring.forEach(c => coordsList.push([c[1], c[0]]))));
+      };
+      extractCoords(gj.geometry);
+
+      // Check vertex snap
+      coordsList.forEach(c => {
+        const vLatLng = L.latLng(c[0], c[1]);
+        const vPt = map.latLngToContainerPoint(vLatLng);
+        const dist = mousePt.distanceTo(vPt);
+        if (dist < minPx) {
+          minPx = dist;
+          best = { latlng: vLatLng, type: 'vertex', text: 'Vertex Snap', pt: vPt };
+        }
+      });
+    });
+
+    if (best) return best;
+
+    // Check edge snap if no vertex found
+    drawnItems.eachLayer(layer => {
+      if (!layer.toGeoJSON) return;
+      const gj = layer.toGeoJSON();
+      const checkLineSegments = (coords) => {
+        for (let i = 0; i < coords.length - 1; i++) {
+          const a = L.latLng(coords[i][1], coords[i][0]);
+          const b = L.latLng(coords[i+1][1], coords[i+1][0]);
+          const aPt = map.latLngToContainerPoint(a);
+          const bPt = map.latLngToContainerPoint(b);
+          // Project mouse onto segment aPt-bPt
+          const ab = { x: bPt.x - aPt.x, y: bPt.y - aPt.y };
+          const ap = { x: mousePt.x - aPt.x, y: mousePt.y - aPt.y };
+          const abLenSq = ab.x * ab.x + ab.y * ab.y;
+          if (abLenSq === 0) continue;
+          let t = (ap.x * ab.x + ap.y * ab.y) / abLenSq;
+          t = Math.max(0, Math.min(1, t));
+          const projPt = { x: aPt.x + t * ab.x, y: aPt.y + t * ab.y };
+          const dist = mousePt.distanceTo(L.point(projPt.x, projPt.y));
+          if (dist < minPx) {
+            minPx = dist;
+            const projLatLng = map.containerPointToLatLng(L.point(projPt.x, projPt.y));
+            best = { latlng: projLatLng, type: 'edge', text: 'Edge Snap', pt: L.point(projPt.x, projPt.y) };
+          }
+        }
+      };
+
+      const geom = gj.geometry;
+      if (!geom) return;
+      if (geom.type === 'LineString') checkLineSegments(geom.coordinates);
+      else if (geom.type === 'Polygon') geom.coordinates.forEach(ring => checkLineSegments(ring));
+      else if (geom.type === 'MultiLineString') geom.coordinates.forEach(line => checkLineSegments(line));
+      else if (geom.type === 'MultiPolygon') geom.coordinates.forEach(poly => poly.forEach(ring => checkLineSegments(ring)));
+    });
+
+    return best;
+  }
+
+  map.on('mousemove', function(e) {
+    if (!snapModeEnabled) return;
+    const snap = findBestSnap(e.latlng);
+    if (snap) {
+      showSnapIndicator(snap.type, snap.text, snap.pt);
+    } else {
+      hideSnapIndicator();
+    }
+  });
+
+  // Intercept Leaflet.Draw mousemove to snap drawing cursor
+  map.on('draw:drawvertex', function(e) {
+    // If drawing active, check snap
+  });
+
+  function updateAttributeTable() {
+    const tbody = document.querySelector('#attr-table tbody');
+    if (!featureRecords.length) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#788294;">No digitization features added yet.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = featureRecords.map(r => `
+      <tr>
+        <td>#${r.id}</td>
+        <td>${r.type}</td>
+        <td>${r.massaviArea}</td>
+        <td>${r.length}</td>
+        <td style="font-family:monospace; font-size:10px;">${r.coords || '—'}</td>
+      </tr>
+    `).join('');
   }
 
   function searchLocation() {
@@ -914,17 +1474,16 @@
   function searchMouzaByName() {
     const q = document.getElementById('mouza-search-input').value.toLowerCase().trim();
     if (!q) return alert('Enter Mouza name!');
-    if (!mouzaGeoLayer) return alert('Mouza data still loading.');
     let found = false;
-    mouzaGeoLayer.eachLayer(layer => {
-      if (JSON.stringify(layer.feature.properties).toLowerCase().includes(q)) {
+    drawnItems.eachLayer(layer => {
+      if (layer.feature && layer.feature.properties && JSON.stringify(layer.feature.properties).toLowerCase().includes(q)) {
         if (layer.getBounds && layer.getBounds().isValid()) map.fitBounds(layer.getBounds());
         else if (layer.getLatLng) map.setView(layer.getLatLng(), 18);
         if (layer.openPopup) layer.openPopup();
         found = true;
       }
     });
-    if (!found) alert('No matching Mouza found!');
+    if (!found) alert('No matching feature found in drawn/imported items!');
   }
 
   function saveMouzaVectorData() {
@@ -932,7 +1491,7 @@
     if (!data.features.length) { alert('No vector features to save!'); return; }
     const a = document.createElement('a');
     a.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));
-    a.download = 'mouza_vector_design.geojson';
+    a.download = 'vector_design.geojson';
     document.body.appendChild(a); a.click(); a.remove();
   }
 
@@ -1030,7 +1589,7 @@
 
   function removeLegendItem(index) {
     if (LEGEND_ITEMS.length <= 1) {
-      alert('Kam az kam 1 legend item hona chahiye.');
+      alert('At least 1 legend item is required.');
       return;
     }
     LEGEND_ITEMS.splice(index, 1);
@@ -1042,7 +1601,7 @@
     LEGEND_TITLE = 'LEGEND';
     LEGEND_ITEMS.splice(0, LEGEND_ITEMS.length,
       { name:'Mouza Boundary', symbol:'line', color:'#FFFF00' },
-      { name:'Drawn Polygon', symbol:'polygon', color:'#c5a059' },
+      { name:'Drawn Polygon', symbol:'polygon', color:#c5a059 },
       { name:'Drawn Line', symbol:'line', color:'#FFFF00' },
       { name:'Map Point / Note', symbol:'point', color:'#c5a059' }
     );
@@ -1075,500 +1634,302 @@
     toggleNoteMode();
   });
 
+  function styleAndAddKmlLayer(kmlLayer, styleOpts, sourceName) {
+    kmlLayer.eachLayer(l => { if (l.setStyle) l.setStyle(styleOpts); });
+    uploadedLayerGroup.addLayer(kmlLayer);
+    registerImportedVectorLayer(kmlLayer, sourceName || 'KML');
+    const b = kmlLayer.getBounds();
+    if (b && b.isValid && b.isValid()) {
+      map.fitBounds(b);
+      showToast('File uploaded! ✓ KML/KMZ boundary is editable');
+    } else {
+      showToast('File loaded but no valid geometry found');
+    }
+  }
+
   function loadSpatialFile() {
     const file = document.getElementById('file-input').files[0];
     if (!file) return alert('Select a file!');
+    const nameLower = file.name.toLowerCase();
+    const isKML = nameLower.endsWith('.kml');
+    const isKMZ = nameLower.endsWith('.kmz');
+    const isGeoJSON = nameLower.endsWith('.geojson') || nameLower.endsWith('.json');
+
+    const appendMode = document.getElementById('append-mode-toggle').checked;
+    if (!appendMode) {
+      uploadedLayerGroup.clearLayers();
+      clearPreviousImportedFeatures();
+    }
+    const fc = document.getElementById('fill-color').value;
+    const sc = document.getElementById('stroke-color').value;
+    const styleOpts = { color: sc, fillColor: fc, fillOpacity: 0.5, weight: 2.5 };
+
+    if (isKMZ) {
+      if (typeof JSZip === 'undefined') {
+        alert('JSZip library not loaded. Please refresh page.');
+        return;
+      }
+      file.arrayBuffer().then(buffer => JSZip.loadAsync(buffer)).then(zip => {
+        const kmlFileName = Object.keys(zip.files).find(n => n.toLowerCase().endsWith('.kml'));
+        if (!kmlFileName) { alert('No .kml file found inside KMZ!'); return; }
+        return zip.files[kmlFileName].async('string');
+      }).then(kmlText => {
+        if (!kmlText) return;
+        const layer = omnivore.kml.parse(kmlText);
+        styleAndAddKmlLayer(layer, styleOpts, file.name);
+      }).catch(err => {
+        alert('Could not parse KMZ file! ' + err.message);
+      });
+      return;
+    }
+
     const reader = new FileReader();
-    uploadedLayerGroup.clearLayers();
     reader.onload = function(e) {
       try {
-        const fc = document.getElementById('fill-color').value;
-        const sc = document.getElementById('stroke-color').value;
-        const layer = L.geoJSON(JSON.parse(e.target.result), { style: { color:sc, fillColor:fc, fillOpacity:0.5 } });
-        uploadedLayerGroup.addLayer(layer);
-        map.fitBounds(layer.getBounds());
-        showToast('File uploaded! ✓');
-      } catch(err) { alert('Invalid file format!'); }
+        if (isKML) {
+          const layer = omnivore.kml.parse(e.target.result);
+          styleAndAddKmlLayer(layer, styleOpts, file.name);
+        } else if (isGeoJSON) {
+          const json = JSON.parse(e.target.result);
+          const layer = L.geoJSON(json, {
+            style: styleOpts,
+            pointToLayer: (feat, latlng) => L.marker(latlng)
+          });
+          uploadedLayerGroup.addLayer(layer);
+          registerImportedVectorLayer(layer, file.name);
+          const b = layer.getBounds();
+          if (b && b.isValid && b.isValid()) {
+            map.fitBounds(b);
+            showToast('GeoJSON loaded successfully! ✓');
+          }
+        }
+      } catch(err) {
+        alert('Error parsing file: ' + err.message);
+      }
     };
     reader.readAsText(file);
   }
 
-  const drawnItems = new L.FeatureGroup();
-  map.addLayer(drawnItems);
-  
-  const drawControl = new L.Control.Draw({
-    draw: {
-      polygon:  { allowIntersection:false, showArea:true, shapeOptions:{ color:'#FFFF00', fillColor:'#c5a059', fillOpacity:0.45, weight:2 } },
-      polyline: { shapeOptions:{ color:'#FFFF00', weight:3 } },
-      rectangle:false, circle:false, circlemarker:false
-    },
-    edit: { featureGroup: drawnItems, remove:true }
-  });
-  map.addControl(drawControl);
-
-  let editModeActive = false;
-  function getEditHandler() {
-    try {
-      return drawControl._toolbars && drawControl._toolbars.edit &&
-             drawControl._toolbars.edit._modes &&
-             drawControl._toolbars.edit._modes.edit &&
-             drawControl._toolbars.edit._modes.edit.handler;
-    } catch (e) { return null; }
-  }
-  function toggleEditMode() {
-    const handler = getEditHandler();
-    const btn = document.getElementById('edit-mode-btn');
-    if (!handler) { alert('Edit tool load nahi hua. Page ko Ctrl + F5 se refresh karein.'); return; }
-    if (!drawnItems.getLayers().length) { alert('Pehle koi line ya polygon draw karein.'); return; }
-    if (!editModeActive) {
-      handler.enable();
-      editModeActive = true;
-      btn.classList.add('active');
-      btn.textContent = '✓ Editing...';
-      showToast('✏️ Edit mode ON — vertices drag karein');
-    } else {
-      handler.disable();
-      editModeActive = false;
-      btn.classList.remove('active');
-      btn.textContent = '✏️ Edit';
-      updateAttributeTable();
-      showToast('✓ Edit mode OFF');
-    }
-  }
-
-  map.on(L.Draw.Event.EDITSTART, function() {
-    editModeActive = true;
-    const btn = document.getElementById('edit-mode-btn');
-    if (btn) { btn.classList.add('active'); btn.textContent = '✓ Editing...'; }
-  });
-  map.on(L.Draw.Event.EDITSTOP, function() {
-    editModeActive = false;
-    const btn = document.getElementById('edit-mode-btn');
-    if (btn) { btn.classList.remove('active'); btn.textContent = '✏️ Edit'; }
-  });
-
-  function removeFeature(layer) {
-    if (layer._custom_id) removeDimensionLabels(layer._custom_id);
-    drawnItems.removeLayer(layer);
-    featureRecords = featureRecords.filter(f => f.id !== layer._custom_id);
-    updateAttributeTable();
-  }
-
-  let activeDrawHandler = null;
-
-  map.on('draw:drawstart', function(e) {
-    activeDrawHandler = e.handler;
-    map.once('dblclick', function() {});
-  });
-
-  map.on('draw:drawstop', function() {
-    activeDrawHandler = null;
-  });
-
-  document.getElementById('map').addEventListener('dblclick', function(e) {
-    if (activeDrawHandler) {
-      e.stopPropagation();
-    }
-  }, true);
-
-  function removeLastPoint() {
-    if (activeDrawHandler && typeof activeDrawHandler.deleteLastVertex === 'function') {
-      activeDrawHandler.deleteLastVertex();
-    } else {
-      alert('Pehle Polygon ya Line draw shuru karein.');
-    }
-  }
-
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Backspace' && activeDrawHandler && typeof activeDrawHandler.deleteLastVertex === 'function') {
-      e.preventDefault();
-      activeDrawHandler.deleteLastVertex();
-    }
-
-    if (e.key === 'F2' && activeDrawHandler) {
-      e.preventDefault();
-      if (typeof activeDrawHandler.completeShape === 'function') {
-        activeDrawHandler.completeShape();
-      } else if (typeof activeDrawHandler._finishShape === 'function') {
-        activeDrawHandler._finishShape();
-      } else {
-        const finishBtn = document.querySelector('.leaflet-draw-actions a[title="Finish"]') ||
-                          document.querySelector('.leaflet-draw-actions li:first-child a');
-        if (finishBtn) finishBtn.click();
-      }
-      showToast('✓ Drawing completed (F2)');
-    }
-
-    if (e.key === 'Escape' && activeDrawHandler) {
-      activeDrawHandler.disable();
-    }
-  });
-
-  function undoLastAction() {
-    if (!actionHistory.length) { alert('Koi action nahi!'); return; }
-    const a = actionHistory.pop();
-    if (a.type === 'create') {
-      if (a.layer._custom_id) removeDimensionLabels(a.layer._custom_id);
-      drawnItems.removeLayer(a.layer);
-      featureRecords = featureRecords.filter(f => f.id !== a.layer._custom_id);
-    } else if (a.type === 'delete') {
-      a.layers.forEach(l => drawnItems.addLayer(l));
-      a.records.forEach(r => featureRecords.push(r));
-    }
-    updateAttributeTable(); redoStack.push(a);
-  }
-  function redoLastAction() {
-    if (!redoStack.length) { alert('Koi redo nahi!'); return; }
-    const a = redoStack.pop();
-    if (a.type === 'create') {
-      drawnItems.addLayer(a.layer); featureRecords.push(a.record);
-      if (a.layerType && (a.layerType === 'polygon' || a.layerType === 'polyline')) addDimensionLabels(a.layer, a.layer._custom_id, a.layerType);
-    } else if (a.type === 'delete') {
-      a.layers.forEach(l => { removeDimensionLabels(l._custom_id); drawnItems.removeLayer(l); });
-      const ids = a.layers.map(l => l._custom_id);
-      featureRecords = featureRecords.filter(f => !ids.includes(f.id));
-    }
-    updateAttributeTable(); actionHistory.push(a);
-  }
-
-  map.on(L.Draw.Event.DELETED, function(e) {
-    const dl = [], dr = [];
-    e.layers.eachLayer(layer => {
-      const rec = featureRecords.find(f => f.id === layer._custom_id);
-      if (rec) dr.push(rec);
-      dl.push(layer); removeFeature(layer);
-    });
-    pushHistory({ type:'delete', layers:dl, records:dr });
-  });
-
-  map.on(L.Draw.Event.CREATED, function(e) {
-    const layer = e.layer;
-    if (layer.setStyle) layer.setStyle({ color: document.getElementById('stroke-color').value, fillColor: document.getElementById('fill-color').value, fillOpacity:0.5, weight:2.5 });
-    featureCounter++;
-    layer._custom_id = featureCounter;
-    drawnItems.addLayer(layer);
-
-    if (e.layerType === 'polygon' || e.layerType === 'polyline') {
-      const lls = layer.getLatLngs();
-      let pts = Array.isArray(lls[0]) ? lls[0] : lls;
-      if (pts.length >= 2) {
-        const last = pts[pts.length - 1];
-        const secondLast = pts[pts.length - 2];
-        if (Math.abs(last.lat - secondLast.lat) < 0.000001 && Math.abs(last.lng - secondLast.lng) < 0.000001) {
-          pts.pop();
-          if (e.layerType === 'polygon') layer.setLatLngs([pts]);
-          else layer.setLatLngs(pts);
-        }
-      }
-    }
-
-    const geojson = layer.toGeoJSON();
-    const type    = e.layerType;
-    let areaText = 'N/A', lenText = 'N/A', coordsText = '', segLengthsText = 'N/A';
-
-    if (type === 'polygon') {
-      areaText   = calculateMassaviArea(turf.area(geojson)).formattedText;
-      lenText    = `${(turf.length(geojson, {units:'kilometers'}) * 1000).toFixed(2)} m`;
-      coordsText = 'Polygon';
-      const pts = layer.getLatLngs()[0].map(ll => [ll.lat, ll.lng]);
-      pts.push(pts[0]);
-      segLengthsText = getSegmentLengthsText(pts, true);
-    } else if (type === 'polyline') {
-      const l  = turf.length(geojson, {units:'kilometers'});
-      lenText  = l >= 1 ? `${l.toFixed(2)} km` : `${(l*1000).toFixed(2)} m`;
-      coordsText = 'Line';
-      const lls = layer.getLatLngs();
-      const pts = (Array.isArray(lls[0]) ? lls[0] : lls).map(ll => [ll.lat, ll.lng]);
-      segLengthsText = getSegmentLengthsText(pts, false);
-    } else if (type === 'marker') {
-      coordsText = `${geojson.geometry.coordinates[1].toFixed(5)}, ${geojson.geometry.coordinates[0].toFixed(5)}`;
-      segLengthsText = 'N/A';
-    }
-
-    const record = {
-      id: featureCounter,
-      type: type.toUpperCase(),
-      massaviArea: areaText,
-      length: lenText,
-      segLengths: segLengthsText,
-      coords: coordsText
-    };
-    featureRecords.push(record);
-    updateAttributeTable();
-    pushHistory({ type:'create', layer, record, layerType: type });
-
-    if (type === 'polygon' || type === 'polyline') {
-      addDimensionLabels(layer, featureCounter, type);
-    }
-  });
-
   function createBuffer() {
-    const data = drawnItems.toGeoJSON();
-    const r    = parseFloat(document.getElementById('buffer-radius').value);
-    if (!data.features.length) return alert('Draw a feature first!');
+    const dist = parseFloat(document.getElementById('buffer-radius').value);
+    if (isNaN(dist) || dist <= 0) return alert('Enter valid buffer distance!');
     bufferLayerGroup.clearLayers();
-    bufferLayerGroup.addLayer(L.geoJSON(turf.buffer(data, r/1000, {units:'kilometers'}), { style:{ color:'#ef4444', fillColor:'#f87171', fillOpacity:0.35, dashArray:'5,5' } }));
-    showToast('Buffer generated!');
-  }
-
-  function updateAttributeTable() {
-    const tbody = document.querySelector('#attr-table tbody');
-    if (!featureRecords.length) {
-      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#788294;">No digitization features added yet.</td></tr>`;
-      return;
-    }
-    tbody.innerHTML = featureRecords.map(f =>
-      `<tr>
-        <td>#${f.id}</td>
-        <td><strong>${f.type}</strong></td>
-        <td style="color:#d4af37;font-weight:bold;">${f.massaviArea}</td>
-        <td>${f.length}</td>
-        <td style="color:#7dd3fc;font-size:10px;max-width:200px;word-break:break-word;">${f.segLengths || 'N/A'}</td>
-        <td>${f.coords}</td>
-      </tr>`
-    ).join('');
-  }
-
-  function checkTopology() {
-    const data = drawnItems.toGeoJSON();
-    if (!data.features.length) return alert('Draw a feature first!');
-    let errs = 0;
-    data.features.forEach(f => { if (f.geometry.type === 'Polygon') errs += turf.kinks(f).features.length; });
-    alert(errs > 0 ? `Topology Error: ${errs} intersection(s) found!` : 'Topology Valid! No errors.');
+    let count = 0;
+    drawnItems.eachLayer(layer => {
+      if (!layer.toGeoJSON) return;
+      try {
+        const buf = turf.buffer(layer.toGeoJSON(), dist, {units: 'meters'});
+        L.geoJSON(buf, { style: { color: '#3b82f6', fillColor: '#60a5fa', fillOpacity: 0.3, weight: 2, dashArray: '5,5' } }).addTo(bufferLayerGroup);
+        count++;
+      } catch(x) {}
+    });
+    showToast(count >  0 ? `✓ Generated ${count} buffer(s)` : 'No valid features to buffer');
   }
 
   function exportGeoJSON() {
     const data = drawnItems.toGeoJSON();
-    if (!data.features.length) return alert('No features!');
+    if (!data.features.length) return alert('No features to export!');
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
-    a.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));
-    a.download = 'waqar_gis_data.geojson'; a.click();
+    a.href = URL.createObjectURL(blob); a.download = 'spatial_export.geojson';
+    a.click(); a.remove();
+    showToast('GeoJSON downloaded! ✓');
   }
-  function exportCSV() {
-    if (!featureRecords.length) return alert('No data!');
-    let csv = 'ID,Type,Area,Length,SegmentLengths,Coordinates\n';
-    featureRecords.forEach(f => {
-      csv += `${f.id},${f.type},"${f.massaviArea}",${f.length},"${f.segLengths || 'N/A'}","${f.coords}"\n`;
+
+  function exportKML() {
+    const data = drawnItems.toGeoJSON();
+    if (!data.features.length) return alert('No features to export!');
+    // Simple KML conversion for points, linestrings, polygons
+    let kml = `<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2">\n<Document>\n`;
+    data.features.forEach((f, i) => {
+      kml += `  <Placemark>\n    <name>Feature ${i+1}</name>\n`;
+      const geom = f.geometry;
+      if (geom.type === 'Point') {
+        kml += `    <Point><coordinates>${geom.coordinates[0]},${geom.coordinates[1]}</coordinates></Point>\n`;
+      } else if (geom.type === 'LineString') {
+        kml += `    <LineString><coordinates>${geom.coordinates.map(c => c.join(',')).join(' ')}</coordinates></LineString>\n`;
+      } else if (geom.type === 'Polygon') {
+        kml += `    <Polygon><outerBoundaryIs><LinearRing><coordinates>${geom.coordinates[0].map(c => c.join(',')).join(' ')}</coordinates></LinearRing></outerBoundaryIs></Polygon>\n`;
+      }
+      kml += `  </Placemark>\n`;
     });
+    kml += `</Document>\n</kml>`;
+    const blob = new Blob([kml], { type: 'application/vnd.google-earth.kml+xml' });
     const a = document.createElement('a');
-    a.href = encodeURI('data:text/csv;charset=utf-8,' + csv);
-    a.download = 'waqar_gis_attributes.csv'; a.click();
+    a.href = URL.createObjectURL(blob); a.download = 'spatial_export.kml';
+    a.click(); a.remove();
+    showToast('KML downloaded! ✓');
   }
 
-  function showExportOverlay(msg) {
-    document.getElementById('export-overlay-msg').textContent = msg || 'Exporting...';
-    document.getElementById('export-progress-fill').style.width = '0%';
-    document.getElementById('export-overlay').style.display = 'flex';
-  }
-  function hideExportOverlay() {
-    document.getElementById('export-overlay').style.display = 'none';
+  function exportCSV() {
+    if (!featureRecords.length) return alert('No records to export!');
+    let csv = 'ID,Type,Massavi Area,Length,Coordinates\n';
+    featureRecords.forEach(r => {
+      csv += `"${r.id}","${r.type}","${r.massaviArea}","${r.length}","${r.coords}"\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'attribute_table.csv';
+    a.click(); a.remove();
+    showToast('CSV downloaded! ✓');
   }
 
-  /* ============================================================
-     PRINT / EXPORT MAP  (fixed: no more broken duplicate block,
-     and dimension labels are now cloned onto the print map too)
-     ============================================================ */
-  let printLiveMap = null;
-  let printCloneGroup = null;
+  function exportMapImage() {
+    showToast('Capturing map image...');
+    html2canvas(document.getElementById('map'), { useCORS: true, allowTaint: true }).then(canvas => {
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png'); a.download = 'map_capture.png';
+      a.click(); a.remove();
+      showToast('PNG image downloaded! ✓');
+    }).catch(err => {
+      alert('Could not export image: ' + err.message);
+    });
+  }
+
+  // ===== PRINT & PDF REPORT LAYOUT =====
+  let printMap = null;
 
   function openPrintLayout() {
     document.getElementById('print-layout-modal').style.display = 'flex';
     document.getElementById('print-date-disp').textContent = new Date().toLocaleDateString();
     updatePrintPreview();
+    setTimeout(initPrintLiveMap, 250);
   }
 
   function closePrintLayout() {
     document.getElementById('print-layout-modal').style.display = 'none';
-    if (printLiveMap) { printLiveMap.remove(); printLiveMap = null; printCloneGroup = null; }
-  }
-
-  // Clones current drawn features + their dimension labels onto the print map
-  function populatePrintClones() {
-    if (!printLiveMap) return;
-
-    if (printCloneGroup) {
-      printCloneGroup.clearLayers();
-    } else {
-      printCloneGroup = L.layerGroup().addTo(printLiveMap);
-    }
-
-    // Clone every drawn polygon/line/marker
-    drawnItems.eachLayer(layer => {
-      const lClone = L.geoJSON(layer.toGeoJSON(), {
-        style: { color: '#FFFF00', fillColor: '#c5a059', fillOpacity: 0.5, weight: 2.5 }
-      });
-      lClone.addTo(printCloneGroup);
-    });
-
-    // Clone dimension labels, respecting the "Dimension Labels" checkbox
-    const showDims = document.getElementById('chk-dims') ? document.getElementById('chk-dims').checked : dimensionsEnabled;
-    if (showDims) {
-      Object.keys(dimStore).forEach(fid => {
-        const entry = dimStore[fid];
-        if (!entry || !entry.layer) return;
-        const layer = entry.layer;
-        const layerType = entry.layerType;
-        let coords = [];
-        if (layerType === 'polygon') {
-          coords = layer.getLatLngs()[0].map(ll => [ll.lat, ll.lng]);
-          coords.push(coords[0]);
-        } else if (layerType === 'polyline') {
-          const lls = layer.getLatLngs();
-          coords = (Array.isArray(lls[0]) ? lls[0] : lls).map(ll => [ll.lat, ll.lng]);
-        } else {
-          return;
-        }
-        const manualValues = entry.manualValues || {};
-        for (let i = 0; i < coords.length - 1; i++) {
-          const a = coords[i], b = coords[i + 1];
-          const dist = haversineDist(a, b);
-          const autoVal = formatDimDist(dist);
-          const displayVal = manualValues[i] || autoVal;
-          const isManual = !!manualValues[i];
-          const mid = midPt(a, b);
-          const icon = L.divIcon({
-            className: '',
-            html: `<div class="dim-label${isManual ? ' manual' : ''}">${displayVal}</div>`,
-            iconSize: null, iconAnchor: null
-          });
-          L.marker(mid, { icon, interactive: false, zIndexOffset: 600 }).addTo(printCloneGroup);
-        }
-      });
-    }
+    if (printMap) { printMap.remove(); printMap = null; }
   }
 
   function updatePrintPreview() {
     const title = document.getElementById('print-title-inp').value || 'Waqar GIS Portal — Map';
     document.getElementById('print-title-disp').textContent = title;
-
+    
     document.getElementById('print-north-arrow').style.display = document.getElementById('chk-north').checked ? 'flex' : 'none';
     document.getElementById('print-scale-bar').style.display = document.getElementById('chk-scale').checked ? 'block' : 'none';
-
-    const legendBox = document.getElementById('print-legend-box');
-    if (document.getElementById('chk-legend').checked) {
-      legendBox.style.display = 'block';
-      legendBox.innerHTML = buildLegendHTML();
-    } else {
-      legendBox.style.display = 'none';
-    }
-
-    if (!printLiveMap) {
-      setTimeout(() => {
-        const container = document.getElementById('print-map-live');
-        if (!container || printLiveMap) return;
-        printLiveMap = L.map(container, { zoomControl:true, attributionControl:false, dragging:true, scrollWheelZoom:true, doubleClickZoom:true });
-        L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0','mt1','mt2','mt3'], crossOrigin:true }).addTo(printLiveMap);
-        printLiveMap.setView(map.getCenter(), map.getZoom());
-        populatePrintClones();
-      }, 150);
-    } else {
-      printLiveMap.setView(map.getCenter(), map.getZoom());
-      printLiveMap.invalidateSize();
-      populatePrintClones();
-    }
+    document.getElementById('print-legend-box').style.display = document.getElementById('chk-legend').checked ? 'block' : 'none';
+    
+    document.getElementById('print-legend-box').innerHTML = buildLegendHTML();
   }
 
-  function exportMapPDF() {
-    window.print();
-  }
+  function initPrintLiveMap() {
+    const container = document.getElementById('print-map-live');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    printMap = L.map('print-map-live', {
+      zoomControl: false,
+      attributionControl: false,
+      dragging: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      boxZoom: false
+    });
 
-  function exportMapImage() {
-    showExportOverlay('Generating PNG image...');
-    setTimeout(() => {
-      html2canvas(document.getElementById('print-preview-box'), { useCORS: true, allowTaint: false, scale: 2 }).then(canvas => {
-        hideExportOverlay();
-        const a = document.createElement('a');
-        a.href = canvas.toDataURL('image/png');
-        a.download = 'waqar_gis_map_export.png';
-        a.click();
-        showToast('PNG Exported Successfully! ✓');
-      }).catch(err => {
-        hideExportOverlay();
-        alert('Export failed: ' + err.message);
-      });
-    }, 400);
+    // Mirror current map view
+    printMap.setView(map.getCenter(), map.getZoom());
+
+    // Add same basemap
+    L.tileLayer(currentBasemapKey === 'osm' ? 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' :
+                currentBasemapKey === 'dark' ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' :
+                'https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+      maxZoom: 20, subdomains: ['mt0','mt1','mt2','mt3'], crossOrigin: true
+    }).printMapLayer = true;
+
+    // Clone drawn items into print map
+    const printDrawn = new L.FeatureGroup();
+    drawnItems.eachLayer(l => {
+      if (l.toGeoJSON) {
+        const gj = l.toGeoJSON();
+        L.geoJSON(gj, {
+          style: { color: '#FFFF00', fillColor: '#c5a059', fillOpacity: 0.5, weight: 2 }
+        }).addTo(printDrawn);
+      }
+    });
+    printDrawn.addTo(printMap);
   }
 
   function resetPrintElementPositions() {
-    const na = document.getElementById('print-north-arrow');
-    const sb = document.getElementById('print-scale-bar');
-    const lb = document.getElementById('print-legend-box');
-    na.style.top = '12px'; na.style.right = '14px'; na.style.left = ''; na.style.bottom = '';
-    sb.style.bottom = '12px'; sb.style.left = '14px'; sb.style.right = ''; sb.style.top = '';
-    lb.style.bottom = '12px'; lb.style.right = '14px'; lb.style.left = ''; lb.style.top = '';
-    showToast('Elements position reset');
+    const north = document.getElementById('print-north-arrow');
+    const scale = document.getElementById('print-scale-bar');
+    const legend = document.getElementById('print-legend-box');
+    north.style.top = '12px'; north.style.right = '14px'; north.style.left = 'auto'; north.style.bottom = 'auto';
+    scale.style.bottom = '12px'; scale.style.left = '14px'; scale.style.right = 'auto'; scale.style.top = 'auto';
+    legend.style.bottom = '12px'; legend.style.right = '14px'; legend.style.left = 'auto'; legend.style.top = 'auto';
+    showToast('Print elements reset to default positions');
   }
 
-  // Draggable print overlay items
-  document.querySelectorAll('.print-overlay-item').forEach(el => {
-    let isDragging = false, startX, startY, initX, initY;
-    el.addEventListener('pointerdown', e => {
-      isDragging = true; el.classList.add('editing');
-      startX = e.clientX; startY = e.clientY;
-      const rect = el.getBoundingClientRect();
-      const parentRect = el.parentElement.getBoundingClientRect();
-      initX = rect.left - parentRect.left;
-      initY = rect.top - parentRect.top;
-      el.setPointerCapture(e.pointerId);
+  // Draggable overlay elements in print preview
+  document.querySelectorAll('.print-overlay-item').forEach(item => {
+    let isDragging = false, startX, startY;
+    item.addEventListener('pointerdown', e => {
+      isDragging = true;
+      item.classList.add('editing');
+      startX = e.clientX - item.offsetLeft;
+      startY = e.clientY - item.offsetTop;
+      item.setPointerCapture(e.pointerId);
       e.stopPropagation();
     });
-    el.addEventListener('pointermove', e => {
+    item.addEventListener('pointermove', e => {
       if (!isDragging) return;
-      const dx = e.clientX - startX;
-      const dy = e.clientY - startY;
-      el.style.left = (initX + dx) + 'px';
-      el.style.top = (initY + dy) + 'px';
-      el.style.right = 'auto'; el.style.bottom = 'auto';
+      item.style.left = (e.clientX - startX) + 'px';
+      item.style.top = (e.clientY - startY) + 'px';
+      item.style.right = 'auto'; item.style.bottom = 'auto';
     });
-    el.addEventListener('pointerup', e => {
-      isDragging = false; el.classList.remove('editing');
-      el.releasePointerCapture(e.pointerId);
+    item.addEventListener('pointerup', e => {
+      isDragging = false;
+      item.classList.remove('editing');
+      try { item.releasePointerCapture(e.pointerId); } catch(x) {}
     });
   });
 
-  // Load Mouza Data on startup
-  fetch('Jammat_Polygon.json')
-    .then(r => r.json())
-    .then(data => {
-      mouzaGeoLayer = L.geoJSON(data, {
-        style: { color: '#FFFF00', fillColor: 'rgba(197,160,89,0.3)', weight: 1.5, fillOpacity: 0.3 },
-        onEachFeature: (feature, layer) => {
-          const props = feature.properties || {};
-          let html = '<strong>Mouza Details</strong><br>';
-          for (let k in props) { html += `${k}: ${props[k]}<br>`; }
-          layer.bindPopup(html);
-          layer.on('dblclick', () => {
-            if (layer.getBounds && layer.getBounds().isValid()) map.fitBounds(layer.getBounds());
-          });
-        }
-      }).addTo(map);
-
-      mouzaItemsData = data.features || [];
-      mouzaCount = mouzaItemsData.length;
-      const listEl = document.getElementById('mouza-container-list');
-      listEl.innerHTML = mouzaItemsData.map((f, i) => {
-        const name = (f.properties && (f.properties.Name || f.properties.NAME || f.properties.mouza || f.properties.Mouza)) || `Mouza #${i+1}`;
-        return `<div style="font-size:11px; padding:3px 6px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.05); color:#e2e8f0;" onclick="zoomToMouza(${i})">📍 ${name}</div>`;
-      }).join('');
-    })
-    .catch(err => {
-      document.getElementById('mouza-container-list').innerHTML = '<div style="font-size:10px; color:#f87171; text-align:center; padding:4px;">Jammat_Polygon.json not found</div>';
-    });
-
-  function zoomToMouza(idx) {
-    if (!mouzaGeoLayer) return;
-    let count = 0;
-    mouzaGeoLayer.eachLayer(layer => {
-      if (count === idx) {
-        if (layer.getBounds && layer.getBounds().isValid()) map.fitBounds(layer.getBounds());
-        else if (layer.getLatLng) map.setView(layer.getLatLng(), 18);
-        if (layer.openPopup) layer.openPopup();
-      }
-      count++;
+  function exportMapPDF() {
+    showToast('Generating PDF Report...');
+    const element = document.getElementById('print-preview-box');
+    html2canvas(element, { scale: 2, useCORS: true, allowTaint: true }).then(canvas => {
+      const imgData = canvas.toDataURL('image/png');
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('landscape', 'mm', 'a4');
+      const imgWidth = 297;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, Math.min(imgHeight, 210));
+      pdf.save('Waqar_GIS_Portal_Report.pdf');
+      showToast('PDF Report downloaded! ✓');
+      closePrintLayout();
+    }).catch(err => {
+      alert('Could not generate PDF: ' + err.message);
     });
   }
 
-  showToast('Waqar GIS Portal Loaded Successfully! ✓');
+  // Geolocation control handler
+  const locateBtn = document.getElementById('locate-btn');
+  let userLocMarker = null;
+  locateBtn.addEventListener('click', () => {
+    locateBtn.classList.add('locating');
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser');
+      locateBtn.classList.remove('locating');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(pos => {
+      locateBtn.classList.remove('locating');
+      locateBtn.classList.add('active');
+      const lat = pos.coords.latitude, lng = pos.coords.longitude;
+      map.setView([lat, lng], 17);
+      if (userLocMarker) map.removeLayer(userLocMarker);
+      userLocMarker = L.marker([lat, lng], {
+        icon: L.divIcon({ className: '', html: '<div class="user-location-pulse-wrap"><div class="user-location-marker"></div></div>', iconSize: [16,16], iconAnchor: [8,8] })
+      }).addTo(map).bindPopup('You are here').openPopup();
+      showToast('Location found! ✓');
+    }, err => {
+      locateBtn.classList.remove('locating');
+      locateBtn.classList.add('locate-error');
+      setTimeout(() => locateBtn.classList.remove('locate-error'), 1200);
+      alert('Unable to retrieve your location: ' + err.message);
+    }, { timeout: 10000, enableHighAccuracy: true });
+  });
+
+  loadBookmarks();
 </script>
 </body>
 </html>
