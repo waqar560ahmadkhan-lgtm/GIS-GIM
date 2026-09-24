@@ -190,7 +190,7 @@
     @keyframes user-dot-pulse { 0%{transform:scale(1);opacity:0.7}100%{transform:scale(2.6);opacity:0} }
 
     /* ===== COORD COPY POPUP ===== */
-    #coord-copy-popup { position: absolute; background: #1a1f29; border: 1.5px solid #c5a059; border-radius: 10px; padding: 10px 12px; z-index: 800; display: none; min-width: 230px; box-shadow: 0 8px 24px rgba(0,0,0,0.7); }
+    #coord-copy-popup { position: fixed; background: #1a1f29; border: 1.5px solid #c5a059; border-radius: 10px; padding: 10px 12px; z-index: 1500; display: none; min-width: 230px; box-shadow: 0 8px 24px rgba(0,0,0,0.7); }
     #coord-copy-popup .cp-title { font-size: 10px; color: #c5a059; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 7px; border-bottom: 1px solid rgba(197,160,89,0.25); padding-bottom: 5px; }
     #coord-copy-popup .cp-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: 11px; color: #e2e8f0; gap: 8px; }
     #coord-copy-popup .cp-val { color: #d4af37; font-weight: 700; font-family: monospace; font-size: 11px; }
@@ -206,7 +206,7 @@
     .dim-label.manual:hover { background: rgba(0,255,102,0.4) !important; }
 
     /* ===== DIMENSION EDIT POPUP ===== */
-    #dim-edit-popup { position: absolute; background: #1a1f29; border: 2px solid #c5a059; border-radius: 10px; padding: 12px 14px; z-index: 1500; display: none; min-width: 230px; box-shadow: 0 8px 24px rgba(0,0,0,0.8); }
+    #dim-edit-popup { position: fixed; background: #1a1f29; border: 2px solid #c5a059; border-radius: 10px; padding: 12px 14px; z-index: 1500; display: none; min-width: 230px; box-shadow: 0 8px 24px rgba(0,0,0,0.8); }
     #dim-edit-popup .dep-title { font-size: 10px; color: #c5a059; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
     #dim-edit-popup .dep-auto { font-size: 10px; color: #788294; margin-bottom: 8px; }
     #dim-edit-popup .dep-auto span { color: #c5a059; font-weight: 700; }
@@ -563,7 +563,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr><td colspan="6" style="text-align:center; color:#788294;">No digitization features added yet.</td></tr>
+            <tr><td colspan="5" style="text-align:center; color:#788294;">No digitization features added yet.</td></tr>
           </tbody>
         </table>
       </div>
@@ -635,9 +635,8 @@
 <div id="profileModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('profileModal')">×</button><h2>👤 User Profile</h2><p><strong>Username:</strong> Waqar Ahmad (Admin)</p><p><strong>Role:</strong> GIS Analyst / Spatial Developer</p><p><strong>Phone:</strong> 03201975800</p><p><strong>Workspace:</strong> Pakistan</p></div></div>
 <div id="settingsModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('settingsModal')">×</button><h2>⚙️ Settings</h2><p>Leaflet v1.9.4 Spatial Renderer & UTM Coordinate Mapping active.</p></div></div>
 <div id="faqModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('faqModal')">×</button><h2>❓ Help & FAQ</h2><p>Double-click kisi bhi Mouza par zoom karne ke liye.</p><p>Right-click on map to copy coordinates.</p><p>Click any dimension label to edit it manually.</p><p>Use <strong>Unit selector</strong> in header to switch between Auto / Meter / Feet / KM.</p><p>Press <strong>Backspace</strong> ya <strong>⌫ Point</strong> button while drawing to remove last point.</p><p>Press <strong>F2</strong> to finish drawing line/polygon quickly.</p></div></div>
-<div id="privacyModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('privacyModal')">×</button><h2>🔒 Privacy Policy</h2><p>All geometries and user settings remain local to your session.</p></div></div>
-
-<script>
+<div id="privacyModal" class="custom-modal"><div class="modal-content"><button class="modal-close" onclick="closeModal('privacyModal')">×</button><h2>🔒 Privacy Policy</h2><p>All geometries and user settings remain local to your session.</p></div></div>  
+  <script>
   function openModal(id) { document.getElementById(id).style.display = 'flex'; }
   function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
@@ -757,11 +756,10 @@
     document.getElementById('cp-wgs').textContent = `${lat}, ${lng}`;
     document.getElementById('cp-utm').textContent = toUTMStr(e.latlng.lat, e.latlng.lng);
     const popup = document.getElementById('coord-copy-popup');
-    const rect = document.getElementById('map').getBoundingClientRect();
-    let x = e.originalEvent.clientX - rect.left + 10;
-    let y = e.originalEvent.clientY - rect.top + 10;
-    if (x + 250 > rect.width) x -= 260;
-    if (y + 150 > rect.height) y -= 160;
+    let x = e.originalEvent.clientX + 10;
+    let y = e.originalEvent.clientY + 10;
+    if (x + 250 > window.innerWidth)  x -= 260;
+    if (y + 150 > window.innerHeight) y -= 160;
     popup.style.left = x + 'px'; popup.style.top = y + 'px'; popup.style.display = 'block';
     L.DomEvent.stopPropagation(e);
   });
@@ -899,6 +897,7 @@
     const btn = document.getElementById('dim-toggle-btn');
     if (dimensionsEnabled) {
       if (!map.hasLayer(dimensionLayerGroup)) map.addLayer(dimensionLayerGroup);
+      Object.keys(dimStore).forEach(id => refreshDimensionLabels(parseInt(id)));
       btn.textContent = '📐 Dims ON';
       btn.style.background = '';
       showToast('Dimension labels ON');
@@ -922,8 +921,12 @@
   function midPt(a, b) { return [(a[0]+b[0])/2, (a[1]+b[1])/2]; }
 
   function addDimensionLabels(layer, featureId, layerType) {
+    const prevManual = (dimStore[featureId] && dimStore[featureId].manualValues) || {};
     removeDimensionLabels(featureId);
-    if (!dimensionsEnabled) return;
+    if (!dimensionsEnabled) {
+      dimStore[featureId] = { markers: [], manualValues: prevManual, layer, layerType, segLengths: [] };
+      return;
+    }
     let coords = [];
     if (layerType === 'polygon') {
       coords = layer.getLatLngs()[0].map(ll => [ll.lat, ll.lng]);
@@ -933,7 +936,7 @@
       coords = (Array.isArray(lls[0]) ? lls[0] : lls).map(ll => [ll.lat, ll.lng]);
     } else return;
 
-    const manualValues = (dimStore[featureId] && dimStore[featureId].manualValues) || {};
+    const manualValues = prevManual;
     const markers = [];
     const segLengths = [];
 
@@ -1022,10 +1025,10 @@
     const mapEl  = document.getElementById('map');
     const rect   = mapEl.getBoundingClientRect();
     const pt     = map.latLngToContainerPoint(marker.getLatLng());
-    let x = pt.x + 16, y = pt.y - 20;
-    if (x + 250 > rect.width)  x = pt.x - 260;
-    if (y + 130 > rect.height) y = pt.y - 140;
-    if (y < 0) y = 10;
+    let x = rect.left + pt.x + 16, y = rect.top + pt.y - 20;
+    if (x + 250 > window.innerWidth)  x = rect.left + pt.x - 260;
+    if (y + 130 > window.innerHeight) y = rect.top + pt.y - 140;
+    if (y < rect.top) y = rect.top + 10;
     popup.style.left = x + 'px'; popup.style.top = y + 'px'; popup.style.display = 'block';
     setTimeout(() => document.getElementById('dep-input').focus(), 80);
   }
@@ -1452,13 +1455,17 @@
   map.on('click', function(e) {
     if (!noteMode) return;
     noteCounter++;
+    const noteNo = noteCounter;
     const marker = L.marker(e.latlng, {
       icon: L.divIcon({ className:'', html:'<div style="background:#c5a059;border:2px solid #fff;border-radius:50% 50% 50% 0;width:16px;height:16px;transform:rotate(-45deg);box-shadow:0 0 6px rgba(0,0,0,0.6);"></div>', iconSize:[16,16] })
     }).addTo(notesLayerGroup);
     marker.on('dblclick', ev => { L.DomEvent.stopPropagation(ev); notesLayerGroup.removeLayer(marker); });
     const pc = document.createElement('div');
-    pc.innerHTML = `<textarea class="note-popup-input" rows="3">Note #${noteCounter}</textarea><br><button class="note-popup-save">Save</button>`;
-    pc.querySelector('button').onclick = () => marker.bindPopup(`<strong>Note #${noteCounter}</strong><br>${pc.querySelector('textarea').value}`).openPopup();
+    pc.innerHTML = `<textarea class="note-popup-input" rows="3">Note #${noteNo}</textarea><br><button class="note-popup-save">Save</button>`;
+    pc.querySelector('button').onclick = () => {
+      const txt = pc.querySelector('textarea').value.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      marker.bindPopup(`<strong>Note #${noteNo}</strong><br>${txt}`).openPopup();
+    };
     marker.bindPopup(pc).openPopup();
     toggleNoteMode();
   });
@@ -1532,8 +1539,7 @@
     };
     reader.readAsText(file);
   }
-
-  /* ============================================================
+      /* ============================================================
      DIGITIZED DATA PERSISTENCE (localStorage)
      ============================================================ */
   const DIGITIZE_STORAGE_KEY = 'waqar_gis_digitized_data';
@@ -1630,6 +1636,7 @@
       btn.textContent = '✓ Editing...';
       showToast('✏️ Edit mode ON — vertices drag karein');
     } else {
+      handler.save();
       handler.disable();
       editModeActive = false;
       btn.classList.remove('active');
@@ -1772,48 +1779,45 @@
     } catch (e) {}
   }
 
+  let _snapCache = null, _snapCacheKey = '';
+  function invalidateSnapCache() { _snapCache = null; }
+  map.on('draw:created draw:edited draw:deleted draw:editstop', invalidateSnapCache);
+
   function getSnapSources() {
-    const lines = [];
-    const vertices = [];
+    const key = [
+      drawnItems.getLayers().length,
+      uploadedLayerGroup.getLayers().length,
+      mouzaGeoLayer ? mouzaGeoLayer.getLayers().length : 0,
+      actionHistory.length, redoStack.length, featureCounter
+    ].join('|');
+    if (_snapCache && key === _snapCacheKey) return _snapCache;
 
-    if (typeof drawnItems !== 'undefined' && drawnItems) {
-      drawnItems.eachLayer(layer => {
-        if (!layer || typeof layer.toGeoJSON !== 'function') return;
-        try {
-          const gj = layer.toGeoJSON();
-          if (gj && gj.geometry) {
-            collectSnapLines(gj.geometry, lines);
-            collectSnapVertices(gj.geometry, vertices);
-          }
-        } catch (e) {}
-      });
-    }
-
-    if (typeof uploadedLayerGroup !== 'undefined' && uploadedLayerGroup) {
-      const visit = layer => {
-        if (!layer) return;
-
-        if (typeof layer.toGeoJSON === 'function') {
-          try {
-            const gj = layer.toGeoJSON();
-            if (gj && gj.geometry) {
-              collectSnapLines(gj.geometry, lines);
-              collectSnapVertices(gj.geometry, vertices);
-            }
-          } catch (e) {}
-        }
-
-        if (typeof layer.eachLayer === 'function') {
-          layer.eachLayer(visit);
-        }
-      };
-
+    const lines = [], vertices = [];
+    const seen = new Set();
+    const visit = layer => {
+      if (!layer) return;
+      if (typeof layer.eachLayer === 'function' && !(layer instanceof L.Path) && !(layer instanceof L.Marker)) {
+        layer.eachLayer(visit);
+        return;
+      }
+      const id = L.stamp(layer);
+      if (seen.has(id)) return;
+      seen.add(id);
+      if (typeof layer.toGeoJSON !== 'function') return;
       try {
-        uploadedLayerGroup.eachLayer(visit);
+        const gj = layer.toGeoJSON();
+        if (gj && gj.geometry) {
+          collectSnapLines(gj.geometry, lines);
+          collectSnapVertices(gj.geometry, vertices);
+        }
       } catch (e) {}
-    }
+    };
+    [drawnItems, uploadedLayerGroup, mouzaGeoLayer].forEach(g => { if (g) visit(g); });
+    lines.forEach(l => { l._bbox = turf.bbox(l); });
 
-    return { lines, vertices };
+    _snapCache = { lines, vertices };
+    _snapCacheKey = key;
+    return _snapCache;
   }
 
   function findLiveSnap(latlng) {
@@ -1821,80 +1825,41 @@
 
     const sources = getSnapSources();
     const mousePx = map.latLngToContainerPoint(latlng);
+    const mpp = 156543.03392 * Math.cos(latlng.lat * Math.PI / 180) / Math.pow(2, map.getZoom());
+    const pad = (SNAP_TOLERANCE_PX * mpp * 1.5) / 111000;
 
-    let bestVertex = null;
-    let bestVertexPx = Infinity;
-
-    sources.vertices.forEach(vertex => {
-      const px = map.latLngToContainerPoint(vertex);
-      const distance = mousePx.distanceTo(px);
-
-      if (distance < bestVertexPx) {
-        bestVertexPx = distance;
-        bestVertex = vertex;
-      }
-    });
-
-    /* Vertex has first priority. */
-    if (bestVertex && bestVertexPx <= SNAP_VERTEX_PRIORITY_PX) {
-      return {
-        type: 'vertex',
-        latlng: bestVertex,
-        distance: bestVertexPx
-      };
+    let bestVertex = null, bestVertexPx = Infinity;
+    for (const v of sources.vertices) {
+      if (Math.abs(v.lat - latlng.lat) > pad || Math.abs(v.lng - latlng.lng) > pad) continue;
+      const d = mousePx.distanceTo(map.latLngToContainerPoint(v));
+      if (d < bestVertexPx) { bestVertexPx = d; bestVertex = v; }
     }
 
-    /* Then find nearest point on every line/edge. */
-    let bestEdge = null;
-    let bestEdgePx = Infinity;
+    if (bestVertex && bestVertexPx <= SNAP_VERTEX_PRIORITY_PX) {
+      return { type: 'vertex', latlng: bestVertex, distance: bestVertexPx };
+    }
+
+    let bestEdge = null, bestEdgePx = Infinity;
     const mousePoint = turf.point([latlng.lng, latlng.lat]);
-
-    sources.lines.forEach(line => {
+    for (const line of sources.lines) {
+      const bb = line._bbox;
+      if (latlng.lng < bb[0] - pad || latlng.lng > bb[2] + pad ||
+          latlng.lat < bb[1] - pad || latlng.lat > bb[3] + pad) continue;
       try {
-        const nearest = turf.nearestPointOnLine(
-          line,
-          mousePoint,
-          { units: 'meters' }
-        );
-
-        if (!nearest || !nearest.geometry) return;
-
-        const candidate = L.latLng(
-          Number(nearest.geometry.coordinates[1]),
-          Number(nearest.geometry.coordinates[0])
-        );
-
-        const px = map.latLngToContainerPoint(candidate);
-        const distance = mousePx.distanceTo(px);
-
-        if (distance < bestEdgePx) {
-          bestEdgePx = distance;
-          bestEdge = candidate;
-        }
+        const nearest = turf.nearestPointOnLine(line, mousePoint, { units: 'meters' });
+        if (!nearest || !nearest.geometry) continue;
+        const candidate = L.latLng(nearest.geometry.coordinates[1], nearest.geometry.coordinates[0]);
+        const d = mousePx.distanceTo(map.latLngToContainerPoint(candidate));
+        if (d < bestEdgePx) { bestEdgePx = d; bestEdge = candidate; }
       } catch (e) {}
-    });
+    }
 
     if (bestEdge && bestEdgePx <= SNAP_TOLERANCE_PX) {
-      return {
-        type: 'edge',
-        latlng: bestEdge,
-        distance: bestEdgePx
-      };
+      return { type: 'edge', latlng: bestEdge, distance: bestEdgePx };
     }
-
-    /* Vertex can still win inside the wider tolerance. */
-    if (
-      bestVertex &&
-      bestVertexPx <= SNAP_TOLERANCE_PX &&
-      bestVertexPx <= bestEdgePx
-    ) {
-      return {
-        type: 'vertex',
-        latlng: bestVertex,
-        distance: bestVertexPx
-      };
+    if (bestVertex && bestVertexPx <= SNAP_TOLERANCE_PX && bestVertexPx <= bestEdgePx) {
+      return { type: 'vertex', latlng: bestVertex, distance: bestVertexPx };
     }
-
     return null;
   }
 
@@ -2133,6 +2098,7 @@
   }
 
   document.addEventListener('keydown', function(e) {
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
     if (e.key === 'Backspace' && activeDrawHandler && typeof activeDrawHandler.deleteLastVertex === 'function') {
       e.preventDefault();
       activeDrawHandler.deleteLastVertex();
@@ -2304,8 +2270,8 @@
       `<tr>
         <td>#${f.id}</td>
         <td><strong>${f.type}</strong></td>
-        <td style="color:#d4af37;font-weight:bold;">${f.areaSqFt != null ? `${f.massaviArea}<br><span style=\"font-size:10px;color:#f3e8c8;\">${f.areaSqFt.toFixed(2)} sq ft</span>` : f.massaviArea}</td>
-        <td>${f.length}${f.lengthMeters != null ? `<br><span style=\"font-size:10px;color:#a7f3d0;\">${f.lengthMeters.toFixed(2)} m</span>` : ''}</td>
+        <td style="color:#d4af37;font-weight:bold;">${f.areaSqFt != null ? `${f.massaviArea}<br><span style="font-size:10px;color:#f3e8c8;">${f.areaSqFt.toFixed(2)} sq ft</span>` : f.massaviArea}</td>
+        <td>${f.length}${f.lengthMeters != null ? `<br><span style="font-size:10px;color:#a7f3d0;">${f.lengthMeters.toFixed(2)} m</span>` : ''}</td>
         <td>${f.coords}</td>
       </tr>`
     ).join('');
@@ -2361,14 +2327,14 @@
     let placemarks = '';
     data.features.forEach((f, i) => {
       const rec = featureRecords.find(r => r.id === (drawnItems.getLayers()[i] && drawnItems.getLayers()[i]._custom_id));
-      const name = (rec && rec.source) || `Feature ${i+1}`;
+      const name = (rec && rec.source && rec.source !== 'Digitized') ? rec.source : `${rec ? rec.type : 'Feature'} #${rec ? rec.id : i + 1}`;
       const strokeColor = document.getElementById('stroke-color').value.replace('#','');
       const fillColor = document.getElementById('fill-color').value.replace('#','');
       const kmlColor = (hex) => 'ff' + hex.match(/.{2}/g).reverse().join('');
       let desc = '';
       if (rec) {
-        if (rec.massaviArea && rec.massaviArea !== 'N/A') desc += `Area: ${rec.massaviArea} (${(rec.areaSqFt||0).toFixed(2)} sq ft)&#10;`;
-        if (rec.length && rec.length !== 'N/A') desc += `Length: ${rec.length}&#10;`;
+        if (rec.massaviArea && rec.massaviArea !== 'N/A') desc += `Area: ${rec.massaviArea} (${(rec.areaSqFt||0).toFixed(2)} sq ft)\n`;
+        if (rec.length && rec.length !== 'N/A') desc += `Length: ${rec.length}\n`;
       }
       placemarks += `<Placemark>
         <name>${kmlEscape(name)}</name>
@@ -2510,13 +2476,28 @@ ${placemarks}
         printLiveMap = L.map(container, { zoomControl:true, attributionControl:false, dragging:true, scrollWheelZoom:true, doubleClickZoom:true, preferCanvas:true, renderer: L.canvas({ padding: 0.5 }) });
         L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0','mt1','mt2','mt3'], crossOrigin:true }).addTo(printLiveMap);
         printLiveMap.setView(map.getCenter(), map.getZoom());
-        setTimeout(() => { printLiveMap.invalidateSize(); populatePrintClones(); }, 200);
+        setTimeout(() => { printLiveMap.invalidateSize(); populatePrintClones(); printLiveMap.on('zoomend moveend', updatePrintScaleBar); updatePrintScaleBar(); }, 200);
       }, 150);
     } else {
       printLiveMap.invalidateSize();
       printLiveMap.setView(map.getCenter(), map.getZoom());
       populatePrintClones();
+      updatePrintScaleBar();
     }
+  }
+
+  function updatePrintScaleBar() {
+    if (!printLiveMap) return;
+    const lat = printLiveMap.getCenter().lat;
+    const mpp = 156543.03392 * Math.cos(lat * Math.PI / 180) / Math.pow(2, printLiveMap.getZoom());
+    const segs = 4, segPx = 34;
+    const rawM = mpp * segPx * segs;
+    const pow  = Math.pow(10, Math.floor(Math.log10(rawM)));
+    const nice = [1, 2, 5, 10].map(n => n * pow).filter(v => v <= rawM).pop() || pow;
+    const segWidth = nice / mpp / segs;
+    document.querySelectorAll('#print-scale-bar .sb-seg').forEach(sg => sg.style.width = segWidth + 'px');
+    const label = nice >= 1000 ? (nice / 1000) + ' km' : nice + ' m';
+    document.querySelector('#print-scale-bar .scale-bar-text').textContent = '0 ——— ' + label;
   }
 
   function printMapZoom(delta) {
